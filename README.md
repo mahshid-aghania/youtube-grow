@@ -26,7 +26,15 @@ Every push to `main` publishes `public/` to GitHub Pages at:
 
 **https://mahshid-aghania.github.io/youtube-grow/**
 
-The workflow passes `enablement: true` to `actions/configure-pages`, so it turns
-Pages on itself the first time it runs — no manual setup needed. If you ever need
-to check or change it, it lives under **Settings → Pages → Build and deployment**,
-where the source should read **GitHub Actions**.
+### One-time setup (required)
+
+Pages has to be switched on by a repo admin before the first deploy can succeed.
+The workflow cannot do it for you: `GITHUB_TOKEN` is not allowed to call the
+create-Pages-site API, so `configure-pages` with `enablement: true` fails with
+`Resource not accessible by integration`.
+
+1. Go to **Settings → Pages**
+2. Under **Build and deployment → Source**, choose **GitHub Actions**
+
+Then re-run the deploy: **Actions → Deploy → Run workflow**, or push any commit
+to `main`.
