@@ -1,0 +1,12 @@
+{
+  "name": "youtube-grow",
+  "version": "0.1.0",
+  "description": "Starter tooling for YouTube channel growth",
+  "type": "module",
+  "main": "src/growth.js",
+  "scripts": {
+    "build": "cp src/growth.js public/growth.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}

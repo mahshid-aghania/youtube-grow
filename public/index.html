@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube Grow</title>
+<style>
+  :root {
+    --bg: #f7f7f9;
+    --surface: #ffffff;
+    --border: #e3e3e8;
+    --text: #17171c;
+    --muted: #62626e;
+    --accent: #d92d20;
+    --good: #12805c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f12;
+      --surface: #17171c;
+      --border: #2a2a33;
+      --text: #f2f2f5;
+      --muted: #9a9aa8;
+      --accent: #ff5c4d;
+      --good: #35c99a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 3rem 1.25rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 56rem; margin: 0 auto; }
+  .badge {
+    display: inline-block;
+    padding: .25rem .7rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--good) 15%, transparent);
+    color: var(--good);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  h1 { font-size: clamp(2rem, 6vw, 3rem); margin: 1rem 0 .5rem; letter-spacing: -.02em; }
+  .lede { color: var(--muted); font-size: 1.1rem; margin: 0 0 2.5rem; max-width: 40rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    padding: 1.25rem;
+  }
+  .card .label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+  .card .value { font-size: 2rem; font-weight: 700; margin-top: .35rem; letter-spacing: -.02em; }
+  .card .note { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+  h2 { font-size: 1.15rem; margin: 2.5rem 0 .75rem; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface);
+          border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; }
+  th, td { padding: .7rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  footer { margin-top: 3rem; color: var(--muted); font-size: .875rem; }
+  code { background: var(--bg); border: 1px solid var(--border); border-radius: .3rem; padding: .1rem .35rem; font-size: .85em; }
+</style>
+</head>
+<body>
+<main>
+  <span class="badge">Deployed from GitHub Actions</span>
+  <h1>YouTube Grow</h1>
+  <p class="lede">
+    A sample deployment for <code>mahshid-aghania/youtube-grow</code>. The numbers below
+    are computed in the browser by the same <code>src/growth.js</code> module the test
+    suite covers &mdash; if this page renders, the build and the deploy both worked.
+  </p>
+
+  <div class="grid" id="stats"></div>
+
+  <h2>Top performers by view velocity</h2>
+  <table>
+    <thead><tr><th>Video</th><th class="num">Views / day</th></tr></thead>
+    <tbody id="top"></tbody>
+  </table>
+
+  <footer>
+    Built <span id="built"></span> &middot;
+    <a href="https://github.com/mahshid-aghania/youtube-grow">Source on GitHub</a>
+  </footer>
+</main>
+
+<script type="module">
+  import {
+    projectSubscribers,
+    engagementRate,
+    viewVelocity,
+    topPerformers,
+  } from './growth.js';
+
+  const channel = { subscribers: 12400, monthlyGrowth: 0.06 };
+  const videos = [
+    { title: 'I tried the algorithm for 30 days', views: 41200, daysSincePublish: 5, likes: 2850, comments: 410 },
+    { title: 'Why your thumbnails are losing clicks', views: 18900, daysSincePublish: 21, likes: 1120, comments: 260 },
+    { title: 'Channel audit: 0 to 10k', views: 96400, daysSincePublish: 180, likes: 4300, comments: 690 },
+    { title: 'Shorts vs. long-form in 2026', views: 7400, daysSincePublish: 9, likes: 380, comments: 95 },
+  ];
+
+  const totalViews = videos.reduce((sum, v) => sum + v.views, 0);
+  const totalLikes = videos.reduce((sum, v) => sum + v.likes, 0);
+  const totalComments = videos.reduce((sum, v) => sum + v.comments, 0);
+
+  const stats = [
+    {
+      label: 'Subscribers',
+      value: channel.subscribers.toLocaleString(),
+      note: 'as of today',
+    },
+    {
+      label: 'Projected in 12 mo',
+      value: projectSubscribers(channel.subscribers, channel.monthlyGrowth, 12).toLocaleString(),
+      note: `at +${(channel.monthlyGrowth * 100).toFixed(0)}% / month`,
+    },
+    {
+      label: 'Engagement rate',
+      value: `${engagementRate({ views: totalViews, likes: totalLikes, comments: totalComments })}%`,
+      note: 'likes + comments / views',
+    },
+    {
+      label: 'Best velocity',
+      value: Math.max(...videos.map((v) => viewVelocity(v.views, v.daysSincePublish))).toLocaleString(),
+      note: 'views / day',
+    },
+  ];
+
+  document.getElementById('stats').innerHTML = stats
+    .map((s) => `<div class="card">
+        <div class="label">${s.label}</div>
+        <div class="value">${s.value}</div>
+        <div class="note">${s.note}</div>
+      </div>`)
+    .join('');
+
+  document.getElementById('top').innerHTML = topPerformers(videos, 4)
+    .map((v) => `<tr><td>${v.title}</td><td class="num">${v.velocity.toLocaleString()}</td></tr>`)
+    .join('');
+
+  document.getElementById('built').textContent = new Date().toLocaleDateString(undefined, {
+    year: 'numeric', month: 'short', day: 'numeric',
+  });
+</script>
+</body>
+</html>
