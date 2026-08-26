@@ -26,13 +26,7 @@ Every push to `main` publishes `public/` to GitHub Pages at:
 
 **https://mahshid-aghania.github.io/youtube-grow/**
 
-### One-time setup
-
-GitHub Pages must be told to accept deployments from Actions before the first
-run can succeed:
-
-1. Go to **Settings → Pages**
-2. Under **Build and deployment → Source**, choose **GitHub Actions**
-
-Then re-run the `Deploy` workflow (Actions tab → Deploy → Run workflow), or push
-any commit to `main`.
+The workflow passes `enablement: true` to `actions/configure-pages`, so it turns
+Pages on itself the first time it runs — no manual setup needed. If you ever need
+to check or change it, it lives under **Settings → Pages → Build and deployment**,
+where the source should read **GitHub Actions**.
