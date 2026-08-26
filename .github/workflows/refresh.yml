@@ -1,0 +1,61 @@
+name: Refresh Shorts
+
+# Pulls a fresh 7-day window from the YouTube Data API and commits it when the
+# numbers have moved. Pushing to main triggers Deploy, so the site follows.
+on:
+  schedule:
+    # 06:15 UTC daily — off the hour, where scheduled runs queue up.
+    - cron: '15 6 * * *'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Search topic'
+        default: 'roblox'
+        required: false
+      days:
+        description: 'Window length in days'
+        default: '7'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-shorts
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Fails loudly here rather than silently committing a stale snapshot:
+      # a scheduled refresh that cannot reach the API is a broken refresh.
+      - name: Fetch latest window
+        run: >-
+          node scripts/fetch-shorts.js
+          --require-key
+          --topic "${{ inputs.topic || 'roblox' }}"
+          --days "${{ inputs.days || '7' }}"
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+
+      - name: Validate the new snapshot
+        run: npm test
+
+      - name: Commit if the data moved
+        run: |
+          if git diff --quiet -- data/; then
+            echo "No change in data/ — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git commit -m "chore(data): refresh Shorts snapshot for $(date -u +%Y-%m-%d)"
+          git push

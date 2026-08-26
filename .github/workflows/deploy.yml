@@ -29,6 +29,13 @@ jobs:
       - name: Run test suite
         run: npm test
 
+      # No-ops without the secret, so forks and PRs still build against the
+      # committed snapshot instead of failing.
+      - name: Refresh Shorts snapshot
+        run: npm run fetch:shorts
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+
       - name: Build site
         run: npm run build
 

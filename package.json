@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/growth.js",
   "scripts": {
-    "build": "cp src/growth.js public/growth.js",
+    "build": "node scripts/build.js",
+    "fetch:shorts": "node scripts/fetch-shorts.js",
     "test": "node --test"
   },
   "license": "MIT"
