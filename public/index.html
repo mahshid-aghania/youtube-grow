@@ -71,47 +71,9 @@
     font-size: .8rem;
     font-weight: 600;
   }
-  h1 { font-size: clamp(2rem, 6vw, 3rem); margin: 1rem 0 .5rem; letter-spacing: -.02em; }
-  .lede { color: var(--text-2); font-size: 1.1rem; margin: 0 0 1rem; max-width: 46rem; }
 
   h2 { font-size: 1.15rem; margin: 2.5rem 0 .5rem; }
   .section-note { color: var(--muted); font-size: .9rem; margin: 0 0 1rem; max-width: 46rem; }
-
-  .caveat {
-    border-left: 3px solid var(--warn-line);
-    background: var(--warn-wash);
-    border-radius: .3rem;
-    padding: .9rem 1.1rem;
-    margin: 1.5rem 0;
-    color: var(--text-2);
-    font-size: .92rem;
-    max-width: 52rem;
-  }
-  .caveat strong { color: var(--text); }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: 1rem;
-  }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: .75rem;
-    padding: 1.25rem;
-  }
-  .card .label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
-  .card .value { font-size: 2rem; font-weight: 700; margin-top: .35rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-  .card .note { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
-
-  .bars { display: grid; gap: .5rem; }
-  .bar-row { display: grid; grid-template-columns: 5.5rem 1fr 5rem; align-items: center; gap: .75rem; font-size: .875rem; }
-  .bar-row .day { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .bar-track { background: var(--accent-wash); border-radius: 999px; height: .55rem; overflow: hidden; }
-  /* display:block is load-bearing: an inline span ignores width/height,
-     which collapses the fill and makes every day look identical. */
-  .bar-fill { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
-  .bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 
   .tablewrap { overflow-x: auto; }
   table {
@@ -139,23 +101,7 @@
 <body>
 <main>
   <span class="badge">Deployed from GitHub Actions</span>
-  <h1>Roblox Shorts</h1>
-  <p class="lede">
-    A rolling 7-day report on the biggest Roblox Shorts on YouTube. Every figure is
-    computed in your browser by <code>src/shorts.js</code> &mdash; the same module the
-    test suite covers in
-    <a href="https://github.com/mahshid-aghania/youtube-grow">mahshid-aghania/youtube-grow</a>.
-  </p>
-  <p class="section-note" id="window"></p>
-
-  <div class="caveat" id="caveat"></div>
-
-  <h2>The week in totals</h2>
-  <div class="grid" id="stats"><p class="loading">Loading snapshot&hellip;</p></div>
-
-  <h2>Views by publish day</h2>
-  <p class="section-note" id="daily-note"></p>
-  <div class="bars" id="daily"></div>
+  <p class="loading" id="status">Loading snapshot&hellip;</p>
 
   <h2>Top Shorts by views</h2>
   <div class="tablewrap">
@@ -207,15 +153,6 @@
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const watch = (id) => `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`;
   const chan = (id) => `https://www.youtube.com/channel/${encodeURIComponent(id)}`;
-  const full = (n) => n.toLocaleString();
-
-  // Built piecewise: toLocaleDateString with {weekday, day} orders these by
-  // locale ("20 Thu" in en-GB), and this axis reads better weekday-first.
-  const dayLabel = (iso) => {
-    const d = new Date(`${iso}T00:00:00Z`);
-    const wd = d.toLocaleDateString(undefined, { weekday: 'short', timeZone: 'UTC' });
-    return `${wd} ${d.getUTCDate()}`;
-  };
 
   const videoCell = (v) => `
     <a href="${watch(v.id)}" target="_blank" rel="noopener">${esc(v.title)}</a>
@@ -225,42 +162,7 @@
     const res = await fetch('./data/roblox-shorts.json');
     if (!res.ok) throw new Error(`snapshot returned ${res.status}`);
     const report = buildReport(await res.json());
-    const t = report.totals;
-
-    document.getElementById('window').textContent =
-      `${report.window.start.slice(0, 10)} to ${report.window.end.slice(0, 10)} · ` +
-      `collected ${new Date(report.fetchedAt).toLocaleString()}`;
-
-    document.getElementById('caveat').innerHTML =
-      `<strong>Coverage: ${esc(report.coverage)}.</strong> ${esc(report.coverageNote)}`;
-
-    document.getElementById('stats').innerHTML = [
-      { label: 'Shorts tracked', value: full(t.videoCount), note: `across ${t.channelCount} channels` },
-      { label: 'Total views', value: compact(t.views), note: `${full(t.views)} exactly` },
-      { label: 'Median views', value: compact(t.medianViews), note: `mean ${compact(t.meanViews)} — skewed by the top` },
-      { label: 'Engagement', value: `${t.engagementRate}%`, note: `${compact(t.likes)} likes · ${compact(t.comments)} comments` },
-      { label: 'Peak velocity', value: compact(t.peakVph), note: 'views / hour, best Short' },
-      { label: 'Median length', value: `${t.medianDurationSec}s`, note: 'of the tracked Shorts' },
-    ].map((s) => `<div class="card">
-        <div class="label">${s.label}</div>
-        <div class="value">${s.value}</div>
-        <div class="note">${s.note}</div>
-      </div>`).join('');
-
-    const peakDay = Math.max(...report.daily.map((d) => d.views), 1);
-    const busiest = report.daily.reduce((a, b) => (b.views > a.views ? b : a), report.daily[0]);
-
-    document.getElementById('daily-note').textContent =
-      `Peak was ${dayLabel(busiest.day)} at ${compact(busiest.views)} views from ` +
-      `${busiest.videoCount} Shorts. Later days read lower partly because their videos ` +
-      `have had less time to accumulate views — not only because they performed worse.`;
-
-    document.getElementById('daily').innerHTML = report.daily.map((d) => `
-      <div class="bar-row">
-        <span class="day">${dayLabel(d.day)}</span>
-        <span class="bar-track"><span class="bar-fill" style="width:${Math.max(1, (d.views / peakDay) * 100).toFixed(1)}%"></span></span>
-        <span class="val">${compact(d.views)}</span>
-      </div>`).join('');
+    document.getElementById('status').remove();
 
     document.getElementById('top-views').innerHTML = report.topByViews.map((v) => `
       <tr>
@@ -293,9 +195,9 @@
         <td class="num">${v.viewsPerSub.toLocaleString()}&times;</td>
       </tr>`).join('');
   } catch (err) {
-    document.getElementById('stats').innerHTML =
-      `<p class="loading">Could not load the Shorts snapshot: ${esc(err.message)}. ` +
-      `Run <code>npm run build</code> to copy data/ into public/.</p>`;
+    document.getElementById('status').innerHTML =
+      `Could not load the Shorts snapshot: ${esc(err.message)}. ` +
+      `Run <code>npm run build</code> to copy data/ into public/.`;
   }
 </script>
 </body>
