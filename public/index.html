@@ -5,49 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roblox Shorts — 7-day report</title>
 <style>
+  /* Dark-only by design: one committed look, so the page renders the same
+     whatever the viewer's OS or browser is set to. No prefers-color-scheme
+     block and no [data-theme] stamps — every colour below is unconditional. */
   :root {
-    --bg: #f2f4f7;
-    --surface: #ffffff;
-    --surface-2: #f7f9fb;
-    --border: #e0e4ea;
-    --text: #12151b;
-    --text-2: #3c4553;
-    --muted: #626d7e;
-    --accent: #a85708;
-    --accent-wash: rgba(168, 87, 8, .1);
-    --good: #0d7a62;
-    --warn-wash: rgba(138, 90, 0, .08);
-    --warn-line: #8a5a00;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0b0d12;
-      --surface: #14181f;
-      --surface-2: #1a1f28;
-      --border: #262d39;
-      --text: #eef1f6;
-      --text-2: #c3cad5;
-      --muted: #8d97a6;
-      --accent: #e79a3d;
-      --accent-wash: rgba(231, 154, 61, .14);
-      --good: #3ec2a0;
-      --warn-wash: rgba(224, 170, 90, .1);
-      --warn-line: #e0aa5a;
-    }
-  }
-  :root[data-theme="dark"] {
+    color-scheme: dark;
     --bg: #0b0d12;
     --surface: #14181f;
     --surface-2: #1a1f28;
     --border: #262d39;
+    --border-soft: #1e242e;
     --text: #eef1f6;
     --text-2: #c3cad5;
     --muted: #8d97a6;
     --accent: #e79a3d;
+    --accent-2: #f0b364;
     --accent-wash: rgba(231, 154, 61, .14);
     --good: #3ec2a0;
-    --warn-wash: rgba(224, 170, 90, .1);
-    --warn-line: #e0aa5a;
+    --good-wash: rgba(62, 194, 160, .15);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px -18px rgba(0, 0, 0, .9);
   }
 
   * { box-sizing: border-box; }
@@ -92,6 +68,93 @@
   td a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
   .sub { display: block; color: var(--muted); font-size: .8rem; }
   .loading { color: var(--muted); font-style: italic; }
+
+  /* ---------- shot list ---------- */
+  .lookup { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .75rem; }
+  .lookup input {
+    flex: 1 1 22rem;
+    min-width: 0;
+    padding: .6rem .8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .45rem;
+    color: var(--text);
+    font: inherit;
+    font-size: .95rem;
+  }
+  .lookup input::placeholder { color: var(--muted); }
+  .lookup input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .lookup button {
+    padding: .6rem 1.1rem;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: .45rem;
+    color: #14181f;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .lookup button:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .lookup button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.25rem; }
+  .chip {
+    padding: .3rem .7rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-2);
+    font-size: .82rem;
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .msg {
+    padding: .85rem 1.1rem;
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: .35rem;
+    color: var(--text-2);
+    font-size: .92rem;
+    margin-bottom: 1.25rem;
+  }
+  .msg strong { color: var(--text); }
+
+  .hook {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.1rem;
+    align-items: flex-start;
+    padding: 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: .75rem;
+    margin-bottom: 1rem;
+  }
+  .hook img {
+    width: 168px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: .5rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    flex: none;
+  }
+  .hook__body { flex: 1 1 20rem; min-width: 0; }
+  .hook__label {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--accent); font-weight: 600;
+  }
+  .hook__title { font-weight: 600; margin: .2rem 0 .1rem; }
+  .hook__meta { color: var(--muted); font-size: .82rem; margin-bottom: .5rem; }
+  .hook__why { color: var(--text-2); font-size: .92rem; margin: 0; }
+
+  .scene-n { color: var(--muted); font-variant-numeric: tabular-nums; width: 2.5rem; }
+  .dur { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dur .share { display: block; color: var(--muted); font-size: .78rem; }
+  td.said { color: var(--text-2); font-style: italic; }
+  td.cam { color: var(--text-2); font-size: .88rem; }
 
   footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .875rem; }
   a { color: var(--accent); }
@@ -140,6 +203,21 @@
     </table>
   </div>
 
+  <h2>Scene-by-scene shot list</h2>
+  <p class="section-note">
+    Paste a YouTube Short link to see how it is built &mdash; every scene, how long it
+    holds, what the character does and says, and how the camera moves.
+  </p>
+
+  <form class="lookup" id="lookup">
+    <input id="link" type="text" inputmode="url" autocomplete="off" spellcheck="false"
+           placeholder="https://www.youtube.com/shorts/..." aria-label="YouTube Short link">
+    <button type="submit">Show shot list</button>
+  </form>
+  <div class="chips" id="chips"></div>
+
+  <div id="shotlist-out"></div>
+
   <footer>
     Refresh with <code>npm run fetch:shorts</code> &middot;
     <a href="https://github.com/mahshid-aghania/youtube-grow">Source on GitHub</a>
@@ -148,6 +226,7 @@
 
 <script type="module">
   import { buildReport, compact } from './shorts.js';
+  import { parseVideoId, normaliseShotlist, sceneRange, longestScene } from './shotlist.js';
 
   const esc = (str) => String(str).replace(/[&<>"]/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -198,6 +277,116 @@
     document.getElementById('status').innerHTML =
       `Could not load the Shorts snapshot: ${esc(err.message)}. ` +
       `Run <code>npm run build</code> to copy data/ into public/.`;
+  }
+
+  /* ---------- shot list ---------- */
+  const out = document.getElementById('shotlist-out');
+
+  const message = (html) => { out.innerHTML = `<div class="msg">${html}</div>`; };
+
+  function renderShotlist(list) {
+    const longest = longestScene(list);
+    out.innerHTML = `
+      <div class="hook">
+        <img src="${list.thumbnail}" alt="" loading="lazy" width="168" height="94">
+        <div class="hook__body">
+          <div class="hook__label">Hook &middot; first ${list.hook?.seconds ?? 3}s</div>
+          <p class="hook__title">
+            <a href="${list.url}" target="_blank" rel="noopener">${esc(list.title)}</a>
+          </p>
+          <p class="hook__meta">
+            ${esc(list.channel)} &middot; ${list.durationSeconds}s &middot;
+            ${list.sceneCount} scenes &middot; ${list.meanSceneSec}s average
+          </p>
+          <p class="hook__why">${esc(list.hook?.why ?? '')}</p>
+        </div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Time</th><th>Character does</th>
+              <th>Character says</th><th>Camera</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.scenes.map((sc) => `
+              <tr${sc.n === longest.n ? ' style="background:var(--accent-wash)"' : ''}>
+                <td class="scene-n">${sc.n}</td>
+                <td class="dur">
+                  ${sceneRange(sc)}
+                  <span class="share">${sc.durationSec}s &middot; ${sc.share}%</span>
+                </td>
+                <td>${esc(sc.action)}</td>
+                <td class="said">${esc(sc.dialogue)}</td>
+                <td class="cam">${esc(sc.camera)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+      <p class="section-note" style="margin-top:.75rem">
+        The highlighted row is the longest scene &mdash; ${longest.durationSec}s,
+        ${longest.share}% of the runtime. In a Short that is usually the payoff.
+      </p>`;
+  }
+
+  let index = { videoIds: [] };
+  try {
+    const res = await fetch('./data/shotlists/index.json');
+    if (res.ok) index = await res.json();
+  } catch { /* the chips just stay empty */ }
+
+  async function show(videoId, { scroll = true } = {}) {
+    try {
+      const res = await fetch(`./data/shotlists/${encodeURIComponent(videoId)}.json`);
+      if (res.status === 404) {
+        message(
+          `<strong>No shot list for <code>${esc(videoId)}</code> yet.</strong> ` +
+          `Breaking a video into scenes needs a model that can watch it, which a static ` +
+          `page cannot do on its own. Send me the link in chat and I will analyse it and ` +
+          `commit the result &mdash; it then shows up here.`);
+        return;
+      }
+      if (!res.ok) throw new Error(`server returned ${res.status}`);
+      renderShotlist(normaliseShotlist(await res.json()));
+      // A blocked or missing thumbnail should leave a clean empty frame,
+      // not the browser's broken-image icon.
+      const thumb = out.querySelector('.hook img');
+      if (thumb) thumb.addEventListener('error', () => { thumb.style.visibility = 'hidden'; });
+      if (scroll) out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      message(`Could not load that shot list: ${esc(err.message)}`);
+    }
+  }
+
+  document.getElementById('chips').innerHTML = index.videoIds.map((id) => `
+    <button type="button" class="chip" data-id="${id}">${id}</button>`).join('');
+
+  document.getElementById('chips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.getElementById('link').value = `https://www.youtube.com/shorts/${chip.dataset.id}`;
+    show(chip.dataset.id);
+  });
+
+  document.getElementById('lookup').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const videoId = parseVideoId(document.getElementById('link').value);
+    if (!videoId) {
+      message(
+        `<strong>That does not look like a YouTube link.</strong> ` +
+        `Paste a full URL &mdash; <code>youtube.com/shorts/…</code>, ` +
+        `<code>youtube.com/watch?v=…</code>, or <code>youtu.be/…</code> &mdash; or the bare 11-character id.`);
+      return;
+    }
+    show(videoId);
+  });
+
+  // Load the first shot list so the section is never empty on arrival.
+  if (index.videoIds.length) {
+    document.getElementById('link').value =
+      `https://www.youtube.com/shorts/${index.videoIds[0]}`;
+    show(index.videoIds[0], { scroll: false });
   }
 </script>
 </body>

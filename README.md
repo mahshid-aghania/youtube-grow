@@ -32,7 +32,33 @@ node scripts/fetch-shorts.js --days 30 --pages 8  # wider window, deeper search
 npm run build && npx http-server public           # view the report
 ```
 
-### Coverage — read this before quoting a total
+### Scene-by-scene shot lists
+
+The site has a **Scene-by-scene shot list** section: paste a YouTube Short link and
+it renders every scene — timecode, how long the scene holds and what share of the
+runtime that is, what the character does, what they say, and how the camera moves —
+plus the hook, its thumbnail, and why the first three seconds work. The longest
+scene is highlighted, since in a Short that is almost always the payoff.
+
+`src/shotlist.js` parses the pasted link (every YouTube URL shape, or a bare id),
+validates the record, and computes the per-scene shares. Records live in
+`data/shotlists/<videoId>.json` and are listed in `data/shotlists/index.json` — the
+test suite fails if a file is added without listing it, since an unlisted shot list
+is invisible to the page.
+
+### Adding a video
+
+**The page cannot analyse a video by itself.** Turning footage into scenes needs a
+model that can watch it; a static site has no way to do that, and there is no
+public API that returns a shot list. So the flow is:
+
+1. Send the link to Claude in a session with video-analysis tools available
+2. Claude writes `data/shotlists/<videoId>.json` and adds the id to `index.json`
+3. `npm test` validates it, and the next push deploys it
+
+Three shot lists ship with the repo, covering the top Roblox Shorts of the window.
+
+## Coverage — read this before quoting a total
 
 **The totals are the head of the distribution, not a census.** YouTube's Search
 API does not expose a complete index of everything published, and it caps any

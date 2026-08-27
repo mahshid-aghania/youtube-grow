@@ -1,0 +1,78 @@
+{
+  "videoId": "xQXojdSP54s",
+  "url": "https://www.youtube.com/shorts/xQXojdSP54s",
+  "title": "BRO Made Doctor Harlow ANGRY 😡 #roblox #robloxshorts",
+  "channel": "Jojo CoreBlox",
+  "durationSeconds": 50,
+  "analysedAt": "2026-08-27T05:10:00Z",
+  "source": "vidIQ shortform analysis",
+  "hook": {
+    "seconds": 3,
+    "why": "Spin the bottle — a harmless party game — turns instantly into horror comedy when the loser screams. The gap between the casual setup and the dramatic reaction makes you wait to find out what the forfeit is."
+  },
+  "scenes": [
+    {
+      "startSec": 0, "endSec": 3,
+      "action": "A girl in a white jumpsuit spins a green bottle. It points at the boy in yellow, who screams and cries dramatically.",
+      "dialogue": "\"Huh\" / (screaming)",
+      "camera": "Wide looking down on the circle, then quick cut to a low-angle close-up",
+      "visual": "Three Roblox characters around a green bottle in an office-like room."
+    },
+    {
+      "startSec": 3, "endSec": 8,
+      "action": "The yellow character runs to the \"Doctors Only\" door, knocks frantically, and panics when Dr. Harlow opens it.",
+      "dialogue": "—",
+      "camera": "Medium from behind, switching to over-the-shoulder close-up",
+      "visual": "Hallway door signed \"Restricted Access / Doctors Only\"; antlered Dr. Harlow appears."
+    },
+    {
+      "startSec": 8, "endSec": 13,
+      "action": "Back in the room the girl spins again. It lands on her; she collapses face-down.",
+      "dialogue": "\"Wait, what?\" / \"Bruh\"",
+      "camera": "Medium eye-level, then slight high angle as she drops",
+      "visual": "The bottle glowing as it spins, settling toward the centre girl."
+    },
+    {
+      "startSec": 13, "endSec": 16,
+      "action": "The bottle lands on the boy in pink, who cycles through angry and distressed meme faces.",
+      "dialogue": "—",
+      "camera": "Low-angle front-facing close-up",
+      "visual": "Pink character seated, face morphing in exaggerated reactions."
+    },
+    {
+      "startSec": 16, "endSec": 24,
+      "action": "The pink character walks to the door and knocks. Dr. Harlow opens it with a monstrous open jaw, scaring him backward.",
+      "dialogue": "\"Huh\"",
+      "camera": "Medium from behind, cutting to a close front view of Harlow",
+      "visual": "Metal door opening onto Dr. Harlow transformed, sharp teeth bared."
+    },
+    {
+      "startSec": 24, "endSec": 30,
+      "action": "The pink character flexes, turns, returns to Dr. Harlow and gives him a friendly handshake.",
+      "dialogue": "—",
+      "camera": "Medium moving shot down the hallway, then a side two-shot at the doorway",
+      "visual": "Hospital corridor with vending machines; the two shaking hands."
+    },
+    {
+      "startSec": 30, "endSec": 37,
+      "action": "The bottle is spun again and releases green gas. All three characters react in agony and pass out.",
+      "dialogue": "—",
+      "camera": "Medium wide of the room, quick cuts between distressed faces",
+      "visual": "Green smoke pouring from the tipped bottle; characters down on the floor."
+    },
+    {
+      "startSec": 37, "endSec": 40,
+      "action": "Dr. Harlow walks the corridor, spots a green recycling bin, and climbs inside to hide.",
+      "dialogue": "—",
+      "camera": "Medium tracking shot, locking onto the bin",
+      "visual": "Corner of the hallway with a green recycling bin."
+    },
+    {
+      "startSec": 40, "endSec": 49,
+      "action": "The girl crawls out and hits the red door buzzer. Dr. Harlow grabs and body-slams her, throwing her under a hospital bed where red eyes glow in the dark.",
+      "dialogue": "(dramatic screaming / meme voiceover)",
+      "camera": "Low-angle wide tracking her crawl, fast medium cut to the struggle, ending on a static wide",
+      "visual": "Sterile medical room; glowing red eyes beneath the hospital bed."
+    }
+  ]
+}

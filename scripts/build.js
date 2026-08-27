@@ -23,12 +23,19 @@ for (const file of readdirSync('src').filter((f) => f.endsWith('.js'))) {
   copy(join('src', file), join('public', file));
 }
 
-// Data snapshots the page fetches.
-mkdirSync(join('public', 'data'), { recursive: true });
-for (const file of readdirSync('data').filter((f) => f.endsWith('.json'))) {
-  const from = join('data', file);
-  copy(from, join('public', 'data', file));
-  console.log(`    (${(statSync(from).size / 1024).toFixed(1)} KB)`);
-}
+// Data the page fetches — including data/shotlists/, so nested dirs come too.
+const copyJson = (fromDir, toDir) => {
+  mkdirSync(toDir, { recursive: true });
+  for (const entry of readdirSync(fromDir, { withFileTypes: true })) {
+    const from = join(fromDir, entry.name);
+    if (entry.isDirectory()) {
+      copyJson(from, join(toDir, entry.name));
+    } else if (entry.name.endsWith('.json')) {
+      copy(from, join(toDir, entry.name));
+      console.log(`    (${(statSync(from).size / 1024).toFixed(1)} KB)`);
+    }
+  }
+};
+copyJson('data', join('public', 'data'));
 
 console.log('Done.');

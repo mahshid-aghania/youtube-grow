@@ -1,0 +1,50 @@
+{
+  "videoId": "gpBA12uEBIA",
+  "url": "https://www.youtube.com/shorts/gpBA12uEBIA",
+  "title": "Life of Roblox Bacon but in Real Life... 😨 #shorts",
+  "channel": "Junell Dominic",
+  "durationSeconds": 15,
+  "analysedAt": "2026-08-27T05:10:00Z",
+  "source": "vidIQ shortform analysis",
+  "hook": {
+    "seconds": 3,
+    "why": "A split screen runs a Roblox animation against live-action actors doing the same thing. The novelty registers before any story does, and the year stamp promises a life story in fifteen seconds."
+  },
+  "scenes": [
+    {
+      "startSec": 0, "endSec": 1,
+      "action": "A red-haired woman and a young man smile and wave at camera, mirrored in both halves of the split screen.",
+      "dialogue": "\"2018\" (on-screen text)",
+      "camera": "Eye-level medium-wide, static split screen",
+      "visual": "Two friends waving side by side outside a modern house with a fountain — top half Roblox, bottom half real life."
+    },
+    {
+      "startSec": 1, "endSec": 4,
+      "action": "The same pair, now in wedding attire, hold hands and wave to camera.",
+      "dialogue": "\"2020\" (on-screen text)",
+      "camera": "Eye-level medium-wide, static split screen",
+      "visual": "Bride in a white gown, groom in a black tuxedo, in front of the same fountain."
+    },
+    {
+      "startSec": 4, "endSec": 6,
+      "action": "The couple stands behind two young children; all four smile and wave together.",
+      "dialogue": "\"2022\" (on-screen text)",
+      "camera": "Eye-level medium-wide, static split screen",
+      "visual": "Four-person family portrait outside the house, replicated in both formats."
+    },
+    {
+      "startSec": 6, "endSec": 9,
+      "action": "The parents are elderly with grey hair and glasses; the children are grown teenagers. All four wave.",
+      "dialogue": "\"2026\" (on-screen text)",
+      "camera": "Eye-level medium-wide, static split screen",
+      "visual": "Aged parents beside their grown kids, mirrored in Roblox and live-action cosplay."
+    },
+    {
+      "startSec": 9, "endSec": 15,
+      "action": "The grown children kneel weeping at two gravestones. Smoke rises and the dead parents appear as winged angels, playfully slapping their kids' heads.",
+      "dialogue": "\"2030\" / \"MAMA BACON R.I.P\" / \"PAPA BACON R.I.P\" (on-screen text)",
+      "camera": "Eye-level medium, static split screen with smoke and ghost overlays",
+      "visual": "Graveyard; grieving kids at tombstones, then angelic parents emerging from smoke."
+    }
+  ]
+}

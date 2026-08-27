@@ -1,0 +1,50 @@
+{
+  "videoId": "Snpt7oqfzP4",
+  "url": "https://www.youtube.com/shorts/Snpt7oqfzP4",
+  "title": "Lil bro yelling at the family 💀 #shorts #robloxanimation",
+  "channel": "Clutchmaker",
+  "durationSeconds": 15,
+  "analysedAt": "2026-08-27T05:10:00Z",
+  "source": "vidIQ shortform analysis",
+  "hook": {
+    "seconds": 3,
+    "why": "A screeching tantrum on the audio, then rapid-fire reaction shots of each family member arming themselves. The premise and the promised payoff both land inside three seconds."
+  },
+  "scenes": [
+    {
+      "startSec": 0, "endSec": 2,
+      "action": "A blonde Roblox kid stomps and screams. Cutaways show Dad with a remote, Big Bro pulling off headphones, and Noob in the hallway all reacting.",
+      "dialogue": "\"Lil bro yelling at the family\" (on-screen text)",
+      "camera": "Series of quick cuts; medium shots across several rooms",
+      "visual": "Blonde avatar screaming in a modern kitchen, then fast cuts to the rest of the family."
+    },
+    {
+      "startSec": 2, "endSec": 4,
+      "action": "Dad pulls off his leather belt, folds it in his hands, and steps forward.",
+      "dialogue": "\"Dad:\" (on-screen text)",
+      "camera": "Medium full shot, static",
+      "visual": "Stern angular-faced avatar in a living room holding a black belt."
+    },
+    {
+      "startSec": 4, "endSec": 7,
+      "action": "Mom stomps down the hallway wielding two slippers.",
+      "dialogue": "\"Mom:\" (on-screen text)",
+      "camera": "Medium tracking pan following her down the corridor",
+      "visual": "Avatar with glasses and long brown hair, angry grimace, a slipper in each hand."
+    },
+    {
+      "startSec": 7, "endSec": 9,
+      "action": "Big Bro steps forward holding a plastic clothes hanger like a weapon.",
+      "dialogue": "\"Big bro:\" (on-screen text)",
+      "camera": "Medium close-up, low angle, static",
+      "visual": "Avatar in sunglasses, cap and hoodie, hanger raised."
+    },
+    {
+      "startSec": 9, "endSec": 15,
+      "action": "The classic Noob avatar charges down the hallway with an exaggerated run cycle and rapid face changes.",
+      "dialogue": "\"Me:\" (on-screen text)",
+      "camera": "Wide low-angle tracking straight down the hallway, character running at camera",
+      "visual": "Yellow-and-blue Noob sprinting erratically toward the viewer."
+    }
+  ]
+}
