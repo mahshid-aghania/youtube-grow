@@ -3,28 +3,53 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YouTube Grow</title>
+<title>Roblox Shorts — 7-day report</title>
 <style>
   :root {
-    --bg: #f7f7f9;
+    --bg: #f2f4f7;
     --surface: #ffffff;
-    --border: #e3e3e8;
-    --text: #17171c;
-    --muted: #62626e;
-    --accent: #d92d20;
-    --good: #12805c;
+    --surface-2: #f7f9fb;
+    --border: #e0e4ea;
+    --text: #12151b;
+    --text-2: #3c4553;
+    --muted: #626d7e;
+    --accent: #a85708;
+    --accent-wash: rgba(168, 87, 8, .1);
+    --good: #0d7a62;
+    --warn-wash: rgba(138, 90, 0, .08);
+    --warn-line: #8a5a00;
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f0f12;
-      --surface: #17171c;
-      --border: #2a2a33;
-      --text: #f2f2f5;
-      --muted: #9a9aa8;
-      --accent: #ff5c4d;
-      --good: #35c99a;
+    :root:not([data-theme="light"]) {
+      --bg: #0b0d12;
+      --surface: #14181f;
+      --surface-2: #1a1f28;
+      --border: #262d39;
+      --text: #eef1f6;
+      --text-2: #c3cad5;
+      --muted: #8d97a6;
+      --accent: #e79a3d;
+      --accent-wash: rgba(231, 154, 61, .14);
+      --good: #3ec2a0;
+      --warn-wash: rgba(224, 170, 90, .1);
+      --warn-line: #e0aa5a;
     }
   }
+  :root[data-theme="dark"] {
+    --bg: #0b0d12;
+    --surface: #14181f;
+    --surface-2: #1a1f28;
+    --border: #262d39;
+    --text: #eef1f6;
+    --text-2: #c3cad5;
+    --muted: #8d97a6;
+    --accent: #e79a3d;
+    --accent-wash: rgba(231, 154, 61, .14);
+    --good: #3ec2a0;
+    --warn-wash: rgba(224, 170, 90, .1);
+    --warn-line: #e0aa5a;
+  }
+
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -33,24 +58,41 @@
     color: var(--text);
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  main { max-width: 56rem; margin: 0 auto; }
+  main { max-width: 62rem; margin: 0 auto; }
+
   .badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
     padding: .25rem .7rem;
     border-radius: 999px;
     background: color-mix(in srgb, var(--good) 15%, transparent);
     color: var(--good);
     font-size: .8rem;
     font-weight: 600;
-    letter-spacing: .02em;
   }
   h1 { font-size: clamp(2rem, 6vw, 3rem); margin: 1rem 0 .5rem; letter-spacing: -.02em; }
-  .lede { color: var(--muted); font-size: 1.1rem; margin: 0 0 2.5rem; max-width: 40rem; }
+  .lede { color: var(--text-2); font-size: 1.1rem; margin: 0 0 1rem; max-width: 46rem; }
+
+  h2 { font-size: 1.15rem; margin: 2.5rem 0 .5rem; }
+  .section-note { color: var(--muted); font-size: .9rem; margin: 0 0 1rem; max-width: 46rem; }
+
+  .caveat {
+    border-left: 3px solid var(--warn-line);
+    background: var(--warn-wash);
+    border-radius: .3rem;
+    padding: .9rem 1.1rem;
+    margin: 1.5rem 0;
+    color: var(--text-2);
+    font-size: .92rem;
+    max-width: 52rem;
+  }
+  .caveat strong { color: var(--text); }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
     gap: 1rem;
-    margin-bottom: 2.5rem;
   }
   .card {
     background: var(--surface);
@@ -59,153 +101,125 @@
     padding: 1.25rem;
   }
   .card .label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
-  .card .value { font-size: 2rem; font-weight: 700; margin-top: .35rem; letter-spacing: -.02em; }
+  .card .value { font-size: 2rem; font-weight: 700; margin-top: .35rem; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
   .card .note { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
-  h2 { font-size: 1.15rem; margin: 2.5rem 0 .75rem; }
-  table { width: 100%; border-collapse: collapse; background: var(--surface);
-          border: 1px solid var(--border); border-radius: .75rem; overflow: hidden; }
-  th, td { padding: .7rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-  th { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  tr:last-child td { border-bottom: 0; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  footer { margin-top: 3rem; color: var(--muted); font-size: .875rem; }
-  code { background: var(--bg); border: 1px solid var(--border); border-radius: .3rem; padding: .1rem .35rem; font-size: .85em; }
 
-  .section-note { color: var(--muted); font-size: .9rem; margin: .25rem 0 1rem; max-width: 46rem; }
-  .caveat {
-    border-left: 3px solid var(--accent);
-    background: var(--surface);
-    border-radius: .3rem;
-    padding: .75rem 1rem;
-    margin: 1rem 0 1.5rem;
-    color: var(--muted);
-    font-size: .9rem;
-  }
-  .caveat strong { color: var(--text); }
-  .bars { display: grid; gap: .5rem; margin-bottom: 1.5rem; }
+  .bars { display: grid; gap: .5rem; }
   .bar-row { display: grid; grid-template-columns: 5.5rem 1fr 5rem; align-items: center; gap: .75rem; font-size: .875rem; }
   .bar-row .day { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .bar-track { background: var(--bg); border: 1px solid var(--border); border-radius: 999px; height: .55rem; overflow: hidden; }
-  .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+  .bar-track { background: var(--accent-wash); border-radius: 999px; height: .55rem; overflow: hidden; }
+  /* display:block is load-bearing: an inline span ignores width/height,
+     which collapses the fill and makes every day look identical. */
+  .bar-fill { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
   .bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+  .tablewrap { overflow-x: auto; }
+  table {
+    width: 100%; border-collapse: collapse; min-width: 34rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: .75rem; overflow: hidden;
+  }
+  th, td { padding: .7rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); background: var(--surface-2); white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: 0; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   td a { color: inherit; text-decoration: none; }
   td a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
   .sub { display: block; color: var(--muted); font-size: .8rem; }
   .loading { color: var(--muted); font-style: italic; }
+
+  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .875rem; }
+  a { color: var(--accent); }
+  code { background: var(--surface-2); border: 1px solid var(--border); border-radius: .3rem; padding: .1rem .35rem; font-size: .85em; }
 </style>
 </head>
 <body>
 <main>
   <span class="badge">Deployed from GitHub Actions</span>
-  <h1>YouTube Grow</h1>
+  <h1>Roblox Shorts</h1>
   <p class="lede">
-    A sample deployment for <code>mahshid-aghania/youtube-grow</code>. The numbers below
-    are computed in the browser by the same <code>src/growth.js</code> module the test
-    suite covers &mdash; if this page renders, the build and the deploy both worked.
+    A rolling 7-day report on the biggest Roblox Shorts on YouTube. Every figure is
+    computed in your browser by <code>src/shorts.js</code> &mdash; the same module the
+    test suite covers in
+    <a href="https://github.com/mahshid-aghania/youtube-grow">mahshid-aghania/youtube-grow</a>.
   </p>
+  <p class="section-note" id="window"></p>
 
-  <div class="grid" id="stats"></div>
+  <div class="caveat" id="caveat"></div>
 
-  <h2>Top performers by view velocity</h2>
-  <table>
-    <thead><tr><th>Video</th><th class="num">Views / day</th></tr></thead>
-    <tbody id="top"></tbody>
-  </table>
-
-  <h2 id="shorts-heading">Roblox Shorts &mdash; last 7 days</h2>
-  <p class="section-note" id="shorts-window"></p>
-  <div class="caveat" id="shorts-caveat"></div>
-
-  <div class="grid" id="shorts-stats"><p class="loading">Loading snapshot&hellip;</p></div>
+  <h2>The week in totals</h2>
+  <div class="grid" id="stats"><p class="loading">Loading snapshot&hellip;</p></div>
 
   <h2>Views by publish day</h2>
-  <div class="bars" id="shorts-daily"></div>
+  <p class="section-note" id="daily-note"></p>
+  <div class="bars" id="daily"></div>
 
   <h2>Top Shorts by views</h2>
-  <table>
-    <thead><tr><th>Video</th><th class="num">Views</th><th class="num">Views/hr</th></tr></thead>
-    <tbody id="shorts-top"></tbody>
-  </table>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Video</th><th class="num">Views</th><th class="num">Views/hr</th></tr></thead>
+      <tbody id="top-views"></tbody>
+    </table>
+  </div>
 
-  <h2>Channels by total views in window</h2>
-  <table>
-    <thead><tr><th>Channel</th><th class="num">Shorts</th><th class="num">Views</th></tr></thead>
-    <tbody id="shorts-channels"></tbody>
-  </table>
+  <h2>Fastest right now</h2>
+  <p class="section-note">Views per hour since publish.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Video</th><th class="num">Views/hr</th></tr></thead>
+      <tbody id="top-vph"></tbody>
+    </table>
+  </div>
+
+  <h2>Channels taking the most views</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Channel</th><th class="num">Shorts</th><th class="num">Views</th></tr></thead>
+      <tbody id="channels"></tbody>
+    </table>
+  </div>
+
+  <h2>Punching above their size</h2>
+  <p class="section-note">
+    Views divided by subscribers. Channels under 1,000 subscribers are excluded &mdash;
+    the ratio stops meaning anything down there.
+  </p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Video</th><th class="num">Subs</th><th class="num">Views</th><th class="num">&times; subs</th></tr></thead>
+      <tbody id="breakouts"></tbody>
+    </table>
+  </div>
 
   <footer>
-    Built <span id="built"></span> &middot;
+    Refresh with <code>npm run fetch:shorts</code> &middot;
     <a href="https://github.com/mahshid-aghania/youtube-grow">Source on GitHub</a>
   </footer>
 </main>
 
 <script type="module">
-  import {
-    projectSubscribers,
-    engagementRate,
-    viewVelocity,
-    topPerformers,
-  } from './growth.js';
-
-  const channel = { subscribers: 12400, monthlyGrowth: 0.06 };
-  const videos = [
-    { title: 'I tried the algorithm for 30 days', views: 41200, daysSincePublish: 5, likes: 2850, comments: 410 },
-    { title: 'Why your thumbnails are losing clicks', views: 18900, daysSincePublish: 21, likes: 1120, comments: 260 },
-    { title: 'Channel audit: 0 to 10k', views: 96400, daysSincePublish: 180, likes: 4300, comments: 690 },
-    { title: 'Shorts vs. long-form in 2026', views: 7400, daysSincePublish: 9, likes: 380, comments: 95 },
-  ];
-
-  const totalViews = videos.reduce((sum, v) => sum + v.views, 0);
-  const totalLikes = videos.reduce((sum, v) => sum + v.likes, 0);
-  const totalComments = videos.reduce((sum, v) => sum + v.comments, 0);
-
-  const stats = [
-    {
-      label: 'Subscribers',
-      value: channel.subscribers.toLocaleString(),
-      note: 'as of today',
-    },
-    {
-      label: 'Projected in 12 mo',
-      value: projectSubscribers(channel.subscribers, channel.monthlyGrowth, 12).toLocaleString(),
-      note: `at +${(channel.monthlyGrowth * 100).toFixed(0)}% / month`,
-    },
-    {
-      label: 'Engagement rate',
-      value: `${engagementRate({ views: totalViews, likes: totalLikes, comments: totalComments })}%`,
-      note: 'likes + comments / views',
-    },
-    {
-      label: 'Best velocity',
-      value: Math.max(...videos.map((v) => viewVelocity(v.views, v.daysSincePublish))).toLocaleString(),
-      note: 'views / day',
-    },
-  ];
-
-  document.getElementById('stats').innerHTML = stats
-    .map((s) => `<div class="card">
-        <div class="label">${s.label}</div>
-        <div class="value">${s.value}</div>
-        <div class="note">${s.note}</div>
-      </div>`)
-    .join('');
-
-  document.getElementById('top').innerHTML = topPerformers(videos, 4)
-    .map((v) => `<tr><td>${v.title}</td><td class="num">${v.velocity.toLocaleString()}</td></tr>`)
-    .join('');
-
-  document.getElementById('built').textContent = new Date().toLocaleDateString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
-  });
-
-  /* ---------- Roblox Shorts report ---------- */
   import { buildReport, compact } from './shorts.js';
 
   const esc = (str) => String(str).replace(/[&<>"]/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const day = (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString(undefined, {
-    month: 'short', day: 'numeric', timeZone: 'UTC',
-  });
+  const watch = (id) => `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`;
+  const chan = (id) => `https://www.youtube.com/channel/${encodeURIComponent(id)}`;
+  const full = (n) => n.toLocaleString();
+
+  // Built piecewise: toLocaleDateString with {weekday, day} orders these by
+  // locale ("20 Thu" in en-GB), and this axis reads better weekday-first.
+  const dayLabel = (iso) => {
+    const d = new Date(`${iso}T00:00:00Z`);
+    const wd = d.toLocaleDateString(undefined, { weekday: 'short', timeZone: 'UTC' });
+    return `${wd} ${d.getUTCDate()}`;
+  };
+
+  const videoCell = (v) => `
+    <a href="${watch(v.id)}" target="_blank" rel="noopener">${esc(v.title)}</a>
+    <span class="sub">${esc(v.channel)} &middot; ${compact(v.subs)} subs &middot; ${v.durationSec}s</span>`;
 
   try {
     const res = await fetch('./data/roblox-shorts.json');
@@ -213,18 +227,20 @@
     const report = buildReport(await res.json());
     const t = report.totals;
 
-    document.getElementById('shorts-window').textContent =
-      `${report.window.start.slice(0, 10)} to ${report.window.end.slice(0, 10)} \u00b7 ` +
+    document.getElementById('window').textContent =
+      `${report.window.start.slice(0, 10)} to ${report.window.end.slice(0, 10)} · ` +
       `collected ${new Date(report.fetchedAt).toLocaleString()}`;
 
-    document.getElementById('shorts-caveat').innerHTML =
+    document.getElementById('caveat').innerHTML =
       `<strong>Coverage: ${esc(report.coverage)}.</strong> ${esc(report.coverageNote)}`;
 
-    document.getElementById('shorts-stats').innerHTML = [
-      { label: 'Shorts tracked', value: t.videoCount.toLocaleString(), note: `across ${t.channelCount} channels` },
-      { label: 'Total views', value: compact(t.views), note: `${t.views.toLocaleString()} exactly` },
-      { label: 'Median views', value: compact(t.medianViews), note: `mean ${compact(t.meanViews)}` },
-      { label: 'Engagement rate', value: `${t.engagementRate}%`, note: `${compact(t.likes)} likes, ${compact(t.comments)} comments` },
+    document.getElementById('stats').innerHTML = [
+      { label: 'Shorts tracked', value: full(t.videoCount), note: `across ${t.channelCount} channels` },
+      { label: 'Total views', value: compact(t.views), note: `${full(t.views)} exactly` },
+      { label: 'Median views', value: compact(t.medianViews), note: `mean ${compact(t.meanViews)} — skewed by the top` },
+      { label: 'Engagement', value: `${t.engagementRate}%`, note: `${compact(t.likes)} likes · ${compact(t.comments)} comments` },
+      { label: 'Peak velocity', value: compact(t.peakVph), note: 'views / hour, best Short' },
+      { label: 'Median length', value: `${t.medianDurationSec}s`, note: 'of the tracked Shorts' },
     ].map((s) => `<div class="card">
         <div class="label">${s.label}</div>
         <div class="value">${s.value}</div>
@@ -232,34 +248,52 @@
       </div>`).join('');
 
     const peakDay = Math.max(...report.daily.map((d) => d.views), 1);
-    document.getElementById('shorts-daily').innerHTML = report.daily.map((d) => `
+    const busiest = report.daily.reduce((a, b) => (b.views > a.views ? b : a), report.daily[0]);
+
+    document.getElementById('daily-note').textContent =
+      `Peak was ${dayLabel(busiest.day)} at ${compact(busiest.views)} views from ` +
+      `${busiest.videoCount} Shorts. Later days read lower partly because their videos ` +
+      `have had less time to accumulate views — not only because they performed worse.`;
+
+    document.getElementById('daily').innerHTML = report.daily.map((d) => `
       <div class="bar-row">
-        <span class="day">${day(d.day)}</span>
-        <span class="bar-track"><span class="bar-fill" style="width:${((d.views / peakDay) * 100).toFixed(1)}%"></span></span>
+        <span class="day">${dayLabel(d.day)}</span>
+        <span class="bar-track"><span class="bar-fill" style="width:${Math.max(1, (d.views / peakDay) * 100).toFixed(1)}%"></span></span>
         <span class="val">${compact(d.views)}</span>
       </div>`).join('');
 
-    document.getElementById('shorts-top').innerHTML = report.topByViews.map((v) => `
+    document.getElementById('top-views').innerHTML = report.topByViews.map((v) => `
       <tr>
-        <td>
-          <a href="https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}" target="_blank" rel="noopener">${esc(v.title)}</a>
-          <span class="sub">${esc(v.channel)} \u00b7 ${compact(v.subs)} subs \u00b7 ${v.durationSec}s</span>
-        </td>
+        <td>${videoCell(v)}</td>
         <td class="num">${compact(v.views)}</td>
         <td class="num">${compact(v.vph)}</td>
       </tr>`).join('');
 
-    document.getElementById('shorts-channels').innerHTML = report.topChannels.map((c) => `
+    document.getElementById('top-vph').innerHTML = report.topByVph.map((v) => `
+      <tr>
+        <td>${videoCell(v)}</td>
+        <td class="num">${compact(v.vph)}</td>
+      </tr>`).join('');
+
+    document.getElementById('channels').innerHTML = report.topChannels.map((c) => `
       <tr>
         <td>
-          <a href="https://www.youtube.com/channel/${encodeURIComponent(c.channelId)}" target="_blank" rel="noopener">${esc(c.channel)}</a>
+          <a href="${chan(c.channelId)}" target="_blank" rel="noopener">${esc(c.channel)}</a>
           <span class="sub">${compact(c.subs)} subscribers</span>
         </td>
         <td class="num">${c.videoCount}</td>
         <td class="num">${compact(c.views)}</td>
       </tr>`).join('');
+
+    document.getElementById('breakouts').innerHTML = report.breakouts.map((v) => `
+      <tr>
+        <td>${videoCell(v)}</td>
+        <td class="num">${compact(v.subs)}</td>
+        <td class="num">${compact(v.views)}</td>
+        <td class="num">${v.viewsPerSub.toLocaleString()}&times;</td>
+      </tr>`).join('');
   } catch (err) {
-    document.getElementById('shorts-stats').innerHTML =
+    document.getElementById('stats').innerHTML =
       `<p class="loading">Could not load the Shorts snapshot: ${esc(err.message)}. ` +
       `Run <code>npm run build</code> to copy data/ into public/.</p>`;
   }

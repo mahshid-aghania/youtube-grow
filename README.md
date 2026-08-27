@@ -1,18 +1,18 @@
 # YouTube Grow
 
-A starter project for YouTube channel growth tooling — with a live deployment and a green test suite from day one.
+Tracks the biggest YouTube Shorts for a topic over a rolling window, and publishes
+the report as a static site. Ships pointed at `roblox` over the last 7 days.
 
 ## What's here
 
 | Path | Purpose |
 | --- | --- |
-| `src/growth.js` | Growth math: subscriber projection, engagement rate, view velocity |
 | `src/shorts.js` | Shorts-report analysis: windowing, totals, rankings, per-channel and per-day rollups |
 | `scripts/fetch-shorts.js` | Pulls a topic's Shorts from the YouTube Data API into `data/` |
 | `scripts/build.js` | Copies `src/*.js` and `data/*.json` into `public/` for deployment |
 | `data/roblox-shorts.json` | Committed snapshot — the site works with no API key |
 | `test/` | Unit tests on Node's built-in runner — no dependencies, no network |
-| `public/index.html` | Static dashboard, deployed to GitHub Pages |
+| `public/index.html` | The report page, deployed to GitHub Pages |
 | `.github/workflows/ci.yml` | Runs the test suite on every push and pull request |
 | `.github/workflows/deploy.yml` | Publishes `public/` to GitHub Pages on every push to `main` |
 | `.github/workflows/refresh.yml` | Daily: re-fetches the window and commits it when the numbers move |
@@ -64,8 +64,8 @@ Quota: one search page costs 100 units against a 10,000/day default, so the
 npm test          # or: node --test
 ```
 
-The suite covers the growth math, the report analysis, the API-response
-mapping, and the shape of the committed snapshot itself.
+The suite covers the report analysis, the API-response mapping, and the shape
+of the committed snapshot itself. 18 tests, no network, no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 
