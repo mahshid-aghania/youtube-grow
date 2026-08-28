@@ -18,8 +18,8 @@ const copy = (from, to) => {
 
 console.log('Building public/');
 
-// Shared modules the page imports at runtime.
-for (const file of readdirSync('src').filter((f) => f.endsWith('.js'))) {
+// Modules and styles the page loads at runtime.
+for (const file of readdirSync('src').filter((f) => f.endsWith('.js') || f.endsWith('.css'))) {
   copy(join('src', file), join('public', file));
 }
 

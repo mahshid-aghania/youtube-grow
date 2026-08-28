@@ -3,431 +3,232 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Roblox Shorts — 7-day report</title>
-<style>
-  /* Dark-only by design: one committed look, so the page renders the same
-     whatever the viewer's OS or browser is set to. No prefers-color-scheme
-     block and no [data-theme] stamps — every colour below is unconditional. */
-  :root {
-    color-scheme: dark;
-    --bg: #0b0d12;
-    --surface: #14181f;
-    --surface-2: #1a1f28;
-    --border: #262d39;
-    --border-soft: #1e242e;
-    --text: #eef1f6;
-    --text-2: #c3cad5;
-    --muted: #8d97a6;
-    --accent: #e79a3d;
-    --accent-2: #f0b364;
-    --accent-wash: rgba(231, 154, 61, .14);
-    --good: #3ec2a0;
-    --good-wash: rgba(62, 194, 160, .15);
-    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 30px -18px rgba(0, 0, 0, .9);
-  }
+<title>Shorts Intelligence — Roblox Shorts analytics</title>
+<meta name="description" content="Discover breakout Roblox Shorts, track viral momentum, and analyze the creative patterns driving millions of views.">
+<meta name="theme-color" content="#08080a">
+<meta name="color-scheme" content="dark">
 
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    padding: 3rem 1.25rem 4rem;
-    background: var(--bg);
-    color: var(--text);
-    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  main { max-width: 62rem; margin: 0 auto; }
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Shorts Intelligence">
+<meta property="og:title" content="Shorts Intelligence — Roblox Shorts analytics">
+<meta property="og:description" content="Discover breakout Roblox Shorts, track viral momentum, and analyze the creative patterns driving millions of views.">
+<meta property="og:url" content="https://mahshid-aghania.github.io/youtube-grow/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Shorts Intelligence — Roblox Shorts analytics">
+<meta name="twitter:description" content="Discover breakout Roblox Shorts, track viral momentum, and analyze the creative patterns driving millions of views.">
 
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .25rem .7rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--good) 15%, transparent);
-    color: var(--good);
-    font-size: .8rem;
-    font-weight: 600;
-  }
-
-  h2 { font-size: 1.15rem; margin: 2.5rem 0 .5rem; }
-  .section-note { color: var(--muted); font-size: .9rem; margin: 0 0 1rem; max-width: 46rem; }
-
-  .tablewrap { overflow-x: auto; }
-  table {
-    width: 100%; border-collapse: collapse; min-width: 34rem;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: .75rem; overflow: hidden;
-  }
-  th, td { padding: .7rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-  th {
-    font-size: .78rem; text-transform: uppercase; letter-spacing: .06em;
-    color: var(--muted); background: var(--surface-2); white-space: nowrap;
-  }
-  tr:last-child td { border-bottom: 0; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  td a { color: inherit; text-decoration: none; }
-  td a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
-  .sub { display: block; color: var(--muted); font-size: .8rem; }
-  .loading { color: var(--muted); font-style: italic; }
-
-  /* ---------- shot list ---------- */
-  .lookup { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .75rem; }
-  .lookup input {
-    flex: 1 1 22rem;
-    min-width: 0;
-    padding: .6rem .8rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: .45rem;
-    color: var(--text);
-    font: inherit;
-    font-size: .95rem;
-  }
-  .lookup input::placeholder { color: var(--muted); }
-  .lookup input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-  .lookup button {
-    padding: .6rem 1.1rem;
-    background: var(--accent);
-    border: 1px solid var(--accent);
-    border-radius: .45rem;
-    color: #14181f;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .lookup button:hover { background: var(--accent-2); border-color: var(--accent-2); }
-  .lookup button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-
-  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.25rem; }
-  .chip {
-    padding: .3rem .7rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    color: var(--text-2);
-    font-size: .82rem;
-    cursor: pointer;
-  }
-  .chip:hover { border-color: var(--accent); color: var(--text); }
-  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  .msg {
-    padding: .85rem 1.1rem;
-    border-left: 3px solid var(--accent);
-    background: var(--surface);
-    border-radius: .35rem;
-    color: var(--text-2);
-    font-size: .92rem;
-    margin-bottom: 1.25rem;
-  }
-  .msg strong { color: var(--text); }
-
-  .hook {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.1rem;
-    align-items: flex-start;
-    padding: 1.1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: .75rem;
-    margin-bottom: 1rem;
-  }
-  .hook img {
-    width: 168px;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: .5rem;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    flex: none;
-  }
-  .hook__body { flex: 1 1 20rem; min-width: 0; }
-  .hook__label {
-    font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
-    color: var(--accent); font-weight: 600;
-  }
-  .hook__title { font-weight: 600; margin: .2rem 0 .1rem; }
-  .hook__meta { color: var(--muted); font-size: .82rem; margin-bottom: .5rem; }
-  .hook__why { color: var(--text-2); font-size: .92rem; margin: 0; }
-
-  .frame-cell { width: 132px; }
-  .frame {
-    display: block;
-    width: 116px;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: .35rem;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-  }
-  /* A frame YouTube took outside this scene is a different moment. Dim it and
-     mark it so a shared still is never read as this scene's own shot. */
-  .frame--approx { opacity: .45; filter: saturate(.7); }
-  .frame-note {
-    display: block;
-    margin-top: .25rem;
-    font-size: .72rem;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-  }
-  .frame-note--approx { color: var(--accent); }
-
-  .scene-n { color: var(--muted); font-variant-numeric: tabular-nums; width: 2.5rem; }
-  .dur { white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .dur .share { display: block; color: var(--muted); font-size: .78rem; }
-  td.said { color: var(--text-2); font-style: italic; }
-  td.cam { color: var(--text-2); font-size: .88rem; }
-
-  footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .875rem; }
-  a { color: var(--accent); }
-  code { background: var(--surface-2); border: 1px solid var(--border); border-radius: .3rem; padding: .1rem .35rem; font-size: .85em; }
-</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%2308080a'/%3E%3Cpath d='M12 4 4.5 8v8l7.5 4 7.5-4V8z' fill='none' stroke='%23ff4d4f' stroke-width='1.6' stroke-linejoin='round'/%3E%3Cpath d='m10.5 9.5 4 2.5-4 2.5z' fill='%23ff4d4f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://i.ytimg.com" crossorigin>
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<main>
-  <span class="badge">Deployed from GitHub Actions</span>
-  <p class="loading" id="status">Loading snapshot&hellip;</p>
+<a class="skip" href="#main">Skip to content</a>
 
-  <h2>Top Shorts by views</h2>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Video</th><th class="num">Views</th><th class="num">Views/hr</th></tr></thead>
-      <tbody id="top-views"></tbody>
-    </table>
-  </div>
+<div class="app">
+  <!-- Mobile drawer backdrop; inert on desktop. -->
+  <div class="scrim" id="scrim" data-open="false" aria-hidden="true"></div>
 
-  <h2>Fastest right now</h2>
-  <p class="section-note">Views per hour since publish.</p>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Video</th><th class="num">Views/hr</th></tr></thead>
-      <tbody id="top-vph"></tbody>
-    </table>
-  </div>
+  <aside class="sidebar" id="sidebar" data-open="false" aria-label="Sections">
+    <div class="brand">
+      <span class="brand__mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m10 9 5 3-5 3z"/></svg>
+      </span>
+      <span>
+        <span class="brand__name">Shorts Intelligence</span><br>
+        <span class="brand__sub">Roblox · 7-day window</span>
+      </span>
+    </div>
 
-  <h2>Channels taking the most views</h2>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Channel</th><th class="num">Shorts</th><th class="num">Views</th></tr></thead>
-      <tbody id="channels"></tbody>
-    </table>
-  </div>
+    <nav class="nav" aria-label="Dashboard sections">
+      <p class="nav__label" id="nav-label">Dashboard</p>
+      <a class="nav__link" href="#overview" aria-current="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Overview
+      </a>
+      <a class="nav__link" href="#top-shorts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="4"/><path d="m10 9 5 3-5 3z"/></svg>
+        Top Shorts
+      </a>
+      <a class="nav__link" href="#trending">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+        Trending Now
+      </a>
+      <a class="nav__link" href="#channels">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M22 20v-2a4 4 0 0 0-3-3.9"/></svg>
+        Top Channels
+      </a>
+      <a class="nav__link" href="#breakouts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+        Breakout Videos
+      </a>
+      <a class="nav__link" href="#analyzer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5" width="13" height="14" rx="2"/><path d="M18 8v8M21.5 10v4"/></svg>
+        Shot Analyzer
+      </a>
+    </nav>
 
-  <h2>Punching above their size</h2>
-  <p class="section-note">
-    Views divided by subscribers. Channels under 1,000 subscribers are excluded &mdash;
-    the ratio stops meaning anything down there.
-  </p>
-  <div class="tablewrap">
-    <table>
-      <thead><tr><th>Video</th><th class="num">Subs</th><th class="num">Views</th><th class="num">&times; subs</th></tr></thead>
-      <tbody id="breakouts"></tbody>
-    </table>
-  </div>
+    <div class="sidebar__foot">
+      <p>Deployed from GitHub Actions</p>
+      <p><a href="https://github.com/mahshid-aghania/youtube-grow" target="_blank" rel="noopener noreferrer">Source repository</a></p>
+      <p>Refresh data with <code>npm run fetch:shorts</code></p>
+    </div>
+  </aside>
 
-  <h2>Scene-by-scene shot list</h2>
-  <p class="section-note">
-    Paste a YouTube Short link to see how it is built &mdash; every scene, how long it
-    holds, what the character does and says, and how the camera moves.
-  </p>
+  <div>
+    <!-- Compact header, shown only below the sidebar breakpoint. -->
+    <div class="topbar">
+      <button class="topbar__menu" id="menu-toggle" type="button"
+              aria-expanded="false" aria-controls="sidebar" aria-label="Open sections menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <span class="brand__name">Shorts Intelligence</span>
+    </div>
 
-  <form class="lookup" id="lookup">
-    <input id="link" type="text" inputmode="url" autocomplete="off" spellcheck="false"
-           placeholder="https://www.youtube.com/shorts/..." aria-label="YouTube Short link">
-    <button type="submit">Show shot list</button>
-  </form>
-  <div class="chips" id="chips"></div>
-
-  <div id="shotlist-out"></div>
-
-  <footer>
-    Refresh with <code>npm run fetch:shorts</code> &middot;
-    <a href="https://github.com/mahshid-aghania/youtube-grow">Source on GitHub</a>
-  </footer>
-</main>
-
-<script type="module">
-  import { buildReport, compact } from './shorts.js';
-  import { parseVideoId, normaliseShotlist, sceneRange, longestScene, timecode } from './shotlist.js';
-
-  const esc = (str) => String(str).replace(/[&<>"]/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const watch = (id) => `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`;
-  const chan = (id) => `https://www.youtube.com/channel/${encodeURIComponent(id)}`;
-
-  const videoCell = (v) => `
-    <a href="${watch(v.id)}" target="_blank" rel="noopener">${esc(v.title)}</a>
-    <span class="sub">${esc(v.channel)} &middot; ${compact(v.subs)} subs &middot; ${v.durationSec}s</span>`;
-
-  try {
-    const res = await fetch('./data/roblox-shorts.json');
-    if (!res.ok) throw new Error(`snapshot returned ${res.status}`);
-    const report = buildReport(await res.json());
-    document.getElementById('status').remove();
-
-    document.getElementById('top-views').innerHTML = report.topByViews.map((v) => `
-      <tr>
-        <td>${videoCell(v)}</td>
-        <td class="num">${compact(v.views)}</td>
-        <td class="num">${compact(v.vph)}</td>
-      </tr>`).join('');
-
-    document.getElementById('top-vph').innerHTML = report.topByVph.map((v) => `
-      <tr>
-        <td>${videoCell(v)}</td>
-        <td class="num">${compact(v.vph)}</td>
-      </tr>`).join('');
-
-    document.getElementById('channels').innerHTML = report.topChannels.map((c) => `
-      <tr>
-        <td>
-          <a href="${chan(c.channelId)}" target="_blank" rel="noopener">${esc(c.channel)}</a>
-          <span class="sub">${compact(c.subs)} subscribers</span>
-        </td>
-        <td class="num">${c.videoCount}</td>
-        <td class="num">${compact(c.views)}</td>
-      </tr>`).join('');
-
-    document.getElementById('breakouts').innerHTML = report.breakouts.map((v) => `
-      <tr>
-        <td>${videoCell(v)}</td>
-        <td class="num">${compact(v.subs)}</td>
-        <td class="num">${compact(v.views)}</td>
-        <td class="num">${v.viewsPerSub.toLocaleString()}&times;</td>
-      </tr>`).join('');
-  } catch (err) {
-    document.getElementById('status').innerHTML =
-      `Could not load the Shorts snapshot: ${esc(err.message)}. ` +
-      `Run <code>npm run build</code> to copy data/ into public/.`;
-  }
-
-  /* ---------- shot list ---------- */
-  const out = document.getElementById('shotlist-out');
-
-  const message = (html) => { out.innerHTML = `<div class="msg">${html}</div>`; };
-
-  function renderShotlist(list) {
-    const longest = longestScene(list);
-    out.innerHTML = `
-      <div class="hook">
-        <img src="${list.thumbnail}" alt="" loading="lazy" width="168" height="94">
-        <div class="hook__body">
-          <div class="hook__label">Hook &middot; first ${list.hook?.seconds ?? 3}s</div>
-          <p class="hook__title">
-            <a href="${list.url}" target="_blank" rel="noopener">${esc(list.title)}</a>
+    <main class="main" id="main">
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow">Roblox · YouTube Shorts</p>
+          <h1>Roblox Shorts Intelligence</h1>
+          <p class="pagehead__sub">
+            Discover breakout Roblox Shorts, track viral momentum, and analyze the
+            creative patterns driving millions of views.
           </p>
-          <p class="hook__meta">
-            ${esc(list.channel)} &middot; ${list.durationSeconds}s &middot;
-            ${list.sceneCount} scenes &middot; ${list.meanSceneSec}s average
-          </p>
-          <p class="hook__why">${esc(list.hook?.why ?? '')}</p>
         </div>
-      </div>
-      <div class="tablewrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th><th>Frame</th><th>Time</th><th>Character does</th>
-              <th>Character says</th><th>Camera</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${list.scenes.map((sc) => `
-              <tr${sc.n === longest.n ? ' style="background:var(--accent-wash)"' : ''}>
-                <td class="scene-n">${sc.n}</td>
-                <td class="frame-cell">
-                  <img class="frame${sc.frame.withinScene ? '' : ' frame--approx'}"
-                       src="${sc.frame.url}" alt="Frame from ${esc(list.title)} at ${timecode(sc.frame.atSec)}"
-                       loading="lazy" width="116" height="65"
-                       title="YouTube still #${sc.frame.index}, taken at ${timecode(sc.frame.atSec)}">
-                  <span class="frame-note${sc.frame.withinScene ? '' : ' frame-note--approx'}">
-                    ${sc.frame.withinScene ? timecode(sc.frame.atSec) : `≈ ${timecode(sc.frame.atSec)}`}
-                  </span>
-                </td>
-                <td class="dur">
-                  ${sceneRange(sc)}
-                  <span class="share">${sc.durationSec}s &middot; ${sc.share}%</span>
-                </td>
-                <td>${esc(sc.action)}</td>
-                <td class="said">${esc(sc.dialogue)}</td>
-                <td class="cam">${esc(sc.camera)}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-      <p class="section-note" style="margin-top:.75rem">
-        The highlighted row is the longest scene &mdash; ${longest.durationSec}s,
-        ${longest.share}% of the runtime. In a Short that is usually the payoff.
-      </p>
-      <p class="section-note">
-        <strong>About the frames:</strong> YouTube publishes only three stills per
-        video, at about a quarter, half and three-quarters through. Each row shows
-        the nearest one and the time it was taken. A dimmed frame marked
-        <span class="frame-note--approx">≈</span> falls outside that scene &mdash;
-        it is the closest available still, not a shot from that scene. Getting a
-        true frame per scene would mean downloading the video and extracting it.
-      </p>`;
-  }
+        <div class="pagehead__status" id="head-status" aria-live="polite">
+          <span class="pill">Loading snapshot…</span>
+        </div>
+      </header>
 
-  let index = { videoIds: [] };
-  try {
-    const res = await fetch('./data/shotlists/index.json');
-    if (res.ok) index = await res.json();
-  } catch { /* the chips just stay empty */ }
+      <section class="section" id="overview" style="padding-top:0" aria-labelledby="overview-h">
+        <h2 class="sr-only" id="overview-h">Executive overview</h2>
+        <div class="metrics" id="metrics">
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+        </div>
+        <div class="insights" id="insights" aria-live="polite"></div>
+      </section>
 
-  async function show(videoId, { scroll = true } = {}) {
-    try {
-      const res = await fetch(`./data/shotlists/${encodeURIComponent(videoId)}.json`);
-      if (res.status === 404) {
-        message(
-          `<strong>No shot list for <code>${esc(videoId)}</code> yet.</strong> ` +
-          `Breaking a video into scenes needs a model that can watch it, which a static ` +
-          `page cannot do on its own. Send me the link in chat and I will analyse it and ` +
-          `commit the result &mdash; it then shows up here.`);
-        return;
-      }
-      if (!res.ok) throw new Error(`server returned ${res.status}`);
-      renderShotlist(normaliseShotlist(await res.json()));
-      // A blocked or missing thumbnail should leave a clean empty frame,
-      // not the browser's broken-image icon.
-      for (const img of out.querySelectorAll('.hook img, .frame')) {
-        img.addEventListener('error', () => { img.style.visibility = 'hidden'; });
-      }
-      if (scroll) out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } catch (err) {
-      message(`Could not load that shot list: ${esc(err.message)}`);
-    }
-  }
+      <section class="section" id="top-shorts" aria-labelledby="top-shorts-h">
+        <div class="section__head">
+          <div>
+            <p class="section__eyebrow" style="--tone: var(--red)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="4"/><path d="m10 9 5 3-5 3z"/></svg>
+              Reach
+            </p>
+            <h2 id="top-shorts-h">Top Shorts by views</h2>
+            <p class="section__desc">The videos with the greatest total reach in the tracked window.</p>
+          </div>
+          <div class="section__tools">
+            <label class="sr-only" for="search-views">Search top Shorts by title or channel</label>
+            <input class="input section__search" id="search-views" type="search"
+                   placeholder="Search title or channel…" autocomplete="off">
+          </div>
+        </div>
+        <div id="chart-views"></div>
+        <div id="table-views" style="margin-top:.9rem">
+          <div class="tablecard">
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+          </div>
+        </div>
+      </section>
 
-  document.getElementById('chips').innerHTML = index.videoIds.map((id) => `
-    <button type="button" class="chip" data-id="${id}">${id}</button>`).join('');
+      <section class="section" id="trending" aria-labelledby="trending-h">
+        <div class="section__head">
+          <div>
+            <p class="section__eyebrow" style="--tone: var(--amber)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+              Momentum
+            </p>
+            <h2 id="trending-h">Fastest right now</h2>
+            <p class="section__desc">
+              Videos generating the highest average views per hour since they were published.
+            </p>
+          </div>
+        </div>
+        <div id="table-vph"></div>
+      </section>
 
-  document.getElementById('chips').addEventListener('click', (e) => {
-    const chip = e.target.closest('.chip');
-    if (!chip) return;
-    document.getElementById('link').value = `https://www.youtube.com/shorts/${chip.dataset.id}`;
-    show(chip.dataset.id);
-  });
+      <section class="section" id="channels" aria-labelledby="channels-h">
+        <div class="section__head">
+          <div>
+            <p class="section__eyebrow" style="--tone: var(--cyan)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/></svg>
+              Publishers
+            </p>
+            <h2 id="channels-h">Channels taking the most views</h2>
+            <p class="section__desc">Total reach per channel, summed across every Short it published in the window.</p>
+          </div>
+        </div>
+        <div id="table-channels"></div>
+      </section>
 
-  document.getElementById('lookup').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const videoId = parseVideoId(document.getElementById('link').value);
-    if (!videoId) {
-      message(
-        `<strong>That does not look like a YouTube link.</strong> ` +
-        `Paste a full URL &mdash; <code>youtube.com/shorts/…</code>, ` +
-        `<code>youtube.com/watch?v=…</code>, or <code>youtu.be/…</code> &mdash; or the bare 11-character id.`);
-      return;
-    }
-    show(videoId);
-  });
+      <section class="section" id="breakouts" aria-labelledby="breakouts-h">
+        <div class="section__head">
+          <div>
+            <p class="section__eyebrow" style="--tone: var(--emerald)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+              Outperformers
+            </p>
+            <h2 id="breakouts-h">Punching above their size</h2>
+            <p class="section__desc">
+              Videos earning unusually high reach relative to their channel’s subscriber base.
+              Channels under 1,000 subscribers are excluded, where the ratio stops being meaningful.
+            </p>
+          </div>
+        </div>
+        <div id="table-breakouts"></div>
+      </section>
 
-  // Load the first shot list so the section is never empty on arrival.
-  if (index.videoIds.length) {
-    document.getElementById('link').value =
-      `https://www.youtube.com/shorts/${index.videoIds[0]}`;
-    show(index.videoIds[0], { scroll: false });
-  }
-</script>
+      <section class="section" id="analyzer" aria-labelledby="analyzer-h">
+        <div class="section__head">
+          <div>
+            <p class="section__eyebrow" style="--tone: var(--violet)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="13" height="14" rx="2"/><path d="M18 8v8M21.5 10v4"/></svg>
+              Creative teardown
+            </p>
+            <h2 id="analyzer-h">Scene-by-scene shot analyzer</h2>
+            <p class="section__desc">
+              Reverse-engineer a Short shot by shot — how long each scene holds, what the
+              character does and says, and how the camera moves.
+            </p>
+          </div>
+        </div>
+
+        <div class="analyzer">
+          <div class="analyzer__panel">
+            <form class="analyzer__form" id="analyzer-form" novalidate>
+              <div class="analyzer__field">
+                <label class="analyzer__label" for="analyzer-input">YouTube Shorts URL</label>
+                <input class="input" id="analyzer-input" name="url" type="text" inputmode="url"
+                       autocomplete="off" spellcheck="false"
+                       placeholder="https://www.youtube.com/shorts/…"
+                       aria-describedby="analyzer-hint" aria-invalid="false">
+                <p class="analyzer__hint" id="analyzer-hint" role="status">
+                  Paste a YouTube Shorts link, or pick one of the analysed videos below.
+                </p>
+              </div>
+              <button class="btn btn--primary" id="analyzer-submit" type="submit"
+                      style="margin-top:1.55rem">
+                <svg class="btn__spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg>
+                <span class="btn__label">Analyze Short</span>
+              </button>
+            </form>
+            <div class="analyzer__chips" id="analyzer-chips"></div>
+          </div>
+
+          <div id="analyzer-out" aria-busy="false" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script type="module" src="./app.js"></script>
 </body>
 </html>

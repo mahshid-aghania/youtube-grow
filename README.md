@@ -1,7 +1,35 @@
-# YouTube Grow
+# Shorts Intelligence
 
-Tracks the biggest YouTube Shorts for a topic over a rolling window, and publishes
-the report as a static site. Ships pointed at `roblox` over the last 7 days.
+A focused analytics dashboard for discovering breakout Roblox YouTube Shorts,
+tracking viral momentum, and reverse-engineering successful videos scene by scene.
+Ships pointed at `roblox` over a rolling 7-day window.
+
+**Live:** https://mahshid-aghania.github.io/youtube-grow/
+
+No framework, no bundler, no runtime dependencies — plain ES modules the browser
+loads directly, so the production build is a file copy and the page stays fast.
+
+## Interface
+
+| Layer | File | Role |
+| --- | --- | --- |
+| Design system | `src/styles.css` | Tokens (colour, radii, spacing, motion) and every component class |
+| Interface | `src/app.js` | Shell, navigation, tables, chart, analyzer — small component functions |
+| Presentation logic | `src/insights.js` | Overview metrics and grounded observations |
+| Formatting | `src/format.js` | One implementation per number, duration and date format |
+| Analysis | `src/shorts.js`, `src/shotlist.js` | Unchanged business logic |
+
+Sections: Overview · Top Shorts · Trending Now · Top Channels · Breakout Videos ·
+Shot Analyzer. Tables sort, filter and expand; below 760px they become stacked
+cards rather than a horizontally scrolling grid.
+
+### What the metrics are, and are not
+
+Every figure is computed from the committed snapshot. There is **no trend data** —
+a snapshot is a single window with no history — so the dashboard never shows a
+percentage change or a period-over-period comparison. "Views/hr" is lifetime views
+divided by hours since publication: an average pace, not a live rate from YouTube
+Analytics.
 
 ## What's here
 
