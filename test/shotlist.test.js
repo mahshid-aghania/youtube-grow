@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 import {
   parseVideoId, thumbnailUrl, timecode, sceneRange,
-  normaliseShotlist, longestScene,
+  normaliseShotlist, longestScene, frameForScene, FRAME_FRACTIONS,
 } from '../src/shotlist.js';
 
 test('parseVideoId accepts every YouTube link shape', () => {
@@ -130,4 +130,50 @@ test('the shot-list index lists exactly the files on disk', () => {
 
   assert.deepEqual(index.videoIds.slice().sort(), onDisk,
     'a shot list added without updating index.json would be invisible to the page');
+});
+
+test('frameForScene picks the published still nearest the scene midpoint', () => {
+  const id = 'gpBA12uEBIA';
+  // A 20s video puts the three stills at 5s, 10s and 15s.
+  assert.equal(frameForScene({ startSec: 0, endSec: 4 }, 20, id).index, 1);
+  assert.equal(frameForScene({ startSec: 8, endSec: 12 }, 20, id).index, 2);
+  assert.equal(frameForScene({ startSec: 16, endSec: 20 }, 20, id).index, 3);
+});
+
+test('frameForScene reports the timestamp and URL of the frame it chose', () => {
+  const f = frameForScene({ startSec: 8, endSec: 12 }, 20, 'gpBA12uEBIA');
+  assert.equal(f.atSec, 10);
+  assert.equal(f.url, 'https://i.ytimg.com/vi/gpBA12uEBIA/2.jpg');
+});
+
+test('frameForScene flags a frame that is not actually from the scene', () => {
+  const id = 'gpBA12uEBIA';
+  // Stills at 5/10/15s. A scene running 0-1s has no still inside it, so the
+  // nearest one is a different moment and must not be presented as its shot.
+  const outside = frameForScene({ startSec: 0, endSec: 1 }, 20, id);
+  assert.equal(outside.withinScene, false);
+  assert.equal(outside.exact, false);
+
+  const inside = frameForScene({ startSec: 4, endSec: 6 }, 20, id);
+  assert.equal(inside.withinScene, true);
+  assert.equal(inside.exact, true);
+});
+
+test('frameForScene rejects a runtime it cannot divide', () => {
+  assert.throws(() => frameForScene({ startSec: 0, endSec: 1 }, 0, 'gpBA12uEBIA'), RangeError);
+  assert.throws(() => frameForScene({ startSec: 0, endSec: 1 }, -5, 'gpBA12uEBIA'), RangeError);
+  assert.throws(() => frameForScene({ startSec: 0, endSec: 1 }, Number.NaN, 'gpBA12uEBIA'), RangeError);
+});
+
+test('FRAME_FRACTIONS matches the three stills YouTube publishes', () => {
+  assert.deepEqual(FRAME_FRACTIONS, [0.25, 0.5, 0.75]);
+});
+
+test('normaliseShotlist attaches a frame to every scene', () => {
+  const list = normaliseShotlist(raw);
+  assert.equal(list.scenes.length, 3);
+  for (const sc of list.scenes) {
+    assert.match(sc.frame.url, /^https:\/\/i\.ytimg\.com\/vi\/gpBA12uEBIA\/[123]\.jpg$/);
+    assert.equal(typeof sc.frame.withinScene, 'boolean');
+  }
 });

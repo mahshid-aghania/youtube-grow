@@ -150,6 +150,28 @@
   .hook__meta { color: var(--muted); font-size: .82rem; margin-bottom: .5rem; }
   .hook__why { color: var(--text-2); font-size: .92rem; margin: 0; }
 
+  .frame-cell { width: 132px; }
+  .frame {
+    display: block;
+    width: 116px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: .35rem;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  /* A frame YouTube took outside this scene is a different moment. Dim it and
+     mark it so a shared still is never read as this scene's own shot. */
+  .frame--approx { opacity: .45; filter: saturate(.7); }
+  .frame-note {
+    display: block;
+    margin-top: .25rem;
+    font-size: .72rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .frame-note--approx { color: var(--accent); }
+
   .scene-n { color: var(--muted); font-variant-numeric: tabular-nums; width: 2.5rem; }
   .dur { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .dur .share { display: block; color: var(--muted); font-size: .78rem; }
@@ -226,7 +248,7 @@
 
 <script type="module">
   import { buildReport, compact } from './shorts.js';
-  import { parseVideoId, normaliseShotlist, sceneRange, longestScene } from './shotlist.js';
+  import { parseVideoId, normaliseShotlist, sceneRange, longestScene, timecode } from './shotlist.js';
 
   const esc = (str) => String(str).replace(/[&<>"]/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -305,7 +327,7 @@
         <table>
           <thead>
             <tr>
-              <th>#</th><th>Time</th><th>Character does</th>
+              <th>#</th><th>Frame</th><th>Time</th><th>Character does</th>
               <th>Character says</th><th>Camera</th>
             </tr>
           </thead>
@@ -313,6 +335,15 @@
             ${list.scenes.map((sc) => `
               <tr${sc.n === longest.n ? ' style="background:var(--accent-wash)"' : ''}>
                 <td class="scene-n">${sc.n}</td>
+                <td class="frame-cell">
+                  <img class="frame${sc.frame.withinScene ? '' : ' frame--approx'}"
+                       src="${sc.frame.url}" alt="Frame from ${esc(list.title)} at ${timecode(sc.frame.atSec)}"
+                       loading="lazy" width="116" height="65"
+                       title="YouTube still #${sc.frame.index}, taken at ${timecode(sc.frame.atSec)}">
+                  <span class="frame-note${sc.frame.withinScene ? '' : ' frame-note--approx'}">
+                    ${sc.frame.withinScene ? timecode(sc.frame.atSec) : `≈ ${timecode(sc.frame.atSec)}`}
+                  </span>
+                </td>
                 <td class="dur">
                   ${sceneRange(sc)}
                   <span class="share">${sc.durationSec}s &middot; ${sc.share}%</span>
@@ -327,6 +358,14 @@
       <p class="section-note" style="margin-top:.75rem">
         The highlighted row is the longest scene &mdash; ${longest.durationSec}s,
         ${longest.share}% of the runtime. In a Short that is usually the payoff.
+      </p>
+      <p class="section-note">
+        <strong>About the frames:</strong> YouTube publishes only three stills per
+        video, at about a quarter, half and three-quarters through. Each row shows
+        the nearest one and the time it was taken. A dimmed frame marked
+        <span class="frame-note--approx">≈</span> falls outside that scene &mdash;
+        it is the closest available still, not a shot from that scene. Getting a
+        true frame per scene would mean downloading the video and extracting it.
       </p>`;
   }
 
@@ -351,8 +390,9 @@
       renderShotlist(normaliseShotlist(await res.json()));
       // A blocked or missing thumbnail should leave a clean empty frame,
       // not the browser's broken-image icon.
-      const thumb = out.querySelector('.hook img');
-      if (thumb) thumb.addEventListener('error', () => { thumb.style.visibility = 'hidden'; });
+      for (const img of out.querySelectorAll('.hook img, .frame')) {
+        img.addEventListener('error', () => { img.style.visibility = 'hidden'; });
+      }
       if (scroll) out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (err) {
       message(`Could not load that shot list: ${esc(err.message)}`);

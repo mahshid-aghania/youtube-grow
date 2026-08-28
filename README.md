@@ -40,8 +40,17 @@ runtime that is, what the character does, what they say, and how the camera move
 plus the hook, its thumbnail, and why the first three seconds work. The longest
 scene is highlighted, since in a Short that is almost always the payoff.
 
+Each row also carries a frame. YouTube publishes exactly three stills per video
+(`1.jpg`, `2.jpg`, `3.jpg`, at roughly a quarter, half and three-quarters through),
+and those are the only per-timestamp images available without downloading the file.
+`frameForScene` maps each scene to the nearest one and reports whether that still
+actually falls inside the scene — a Short with more scenes than stills necessarily
+shares frames, and a shared still is dimmed and marked `≈` rather than presented as
+that scene's own shot. True per-scene frames would require downloading the video and
+extracting them with ffmpeg.
+
 `src/shotlist.js` parses the pasted link (every YouTube URL shape, or a bare id),
-validates the record, and computes the per-scene shares. Records live in
+validates the record, computes the per-scene shares, and does the frame mapping. Records live in
 `data/shotlists/<videoId>.json` and are listed in `data/shotlists/index.json` — the
 test suite fails if a file is added without listing it, since an unlisted shot list
 is invisible to the page.
