@@ -9,6 +9,9 @@ Ships pointed at `roblox` over a rolling 7-day window.
 No framework, no bundler, no runtime dependencies — plain ES modules the browser
 loads directly, so the production build is a file copy and the page stays fast.
 
+The [design brief](docs/design-brief.md) that specified this interface is kept
+in the repo alongside it.
+
 ## Interface
 
 | Layer | File | Role |
