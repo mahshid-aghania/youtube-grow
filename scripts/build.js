@@ -18,10 +18,19 @@ const copy = (from, to) => {
 
 console.log('Building public/');
 
-// Modules and styles the page loads at runtime.
-for (const file of readdirSync('src').filter((f) => f.endsWith('.js') || f.endsWith('.css'))) {
-  copy(join('src', file), join('public', file));
-}
+// Modules and styles the page loads at runtime, including src/planner/ —
+// the browser resolves those imports by path, so the tree must ship intact.
+const copySources = (fromDir, toDir) => {
+  mkdirSync(toDir, { recursive: true });
+  for (const entry of readdirSync(fromDir, { withFileTypes: true })) {
+    const from = join(fromDir, entry.name);
+    if (entry.isDirectory()) copySources(from, join(toDir, entry.name));
+    else if (entry.name.endsWith('.js') || entry.name.endsWith('.css')) {
+      copy(from, join(toDir, entry.name));
+    }
+  }
+};
+copySources('src', 'public');
 
 // Data the page fetches — including data/shotlists/, so nested dirs come too.
 const copyJson = (fromDir, toDir) => {

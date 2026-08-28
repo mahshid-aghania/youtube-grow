@@ -21,10 +21,11 @@ in the repo alongside it.
 | Presentation logic | `src/insights.js` | Overview metrics and grounded observations |
 | Formatting | `src/format.js` | One implementation per number, duration and date format |
 | Analysis | `src/shorts.js`, `src/shotlist.js` | Unchanged business logic |
+| Weekly planner | `src/foryou.js`, `src/planner/` | The For You workspace and the engine behind it |
 
-Sections: Overview · Top Shorts · Trending Now · Top Channels · Breakout Videos ·
-Shot Analyzer. Tables sort, filter and expand; below 760px they become stacked
-cards rather than a horizontally scrolling grid.
+Sections: Overview · For You · Top Shorts · Trending Now · Top Channels ·
+Breakout Videos · Shot Analyzer. Tables sort, filter and expand; below 760px they
+become stacked cards rather than a horizontally scrolling grid.
 
 ### What the metrics are, and are not
 
@@ -42,6 +43,7 @@ Analytics.
 | `scripts/fetch-shorts.js` | Pulls a topic's Shorts from the YouTube Data API into `data/` |
 | `scripts/build.js` | Copies `src/*.js` and `data/*.json` into `public/` for deployment |
 | `data/roblox-shorts.json` | Committed snapshot — the site works with no API key |
+| `src/planner/` | The For You engine: signals, recommendations, characters, story, prompts, storage, export |
 | `test/` | Unit tests on Node's built-in runner — no dependencies, no network |
 | `public/index.html` | The report page, deployed to GitHub Pages |
 | `.github/workflows/ci.yml` | Runs the test suite on every push and pull request |
@@ -98,6 +100,103 @@ public API that returns a shot list. So the flow is:
 
 Three shot lists ship with the repo, covering the top Roblox Shorts of the window.
 
+## For You — the weekly planner
+
+`For You` turns the tracked window into a seven-day production plan: one Short
+per day, each with a full package — concept, cast, storyboard, image prompts,
+image-to-video prompts, an audio and editing guide, and a publishing kit.
+
+It runs entirely in the browser. There is no API key, no server and no private
+endpoint; a static GitHub Pages deployment is the whole product.
+
+### How a week is chosen
+
+```
+snapshot + shot lists ──▶ signals.js   what the window actually contains
+                                       (themes, keywords, duration bands,
+                                        the fastest-moving quarter by views/hr)
+                              │
+                              ▼
+                          recommend.js  seven strategic slots, one per day,
+                                        each filled by the best-supported pillar
+                                        not already used this week
+                              │
+                              ▼
+                          plan.js       assembles the day: cast → story →
+                                        scenes → prompts → audio → publishing
+```
+
+Seven slots run in a deliberate order — proven theme, comparison, recurring
+character, comedy, emotional story, proven format, experimental. The experiment
+is last on purpose, so a format test never takes the week's highest-attention
+slot.
+
+Every recommendation carries the evidence behind it, at one of three levels:
+
+| Level | Meaning |
+| --- | --- |
+| Data-supported | The format matches at least three tracked Shorts, including one in the fastest-moving quarter |
+| Pattern-inspired | The format is present in the window, but too thinly to lean on |
+| Experimental | Nothing in the window matches it — a deliberate test, labelled as one |
+
+**This is rule-based pattern matching, not AI, and the interface says so.** There
+is no model, no confidence score and no prediction. Generation is deterministic:
+the same week, preferences and variant always produce the same plan, so a reload
+never silently rewrites your week. `Regenerate` steps the concept to the next
+seed for that pillar and cycles back after a full round.
+
+### Character consistency
+
+Image and video generators have no memory between calls, so a prompt that says
+"the same character as before" produces a different character. `characters.js`
+builds each cast member from a fixed archetype pool and compiles an **identity
+lock** — a single sentence naming build, face, eyes, hair, outfit, footwear,
+accessories, signature colours and distinguishing marks. Every image prompt and
+every video prompt repeats that lock in full. The repetition is the mechanism.
+
+Characters you save are reused across the week and win over generated ones, so a
+recurring lead stays the same person from Monday to Friday.
+
+### Scripts
+
+Each concept seed carries authored dialogue and on-screen captions, one entry per
+story beat, in the script table at the foot of `pillars.js`. Spoken lines are
+words a character says on camera; captions are the literal text burned in during
+editing; the stage direction is a third, separate field. A beat that spans more
+than one scene speaks once, on its first scene — so no line and no caption is
+ever used twice in the same video. An empty line is a deliberate silence, and the
+video prompt turns it into an explicit "keep the mouth closed" instruction.
+
+### Storage
+
+Your week lives in `localStorage` under `shorts-intelligence:planner`, versioned
+(`SCHEMA_VERSION`) with forward migration; an unrecognised version resets rather
+than half-loading. Nothing leaves the browser. Reads and writes never throw, so a
+private window or full quota degrades to an unsaved session instead of a blank
+page.
+
+Persisted per day: status, locks, edits, regeneration variant and scene marks —
+plus your strategy preferences and saved characters for the week as a whole.
+Locking a field snapshots its current value, and regeneration leaves locked
+fields alone. Resetting or overwriting a whole week asks first.
+
+### Exports
+
+| Format | Scope |
+| --- | --- |
+| Markdown | One day, or the whole week |
+| JSON | The whole week, structured |
+| Copy to clipboard | Full plan, image prompts, video prompts, character bible |
+| Print / PDF | The browser's own print path, with a print stylesheet |
+
+### What it will not do
+
+It will not promise virality, predict views, invent a percentage change, or name a
+copyrighted track — music is described as a style brief. Concept seeds are
+original premises written against structural patterns; none reproduces a specific
+video or names a real creator, avatar or branded character, and the test suite
+enforces that.
+
 ## Coverage — read this before quoting a total
 
 **The totals are the head of the distribution, not a census.** YouTube's Search
@@ -130,8 +229,11 @@ Quota: one search page costs 100 units against a 10,000/day default, so the
 npm test          # or: node --test
 ```
 
-The suite covers the report analysis, the API-response mapping, and the shape
-of the committed snapshot itself. 18 tests, no network, no API key needed.
+The suite covers the report analysis, the API-response mapping, the shape of the
+committed snapshot itself, and the whole For You planner — timeline arithmetic
+across every runtime and scene count, regeneration and lock behaviour, storage
+migration, export completeness, and the content rules above. 105 tests, no
+network, no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 

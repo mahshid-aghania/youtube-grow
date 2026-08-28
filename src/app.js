@@ -13,6 +13,7 @@ import {
   parseVideoId, normaliseShotlist, sceneRange, longestScene, timecode,
 } from './shotlist.js';
 import { overviewMetrics, keyInsights, viewsChartRows } from './insights.js';
+import { mountForYou } from './foryou.js';
 import {
   compactNumber, exactNumber, shortDuration, percent, multiple,
   timestamp, dateRange, relativeTime,
@@ -631,6 +632,16 @@ async function boot() {
     renderHeader(report, snapshot);
     renderOverview(report);
     renderTables(report, deep);
+
+    // The planner reads the same snapshot plus whatever shot lists exist, so
+    // its recommendations cite the numbers shown above.
+    const shotlists = await Promise.all((index.videoIds ?? []).map(async (id) => {
+      try {
+        const r = await fetch(`./data/shotlists/${encodeURIComponent(id)}.json`);
+        return r.ok ? await r.json() : null;
+      } catch { return null; }
+    }));
+    mountForYou(snapshot, shotlists.filter(Boolean));
   } catch (err) {
     setHTML('#head-status', '<span class="pill pill--amber">Snapshot unavailable</span>');
     const message = `The Shorts snapshot could not be loaded — ${err.message}.`;
