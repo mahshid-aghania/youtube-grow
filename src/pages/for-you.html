@@ -1,0 +1,31 @@
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow" style="--tone: var(--violet)">Weekly plan</p>
+          <h1>For You</h1>
+          <p class="pagehead__sub">
+            Your personalised seven-day Roblox Shorts strategy, built from current performance
+            signals. Recommendations are data-informed and rule-based — not predictions.
+          </p>
+        </div>
+        <div class="pagehead__status" id="head-status" aria-live="polite">
+          <span class="pill">Loading snapshot…</span>
+        </div>
+      </header>
+
+      <section class="section" id="foryou" style="padding-top:0" aria-labelledby="foryou-h">
+        <h2 class="sr-only" id="foryou-h">Seven-day production plan</h2>
+
+        <div class="foryou__basis" id="foryou-basis"></div>
+        <div id="foryou-prefs"></div>
+        <div class="foryou__summary" id="foryou-summary" aria-live="polite"></div>
+
+        <div class="board" id="foryou-board">
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+          <div class="skeleton skeleton--metric"></div>
+        </div>
+
+        <div class="scrim" id="foryou-scrim" data-open="false" aria-hidden="true"></div>
+        <aside class="ws" id="foryou-ws" data-open="false" role="dialog" aria-modal="true"
+               aria-labelledby="ws-title"></aside>
+      </section>

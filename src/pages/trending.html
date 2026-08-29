@@ -1,0 +1,42 @@
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow" style="--tone: var(--amber)">Momentum</p>
+          <h1>Fastest right now</h1>
+          <p class="pagehead__sub">
+            Videos generating the highest average views per hour since they were published —
+            the closest this dataset gets to what is moving at this moment.
+          </p>
+        </div>
+        <div class="pagehead__status" id="head-status" aria-live="polite">
+          <span class="pill">Loading snapshot…</span>
+        </div>
+      </header>
+
+      <section class="section" style="padding-top:0" aria-labelledby="chart-h">
+        <h2 class="sr-only" id="chart-h">Relative momentum across the fastest Shorts</h2>
+        <div id="chart-vph"></div>
+      </section>
+
+      <section class="section" aria-labelledby="table-h">
+        <div class="section__head">
+          <div>
+            <h2 id="table-h">Full ranking by views per hour</h2>
+            <p class="section__desc">
+              Sort any column, search by title or channel, and expand to the whole list.
+            </p>
+          </div>
+          <div class="section__tools">
+            <label class="sr-only" for="search-vph">Search trending Shorts by title or channel</label>
+            <input class="input section__search" id="search-vph" type="search"
+                   placeholder="Search title or channel…" autocomplete="off">
+          </div>
+        </div>
+        <div id="table-vph">
+          <div class="tablecard">
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+          </div>
+        </div>
+        <div class="notes" id="notes-trending"></div>
+      </section>

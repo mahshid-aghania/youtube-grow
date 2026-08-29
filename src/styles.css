@@ -142,7 +142,14 @@ a:hover { color: var(--red); }
   overflow-y: auto;
 }
 
-.brand { display: flex; align-items: center; gap: .65rem; padding: 0 .35rem; min-width: 0; }
+.brand {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .35rem; margin: -.35rem 0 0 -.35rem;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  color: inherit;
+}
+.brand:hover { background: var(--surface-2); }
 .brand__mark {
   width: 34px; height: 34px; flex: none;
   display: grid; place-items: center;
@@ -164,7 +171,7 @@ a:hover { color: var(--red); }
   position: relative;                 /* anchors the active bar to this row */
   display: flex; align-items: center; gap: .65rem;
   padding: .55rem .6rem;
-  min-height: 40px;
+  min-height: 44px;                   /* a comfortable touch target in the drawer */
   border-radius: var(--radius-sm);
   color: var(--text-2);
   font-size: .875rem;
@@ -172,13 +179,13 @@ a:hover { color: var(--red); }
 }
 .nav__link:hover { background: var(--surface-2); color: var(--text); }
 .nav__link svg { flex: none; opacity: .8; }
-.nav__link[aria-current="true"] {
+.nav__link[aria-current="page"] {
   background: var(--surface-3);
   color: var(--text);
   font-weight: 550;
 }
 /* Position, not colour alone, marks the active section. */
-.nav__link[aria-current="true"]::before {
+.nav__link[aria-current="page"]::before {
   content: "";
   position: absolute;
   left: -.6rem; top: 50%;
@@ -187,7 +194,7 @@ a:hover { color: var(--red); }
   background: var(--red);
   border-radius: 0 3px 3px 0;
 }
-.nav__link[aria-current="true"] svg { opacity: 1; color: var(--red); }
+.nav__link[aria-current="page"] svg { opacity: 1; color: var(--red); }
 
 .sidebar__foot {
   margin-top: auto;
@@ -944,4 +951,143 @@ textarea.input { resize: vertical; font-family: inherit; }
   .beat { grid-template-columns: 5rem 1fr; }
   .promptbox { font-size: .74rem; max-height: 16rem; }
   .scenecard__marks { margin-left: 0; width: 100%; }
+}
+
+/* ==========================================================================
+   12. Multi-page navigation
+   ========================================================================== */
+
+/*
+ * Every sidebar destination except the current page opens in a new tab. The
+ * arrow marks that, but it never carries the message alone: each link also has
+ * an "Open X in a new tab" accessible name and a tooltip, so the behaviour is
+ * announced to a screen reader and legible on hover.
+ */
+.nav__text { flex: 1 1 auto; min-width: 0; }
+.nav__ext {
+  flex: none;
+  width: 11px; height: 11px;
+  opacity: 0;
+  color: var(--muted);
+  transition: opacity var(--dur) var(--ease);
+}
+.nav__link:hover .nav__ext,
+.nav__link:focus-visible .nav__ext { opacity: .85; }
+/* Touch and reduced-motion users get no hover, so the marker is always drawn. */
+@media (hover: none) {
+  .nav__ext { opacity: .5; }
+}
+.nav__note {
+  padding: .6rem .6rem 0;
+  font-size: .7rem; line-height: 1.45; color: var(--muted);
+}
+
+/* ---------- overview: leaders ---------- */
+
+.leaders {
+  display: grid; gap: .9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.leader {
+  display: flex; flex-direction: column; gap: .6rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--tone);
+  border-radius: var(--radius);
+}
+.leader__eyebrow {
+  font-size: .68rem; font-weight: 650; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--tone);
+}
+.leader__body { display: flex; gap: .75rem; align-items: flex-start; min-width: 0; }
+.leader__thumb {
+  flex: none; width: 96px; height: 54px;
+  object-fit: cover; border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.leader__title { font-size: .9rem; font-weight: 600; line-height: 1.35; }
+.leader__link { color: var(--text); }
+.leader__link:hover { color: var(--red); }
+.leader__meta { margin-top: .2rem; font-size: .76rem; color: var(--muted); }
+.leader__stat { font-size: .82rem; color: var(--text-2); }
+.leader__stat strong {
+  font-size: 1.05rem; font-weight: 680; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.leader__more { margin-top: auto; }
+
+/* ---------- overview: workspace cards ---------- */
+
+.wsgrid {
+  display: grid; gap: .9rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.wscard {
+  display: flex; flex-direction: column; gap: .6rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--dur) var(--ease);
+}
+.wscard:hover { border-color: var(--border-strong); }
+.wscard__top { display: flex; align-items: center; gap: .6rem; }
+.wscard__icon {
+  display: grid; place-items: center;
+  width: 30px; height: 30px; flex: none;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text-2);
+}
+.wscard__title { font-size: .92rem; font-weight: 620; }
+.wscard__desc { font-size: .78rem; line-height: 1.5; color: var(--muted); }
+.wscard__preview {
+  display: flex; flex-direction: column; gap: .3rem;
+  padding: .6rem .7rem;
+  list-style: none;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  font-size: .76rem; color: var(--text-2);
+}
+.wscard__preview li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wscard__action { margin-top: auto; }
+
+/* The shared "open this workspace in a new tab" affordance. */
+.wslink {
+  display: inline-flex; align-items: center; gap: .35rem;
+  min-height: 44px;
+  font-size: .8rem; font-weight: 560;
+  color: var(--red);
+}
+.wslink:hover { text-decoration: underline; }
+.wslink .ext { width: 11px; height: 11px; opacity: .8; }
+
+/* ---------- per-page explanatory notes ---------- */
+
+.notes { margin-top: 1rem; }
+
+/* ---------- analyzer: recently analysed ---------- */
+
+.analyzer__recents {
+  display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+  margin-top: .7rem;
+  padding-top: .7rem;
+  border-top: 1px solid var(--border);
+}
+.analyzer__recents:empty { display: none; }
+
+.muted { color: var(--muted); }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1080px) {
+  .wsgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .leaders,
+  .wsgrid { grid-template-columns: minmax(0, 1fr); }
+  .leader__thumb { width: 76px; height: 43px; }
 }

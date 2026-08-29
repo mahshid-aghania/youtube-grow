@@ -1,0 +1,39 @@
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow" style="--tone: var(--violet)">Creative teardown</p>
+          <h1>Scene-by-scene shot analyzer</h1>
+          <p class="pagehead__sub">
+            Reverse-engineer a Short shot by shot — how long each scene holds, what the
+            character does and says, and how the camera moves.
+          </p>
+        </div>
+      </header>
+
+      <section class="section" style="padding-top:0" aria-labelledby="analyzer-h">
+        <h2 class="sr-only" id="analyzer-h">Analyze a Short</h2>
+        <div class="analyzer">
+          <div class="analyzer__panel">
+            <form class="analyzer__form" id="analyzer-form" novalidate>
+              <div class="analyzer__field">
+                <label class="analyzer__label" for="analyzer-input">YouTube Shorts URL</label>
+                <input class="input" id="analyzer-input" name="url" type="text" inputmode="url"
+                       autocomplete="off" spellcheck="false"
+                       placeholder="https://www.youtube.com/shorts/…"
+                       aria-describedby="analyzer-hint" aria-invalid="false">
+                <p class="analyzer__hint" id="analyzer-hint" role="status">
+                  Paste a YouTube Shorts link, or pick one of the analysed videos below.
+                </p>
+              </div>
+              <button class="btn btn--primary" id="analyzer-submit" type="submit"
+                      style="margin-top:1.55rem">
+                <svg class="btn__spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg>
+                <span class="btn__label">Analyze Short</span>
+              </button>
+            </form>
+            <div class="analyzer__chips" id="analyzer-chips"></div>
+            <div class="analyzer__recents" id="analyzer-recents"></div>
+          </div>
+
+          <div id="analyzer-out" aria-busy="false" aria-live="polite"></div>
+        </div>
+      </section>

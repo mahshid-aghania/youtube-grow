@@ -12,20 +12,80 @@ loads directly, so the production build is a file copy and the page stays fast.
 The [design brief](docs/design-brief.md) that specified this interface is kept
 in the repo alongside it.
 
+## Pages and routing
+
+Seven pages, each with its own address, each a real file on disk:
+
+| URL | Page |
+| --- | --- |
+| `/youtube-grow/` | Overview — executive summary |
+| `/youtube-grow/for-you/` | For You — the weekly production planner |
+| `/youtube-grow/top-shorts/` | Top Shorts by views |
+| `/youtube-grow/trending/` | Trending Now — views per hour |
+| `/youtube-grow/top-channels/` | Top Channels |
+| `/youtube-grow/breakout-videos/` | Breakout Videos |
+| `/youtube-grow/shot-analyzer/` | Shot Analyzer |
+
+**There is no client-side router.** `npm run build` writes one directory per
+route, each holding a complete `index.html`, so `/youtube-grow/trending/` is a
+static file that GitHub Pages serves directly. A direct visit, a refresh, a
+shared link and the back button are all ordinary browser navigation — there is
+no history-API fallback that can 404 in production while working locally, and
+no `404.html` redirect trick.
+
+Sidebar links are plain anchors carrying `target="_blank"` and
+`rel="noopener noreferrer"`, so **a click opens the destination in a new tab**
+and the current tab stays put. Nothing calls `window.open`, which is what keeps
+middle-click, the context menu, "copy link address" and keyboard activation
+behaving exactly as the browser intends. The link for the page you are already
+on has no `target` — it will not open a duplicate of itself — and is marked
+`aria-current="page"`. Every other link carries an "Open *X* in a new tab"
+accessible name and an "Opens this workspace in a new tab" tooltip, so the small
+arrow icon never has to carry that meaning alone.
+
 ## Interface
 
 | Layer | File | Role |
 | --- | --- | --- |
+| Route table | `src/routes.js` | Every page's path, title, description and icon — one source of truth |
+| Page shell | `src/shell.js` | The document, sidebar and metadata, rendered once per route at build time |
+| Page bodies | `src/pages/*.html` | What goes inside `<main>` for each page |
+| Page modules | `src/pages/*.js` | One controller per page, imported on demand |
+| Entry point | `src/app.js` | Wires the shell, then loads the module named by `<body data-page>` |
 | Design system | `src/styles.css` | Tokens (colour, radii, spacing, motion) and every component class |
-| Interface | `src/app.js` | Shell, navigation, tables, chart, analyzer — small component functions |
+| Shared UI | `src/ui.js` | Icons, states, cards, the sortable table, cell renderers, the bar chart |
+| Data loading | `src/data.js` | Fetch and memoise the snapshot, the report and the shot lists |
+| Shell behaviour | `src/nav.js` | The mobile drawer and the dataset status strip |
 | Presentation logic | `src/insights.js` | Overview metrics and grounded observations |
 | Formatting | `src/format.js` | One implementation per number, duration and date format |
 | Analysis | `src/shorts.js`, `src/shotlist.js` | Unchanged business logic |
 | Weekly planner | `src/foryou.js`, `src/planner/` | The For You workspace and the engine behind it |
 
-Sections: Overview · For You · Top Shorts · Trending Now · Top Channels ·
-Breakout Videos · Shot Analyzer. Tables sort, filter and expand; below 760px they
-become stacked cards rather than a horizontally scrolling grid.
+The shell exists once. Adding a page means one row in `src/routes.js`, one body
+fragment in `src/pages/`, and one module — no HTML is copied between pages.
+
+Each page loads only what it needs: the Shot Analyzer never fetches the
+snapshot, and only For You reads the shot lists. Page modules are imported
+dynamically, so opening Trending Now does not download the planner.
+
+Tables sort, filter and expand; below 760px they become stacked cards rather
+than a horizontally scrolling grid.
+
+### State across tabs
+
+Opening workspaces in separate tabs means several copies of the application
+share one browser. They share their storage too:
+
+| Key | Holds |
+| --- | --- |
+| `shorts-intelligence:planner` | Preferences, the week, locks, edits, saved characters, production statuses |
+| `shorts-intelligence:recent-analyses` | The last six videos analysed |
+
+Both listen for the `storage` event, which fires only in the *other* tabs of the
+origin. Save a character or lock a field in one tab and every other open planner
+updates immediately, without a reload. A planner with its workspace drawer open
+refreshes the board behind it but leaves the drawer alone — replacing the markup
+under someone's cursor would lose their caret.
 
 ### What the metrics are, and are not
 
@@ -41,11 +101,12 @@ Analytics.
 | --- | --- |
 | `src/shorts.js` | Shorts-report analysis: windowing, totals, rankings, per-channel and per-day rollups |
 | `scripts/fetch-shorts.js` | Pulls a topic's Shorts from the YouTube Data API into `data/` |
-| `scripts/build.js` | Copies `src/*.js` and `data/*.json` into `public/` for deployment |
+| `scripts/build.js` | Renders one page per route and copies `src/` and `data/` into `public/` |
+| `src/pages/` | A body fragment and a controller module for each of the seven pages |
 | `data/roblox-shorts.json` | Committed snapshot — the site works with no API key |
 | `src/planner/` | The For You engine: signals, recommendations, characters, story, prompts, storage, export |
 | `test/` | Unit tests on Node's built-in runner — no dependencies, no network |
-| `public/index.html` | The report page, deployed to GitHub Pages |
+| `public/` | Build output — every file is generated; nothing here is hand-written |
 | `.github/workflows/ci.yml` | Runs the test suite on every push and pull request |
 | `.github/workflows/deploy.yml` | Publishes `public/` to GitHub Pages on every push to `main` |
 | `.github/workflows/refresh.yml` | Daily: re-fetches the window and commits it when the numbers move |
@@ -230,10 +291,12 @@ npm test          # or: node --test
 ```
 
 The suite covers the report analysis, the API-response mapping, the shape of the
-committed snapshot itself, and the whole For You planner — timeline arithmetic
-across every runtime and scene count, regeneration and lock behaviour, storage
-migration, export completeness, and the content rules above. 105 tests, no
-network, no API key needed.
+committed snapshot itself, the whole For You planner — timeline arithmetic across
+every runtime and scene count, regeneration and lock behaviour, storage
+migration, export completeness, and the content rules above — and the routing
+layer: that every route resolves to the right URL from every page, that each
+page marks only itself current, and that new-tab links carry the right `rel` and
+accessible name. 119 tests, no network, no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 

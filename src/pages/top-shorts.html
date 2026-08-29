@@ -1,0 +1,42 @@
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow" style="--tone: var(--red)">Reach</p>
+          <h1>Top Shorts by views</h1>
+          <p class="pagehead__sub">
+            Every tracked Roblox Short ranked by the total reach it has accumulated, with the
+            channel behind it and the pace it is still travelling at.
+          </p>
+        </div>
+        <div class="pagehead__status" id="head-status" aria-live="polite">
+          <span class="pill">Loading snapshot…</span>
+        </div>
+      </header>
+
+      <section class="section" style="padding-top:0" aria-labelledby="chart-h">
+        <h2 class="sr-only" id="chart-h">Views across the leading Shorts</h2>
+        <div id="chart-views"></div>
+      </section>
+
+      <section class="section" aria-labelledby="table-h">
+        <div class="section__head">
+          <div>
+            <h2 id="table-h">Full ranking</h2>
+            <p class="section__desc">
+              Sort any column, search by title or channel, and expand to the whole list.
+            </p>
+          </div>
+          <div class="section__tools">
+            <label class="sr-only" for="search-views">Search top Shorts by title or channel</label>
+            <input class="input section__search" id="search-views" type="search"
+                   placeholder="Search title or channel…" autocomplete="off">
+          </div>
+        </div>
+        <div id="table-views">
+          <div class="tablecard">
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+          </div>
+        </div>
+        <div class="notes" id="notes-top-shorts"></div>
+      </section>

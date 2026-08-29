@@ -14,7 +14,7 @@ import { recommendWeek, DAY_NAMES, addDays } from './planner/recommend.js';
 import { buildDayPlan, PRODUCTION_STATUSES, LOCKABLE } from './planner/plan.js';
 import { IMAGE_PLATFORM_OPTIONS, VIDEO_PLATFORM_OPTIONS, DEFAULT_STYLE } from './planner/prompts.js';
 import {
-  loadState, saveState, clearState, dayRecord, setDay, variantMap, DEFAULT_PREFS,
+  loadState, saveState, clearState, dayRecord, setDay, variantMap, DEFAULT_PREFS, STORAGE_KEY,
 } from './planner/storage.js';
 import {
   dayMarkdown, weekMarkdown, weekJson, castMarkdown, imagePromptsText, videoPromptsText,
@@ -499,7 +499,15 @@ function planFor(rec) {
   });
 }
 
-function render() {
+/**
+ * Redraw the board, the summary and — unless told otherwise — the open drawer.
+ *
+ * `keepDrawer` exists for the cross-tab listener: replacing the workspace's
+ * markup while someone is typing in it would lose their caret and their
+ * selection, so a change arriving from another tab refreshes the board behind
+ * the drawer and leaves the drawer itself alone until it is reopened.
+ */
+function render({ keepDrawer = false } = {}) {
   week = currentWeek();
   const plans = week.map(planFor);
 
@@ -512,6 +520,7 @@ function render() {
   $('#foryou-summary').innerHTML = summaryStrip(plans);
 
   const drawer = $('#foryou-ws');
+  if (keepDrawer && openDay) return;
   if (openDay) {
     const i = week.findIndex((r) => r.date === openDay);
     if (i >= 0) {
@@ -589,6 +598,15 @@ function onPrefChange(target) {
 
 function wire() {
   const root = $('#foryou');
+
+  // Cross-tab sync. `storage` fires only in the *other* tabs of this origin, so
+  // saving a character or locking a field in one tab updates every other open
+  // planner immediately rather than at the next reload.
+  window.addEventListener('storage', (e) => {
+    if (e.key !== STORAGE_KEY) return;
+    state = loadState(store);
+    render({ keepDrawer: true });
+  });
 
   root.addEventListener('change', (e) => {
     const t = e.target;

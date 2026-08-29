@@ -1,0 +1,42 @@
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow" style="--tone: var(--cyan)">Publishers</p>
+          <h1>Channels taking the most views</h1>
+          <p class="pagehead__sub">
+            Total reach per channel, summed across every Short it published inside the tracked
+            window.
+          </p>
+        </div>
+        <div class="pagehead__status" id="head-status" aria-live="polite">
+          <span class="pill">Loading snapshot…</span>
+        </div>
+      </header>
+
+      <section class="section" style="padding-top:0" aria-labelledby="chart-h">
+        <h2 class="sr-only" id="chart-h">Share of tracked views by channel</h2>
+        <div id="chart-channels"></div>
+      </section>
+
+      <section class="section" aria-labelledby="table-h">
+        <div class="section__head">
+          <div>
+            <h2 id="table-h">Full channel ranking</h2>
+            <p class="section__desc">
+              Sort any column, search by channel name, and expand to the whole list.
+            </p>
+          </div>
+          <div class="section__tools">
+            <label class="sr-only" for="search-channels">Search channels by name</label>
+            <input class="input section__search" id="search-channels" type="search"
+                   placeholder="Search channel…" autocomplete="off">
+          </div>
+        </div>
+        <div id="table-channels">
+          <div class="tablecard">
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+          </div>
+        </div>
+        <div class="notes" id="notes-channels"></div>
+      </section>
