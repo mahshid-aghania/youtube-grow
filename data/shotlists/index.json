@@ -1,4 +1,9 @@
 {
   "note": "Shot lists available to the page. Adding a JSON file here without listing its id below leaves it invisible — the test suite enforces that these stay in sync.",
-  "videoIds": ["gpBA12uEBIA", "Snpt7oqfzP4", "xQXojdSP54s"]
+  "videoIds": [
+    "gpBA12uEBIA",
+    "Snpt7oqfzP4",
+    "xQXojdSP54s",
+    "bpP9dpTQQtU"
+  ]
 }

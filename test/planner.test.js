@@ -13,6 +13,10 @@ import {
 import { buildCharacter, buildCast, identityLock } from '../src/planner/characters.js';
 import { buildTimeline, buildScenes } from '../src/planner/story.js';
 import { imagePrompt, videoPrompt } from '../src/planner/prompts.js';
+import { RIG_OPTIONS, RENDER_OPTIONS, styleBlock } from '../src/planner/robloxstyle.js';
+import {
+  GAME_CHARACTERS, GAME_WORLDS, gameCharacterById, worldById,
+} from '../src/planner/games.js';
 import { buildDayPlan, planRuntime, LOCKABLE } from '../src/planner/plan.js';
 import {
   migrate, loadState, saveState, dayRecord, setDay, variantMap,
@@ -184,7 +188,8 @@ test('buildCharacter is deterministic and fully specified', () => {
   assert.deepEqual(a, b);
   assert.notEqual(buildCharacter('vet', 'seed-2').name, a.name);
 
-  for (const field of ['name', 'face', 'eyes', 'hair', 'outfit', 'shoes', 'accessories', 'colors', 'marks']) {
+  for (const field of ['name', 'rig', 'head', 'faceDecal', 'hat', 'hair', 'outfit', 'shoes',
+    'accessories', 'colors', 'marks']) {
     assert.ok(a[field] && a[field].length > 0, `${field} is populated`);
   }
   assert.ok(a.mustNotChange.length >= 5 && a.mayChange.length >= 3 && a.negatives.length >= 5);
@@ -193,10 +198,13 @@ test('buildCharacter is deterministic and fully specified', () => {
 test('identityLock names every attribute a generator would otherwise drift on', () => {
   const c = buildCharacter('intern', 'x');
   const lock = identityLock(c);
-  for (const needle of [c.name, c.face, c.eyes, c.hair, c.outfit, c.shoes, c.accessories, c.colors]) {
+  for (const needle of [c.name, c.head, c.faceDecal, c.hat, c.hair, c.outfit, c.shoes,
+    c.accessories, c.colors]) {
     assert.ok(lock.includes(needle), `lock repeats "${needle.slice(0, 24)}…"`);
   }
-  assert.match(lock, /Do not redesign, replace, age, beautify/);
+  assert.match(lock, /Do not redesign, replace, age, humanise/);
+  // The single most common drift: the generator sculpts a real face.
+  assert.match(lock, /it stays a printed decal/);
 });
 
 test('buildCast resolves relative heights across the whole cast', () => {
@@ -328,13 +336,14 @@ test('a speaking scene demands one delivery; a silent scene forbids lip movement
   const timeline = buildTimeline(20, 5);
 
   const spoken = buildScenes(seed, cast, timeline, { dialogue: true })[0];
-  assert.match(videoPrompt(spoken, cast, {}), /exactly once, with .*synchronised lip movement/s);
+  assert.match(videoPrompt(spoken, cast, {}), /deliver the dialogue exactly once/);
+  assert.match(videoPrompt(spoken, cast, {}), /printed decal swapping between open and closed/);
   assert.match(videoPrompt(spoken, cast, {}), /Do not repeat, restart, paraphrase, echo/);
 
   const silent = buildScenes(seed, cast, timeline, { dialogue: false })[0];
   const sp = videoPrompt(silent, cast, {});
   assert.match(sp, /does not speak/);
-  assert.match(sp, /Do not generate any lip movement/);
+  assert.match(sp, /Do not generate any mouth movement/);
 });
 
 /* ---------- plan assembly ---------- */
@@ -440,7 +449,9 @@ test('migrate carries a v1 payload forward and discards an unknown version', () 
 
 test('dayRecord fills defaults for a day never touched', () => {
   const r = dayRecord(loadState(memoryStorage()), '2026-01-01');
-  assert.deepEqual(r, { edits: {}, locks: [], status: 'idea', variant: 0, sceneMarks: {} });
+  assert.deepEqual(r, {
+    edits: {}, locks: [], status: 'idea', variant: 0, sceneMarks: {}, gameCharacters: [],
+  });
 });
 
 /* ---------- locks ---------- */
@@ -583,7 +594,7 @@ test('a silent scene tells the generator to keep the mouth closed', () => {
     const prompt = videoPrompt(s, plan.cast, { platform: 'veo' });
     if (s.dialogue === '—') {
       assert.match(prompt, /does not speak/);
-      assert.match(prompt, /Do not generate any lip movement/);
+      assert.match(prompt, /Do not generate any mouth movement/);
     } else {
       assert.ok(prompt.includes(`"${s.dialogue}"`), `scene ${s.n} carries its line verbatim`);
       assert.match(prompt, /deliver the dialogue exactly once/);
@@ -621,4 +632,175 @@ test('consecutive scenes in the same beat do not repeat the same frame', () => {
       assert.notEqual(a.action, b.action, `${rec.date} scene ${b.n} advances the beat`);
     }
   }
+});
+
+/* ---------- Roblox visual language ---------- */
+
+test('every image prompt states it is a Roblox scene before anything else', () => {
+  const plan = buildDayPlan(week[0], prefs);
+  for (const s of plan.scenes) {
+    const head = s.imagePrompt.slice(0, 400);
+    assert.match(head, /inside the video game Roblox/,
+      `scene ${s.n} names the world in its opening lines`);
+    assert.match(s.imagePrompt, /AVATAR CONSTRUCTION:/);
+    assert.match(s.imagePrompt, /flat 2D decal printed on the front surface of the head/);
+  }
+});
+
+test('prompts forbid the generic-3D drift they used to produce', () => {
+  const plan = buildDayPlan(week[0], prefs);
+  for (const s of plan.scenes) {
+    for (const needle of ['not Pixar style', 'not a realistic human', 'no sculpted facial features',
+      'no individual hair strands', 'no skin texture or pores']) {
+      assert.ok(s.imagePrompt.includes(needle), `scene ${s.n} rules out "${needle}"`);
+      assert.ok(s.videoPrompt.includes(needle), `scene ${s.n} video prompt rules out "${needle}"`);
+    }
+    // The old style string is exactly what produced a Pixar render.
+    assert.doesNotMatch(s.imagePrompt, /Premium cinematic 3D game-inspired animation/);
+  }
+});
+
+test('a video prompt animates rigid parts and a decal, not a face', () => {
+  const plan = buildDayPlan(week[0], prefs);
+  const p = plan.scenes[0].videoPrompt;
+  assert.match(p, /this is a scene inside the video game Roblox/);
+  assert.match(p, /separate rigid Roblox parts/);
+  assert.match(p, /the face is a printed decal/);
+  assert.match(p, /never bend where a Roblox limb cannot/);
+});
+
+test('the rig follows the pillar and every rig produces a real spec', () => {
+  for (const rig of RIG_OPTIONS) {
+    const block = styleBlock({ rig: rig.id, render: 'ingame' });
+    assert.match(block, /AVATAR CONSTRUCTION:/);
+    assert.ok(block.length > 900, `${rig.id} carries the full construction spec`);
+  }
+  // Animal Hospital is played with animal-headed avatars, so a plan set there
+  // must not describe a plain blocky avatar.
+  const rec = week.find((r) => r.pillarId === 'animal-hospital');
+  assert.ok(rec, 'the fixture week includes an Animal Hospital day');
+  assert.match(buildDayPlan(rec, prefs).scenes[0].imagePrompt,
+    /Roblox avatar rig wearing a large moulded animal head/);
+
+  // Pinning a rig in preferences overrides the pillar's default.
+  assert.match(buildDayPlan(rec, { ...prefs, avatarRig: 'r6' }).scenes[0].imagePrompt,
+    /Classic R6 avatar construction/);
+});
+
+test('render presets change only the lighting, never the geometry', () => {
+  for (const preset of RENDER_OPTIONS) {
+    const block = styleBlock({ rig: 'r15', render: preset.id });
+    assert.match(block, /RENDER:/);
+    // Whatever the treatment, the construction rules are still in the prompt.
+    assert.match(block, /flat 2D decal/);
+    assert.match(block, /separate solid parts|rigid solid/);
+  }
+});
+
+test('characters are described the way Roblox builds, not the way people look', () => {
+  for (const roleKey of ['vet', 'intern', 'kid', 'noob', 'pro']) {
+    const c = buildCharacter(roleKey, 'x');
+    assert.match(`${c.head} ${c.faceDecal}`, /head|decal|printed/i);
+    assert.match(c.faceDecal, /printed/i, `${roleKey}'s face is a decal`);
+    assert.ok(['r6', 'r15', 'rthro', 'animal'].includes(c.rig), `${roleKey} names a real rig`);
+    // The vocabulary that produced Pixar characters.
+    const blob = `${c.head} ${c.faceDecal} ${c.hair} ${c.outfit}`.toLowerCase();
+    for (const banned of ['smile lines', 'freckles', 'pores', 'strand of hair', 'soft jaw']) {
+      assert.ok(!blob.includes(banned), `${roleKey} avoids "${banned}"`);
+    }
+  }
+});
+
+test('every concept is staged somewhere that exists in a Roblox world', () => {
+  for (const p of PILLARS) {
+    for (const s of p.seeds) {
+      assert.match(s.setting,
+        /roblox|obby|animal hospital|baseplate|hide-and-seek|spawn|lobby/i,
+        `${s.id} is staged in a Roblox place`);
+      assert.ok(s.props.length >= 2, `${s.id} names props that can be built from parts`);
+    }
+  }
+});
+
+/* ---------- game characters ---------- */
+
+test('the game-character library records what the character actually does', () => {
+  const harlow = gameCharacterById('dr-harlow');
+  assert.ok(harlow, 'Dr. Harlow is in the library');
+  assert.equal(harlow.gameLabel, 'Animal Hospital');
+  for (const needle of ['head doctor', 'mentor', 'supervisor', 'lobby', 'Supplies Shop',
+    'performance report', 'emergencies']) {
+    assert.ok(harlow.lore.toLowerCase().includes(needle.toLowerCase()),
+      `the lore records "${needle}"`);
+  }
+  assert.ok(harlow.beats.length >= 3, 'the library suggests beats he can carry');
+  for (const c of GAME_CHARACTERS) {
+    assert.ok(c.usageNote.length > 40, `${c.id} says how it may be used`);
+    assert.ok(c.game && c.gameLabel, `${c.id} names the game it belongs to`);
+  }
+});
+
+test('casting a game character replaces its role rather than duplicating it', () => {
+  const plain = buildDayPlan(week[0], prefs);
+  const cast = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+
+  assert.equal(cast.cast[0].name, 'Dr. Harlow', 'the guest leads the cast');
+  assert.equal(cast.cast.filter((c) => c.roleKey === 'vet').length, 1, 'one head doctor, not two');
+  assert.equal(cast.cast.length, plain.cast.length, 'the cast does not grow');
+  assert.ok(!cast.cast.some((c) => c.name === 'Dr. Wren'), 'the generated vet steps aside');
+});
+
+test('a cast game character is prompted as a fan interpretation, with a full identity lock', () => {
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const harlow = plan.cast[0];
+  assert.match(harlow.identityLock, /IDENTITY LOCK — Dr\. Harlow/);
+  assert.ok(harlow.identityLock.includes(harlow.head), 'the lock repeats the moulded head');
+  assert.ok(harlow.identityLock.includes(harlow.faceDecal), 'the lock repeats the printed face');
+
+  const prompt = plan.scenes[0].imagePrompt;
+  assert.match(prompt, /A fan interpretation of a character from the Roblox game Animal Hospital/);
+  assert.match(prompt, /rather than copying any official asset/);
+});
+
+test('a game character carries every field the character bible renders', () => {
+  const generated = buildCharacter('vet', 'x');
+  const guest = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] }).cast[0];
+  // The bible renders one card for either kind, so a guest missing a field is a
+  // thrown TypeError in the workspace rather than a blank line.
+  for (const field of Object.keys(generated)) {
+    assert.ok(field in guest, `a game character carries "${field}"`);
+  }
+  for (const field of ['mustNotChange', 'mayChange', 'negatives']) {
+    assert.ok(Array.isArray(guest[field]) && guest[field].length > 0,
+      `${field} is a populated list`);
+  }
+});
+
+test('game characters persist per day, not across the whole week', () => {
+  let state = loadState(memoryStorage());
+  state = setDay(state, '2026-08-29', { gameCharacters: ['dr-harlow'] });
+  assert.deepEqual(dayRecord(state, '2026-08-29').gameCharacters, ['dr-harlow']);
+  assert.deepEqual(dayRecord(state, '2026-08-30').gameCharacters, [],
+    'another day is unaffected');
+});
+
+test('every game world names real locations and buildable props', () => {
+  for (const w of GAME_WORLDS) {
+    assert.ok(w.locations.length >= 3, `${w.id} names somewhere to stage a scene`);
+    assert.ok(w.props.length >= 3, `${w.id} names props`);
+    assert.ok(['r6', 'r15', 'rthro', 'animal'].includes(w.rig), `${w.id} names a real rig`);
+  }
+  assert.equal(worldById('animal-hospital').rig, 'animal');
+});
+
+test('exports carry the Roblox character fields, never an undefined', () => {
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  for (const text of [castMarkdown(plan), dayMarkdown(plan), weekMarkdown([plan], WEEK)]) {
+    assert.ok(!text.includes('undefined'), 'no field renders as undefined');
+    assert.match(text, /Printed face/);
+    assert.match(text, /Headwear/);
+  }
+  assert.match(castMarkdown(plan), /Dr\. Harlow/);
+  assert.ok(!weekJson([plan], WEEK, prefs).includes('"face"'),
+    'the old human-face field is gone from the JSON too');
 });

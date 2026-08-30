@@ -1,0 +1,95 @@
+{
+  "videoId": "bpP9dpTQQtU",
+  "url": "https://www.youtube.com/shorts/bpP9dpTQQtU",
+  "title": "KID 👶🤩 IN ANIMAL HOSPITAL #roblox #animalhospital #update",
+  "channel": "Darok",
+  "durationSeconds": 20,
+  "analysedAt": "2026-08-30T00:00:00Z",
+  "source": "vidIQ shortform analysis",
+  "hook": {
+    "seconds": 3,
+    "why": "It opens on a question the audience already argues about — what should be added to Animal Hospital next — and answers it in the first line rather than teasing it. The gameplay is already running behind the pitch, so there is no title card and nothing to wait through."
+  },
+  "scenes": [
+    {
+      "startSec": 0,
+      "endSec": 2,
+      "action": "A pink parent dog leads a small orange cat child, in a nappy and hoodie, in through the hospital entrance hallway.",
+      "dialogue": "\"What if we added kids to Animal Hospital?\" / \"WHAT IF WE ADDED KIDS TO ANIMAL HOSPITAL\" (on-screen text)",
+      "camera": "Eye-level medium, following the pair down the corridor",
+      "visual": "Bright, clean low-poly hospital hallway; the two visitors read instantly against flat pale walls."
+    },
+    {
+      "startSec": 2,
+      "endSec": 4,
+      "action": "The pair arrive at the reception counter window and wait to be seen.",
+      "dialogue": "\"Parents would bring their children to the hospital\" / \"PARENTS WOULD BRING THEIR CHILDREN TO THE HOSPITAL\" (on-screen text)",
+      "camera": "Medium-wide on the counter, static",
+      "visual": "Reception window with the counter framing the two characters."
+    },
+    {
+      "startSec": 4,
+      "endSec": 5,
+      "action": "A patient card is held up to camera, showing a photo and the name John John.",
+      "dialogue": "\"PATIENT John John\" (on-screen text)",
+      "camera": "Close-up insert on the card",
+      "visual": "The card fills the frame — the one moment the video stops moving so the detail registers."
+    },
+    {
+      "startSec": 5,
+      "endSec": 6,
+      "action": "A cut to the security booth, looking out at the waiting visitors.",
+      "dialogue": "—",
+      "camera": "Interior wide from behind the booth glass",
+      "visual": "Point-of-view shift to staff side, establishing the player's role in the loop."
+    },
+    {
+      "startSec": 6,
+      "endSec": 7,
+      "action": "A door marked with a baby-bottle icon opens onto a play area with a ball pit.",
+      "dialogue": "\"and if everything looks normal, they would be sent to a special kids room with toys and a ball pit\" / \"AND IF EVERYTHING LOOKS NORMAL\" / \"THEY WOULD BE SENT TO A SPECIAL KIDS ROOM\" / \"WITH TOYS AND A BALL PIT\" (on-screen text)",
+      "camera": "Medium-wide through the doorway",
+      "visual": "Saturated primary-coloured ball pit against the clean clinical palette — the brightest frame so far."
+    },
+    {
+      "startSec": 7,
+      "endSec": 9,
+      "action": "A green rabbit doctor in glasses and a moustache watches through a window as the cat toddler stands motionless, facing away from the toys.",
+      "dialogue": "\"But if you notice a child ignoring all the toys and strangely staring at the wall, be careful.\" / \"BUT IF YOU NOTICE A CHILD\" / \"IGNORING ALL THE TOYS\" (on-screen text)",
+      "camera": "Over-the-shoulder through observation glass",
+      "visual": "The stillness is the story — everything else in frame has been moving until now."
+    },
+    {
+      "startSec": 9,
+      "endSec": 13,
+      "action": "The camera cuts to the front of the child, revealing distorted reptilian eyes and a jagged mouth as an anomaly alarm pulses.",
+      "dialogue": "\"That means it's actually an anomaly.\" / \"AND STRANGELY STARING AT THE WALL\" / \"BE CAREFUL THAT MEANS IT'S ACTUALLY AN ANOMALY\" (on-screen text)",
+      "camera": "Push to close-up on the face, held",
+      "visual": "The reveal: familiar toddler geometry with wrong eyes and mouth, lit by a pulsing warning."
+    },
+    {
+      "startSec": 13,
+      "endSec": 15,
+      "action": "The rabbit doctor enters carrying a grey tablet and walks it over to the child.",
+      "dialogue": "\"Grab the tablet and walk up to the child with it.\" / \"GRAB THE TABLET AND WALK UP\" / \"TO THE CHILD WITH IT\" (on-screen text)",
+      "camera": "Medium tracking the doctor into the room",
+      "visual": "The solution is a prop the viewer can picture holding — a plain grey tablet."
+    },
+    {
+      "startSec": 15,
+      "endSec": 18,
+      "action": "The child takes the tablet and its face instantly reverts to normal large glossy eyes as it plays.",
+      "dialogue": "\"The anomaly will immediately turn back into a normal kid.\" / \"ROBLOX\" / \"THE ANOMALY WILL IMMEDIATELY TURN BACK\" / \"INTO A NORMAL KID\" (on-screen text)",
+      "camera": "Close-up, matching the reveal framing so the change reads as a swap",
+      "visual": "Same frame as the anomaly shot with the face corrected — the joke is that Roblox itself is the cure."
+    },
+    {
+      "startSec": 18,
+      "endSec": 20,
+      "action": "The child and parents walk out happily past the doctor, with a thumbs-up graphic overlaid.",
+      "dialogue": "\"Leave a like if you want this update.\" / \"LEAVE A LIKE IF YOU WANT THIS UPDATE\" (on-screen text)",
+      "camera": "Medium-wide, pulling back to the corridor that opened the video",
+      "visual": "Closes on the entrance hallway it started in, so the last frame reads as the first."
+    }
+  ]
+}

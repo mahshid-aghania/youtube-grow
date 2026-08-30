@@ -105,6 +105,8 @@ Analytics.
 | `src/pages/` | A body fragment and a controller module for each of the seven pages |
 | `data/roblox-shorts.json` | Committed snapshot — the site works with no API key |
 | `src/planner/` | The For You engine: signals, recommendations, characters, story, prompts, storage, export |
+| `src/planner/robloxstyle.js` | How a Roblox frame is built — rigs, construction rules, render presets |
+| `src/planner/games.js` | Roblox game worlds and their known characters |
 | `test/` | Unit tests on Node's built-in runner — no dependencies, no network |
 | `public/` | Build output — every file is generated; nothing here is hand-written |
 | `.github/workflows/ci.yml` | Runs the test suite on every push and pull request |
@@ -206,6 +208,54 @@ the same week, preferences and variant always produce the same plan, so a reload
 never silently rewrites your week. `Regenerate` steps the concept to the next
 seed for that pillar and cycles back after a full round.
 
+### Making it look like Roblox
+
+A prompt that says "premium cinematic 3D animation, expressive faces" produces a
+Pixar render, not a Roblox scene — generators have no idea what Roblox looks like
+unless the geometry is spelled out. `planner/robloxstyle.js` spells it out, and
+every image prompt leads with it, before the scene:
+
+- **Avatar construction** per rig — R6 classic, R15, Rthro, or an animal rig with
+  a moulded head. Each names the parts, the joints and the proportions.
+- **Seven rules** that apply to any Roblox frame: the face is a flat decal
+  printed on the head, not sculpted; hair is a rigid accessory, not strands;
+  every surface is flat matte plastic; cloth never drapes; the environment is
+  built from parts on a grid.
+- **A render treatment** — in-game screenshot, cinematic, or animated short.
+  Only the lighting changes; the geometry is fixed either way.
+- **Negatives** that stop the drift back: *not Pixar style*, *no sculpted facial
+  features*, *no individual hair strands*, *no skin texture or pores*.
+
+Characters are described in the same vocabulary. A cast member has a head part
+and a printed face decal, a hair accessory and either a printed shirt or a
+layered solid — never "a soft jaw and hazel eyes". Describing an avatar in human
+terms is exactly what produced a human.
+
+The rig follows the game world the pillar is set in, so an Animal Hospital plan
+gets animal-headed avatars and an obby plan does not. Pinning **Avatar rig** in
+strategy preferences overrides it.
+
+### Game characters
+
+Concepts are staged in places that exist — the Animal Hospital treatment room,
+an obby checkpoint over the void, a Roblox town street — rather than in "a bright
+examination room". `planner/games.js` holds those worlds and the characters that
+live in them.
+
+Casting one is a click in the Character bible. **Dr. Harlow** — the Animal
+Hospital's head doctor, the player's mentor and supervisor, who appears at the
+end of each of the first six shifts, is found afterwards in the lobby and the
+Supplies Shop, grades each shift with a performance report and brings bonuses in
+emergencies — leads the cast, takes the story's senior-vet slot instead of
+duplicating it, and carries the same identity lock every generated character
+does.
+
+These are existing characters from other people's games, and the code says so:
+each entry records the game it belongs to and what it does there, and every
+prompt built from one asks for **a fan interpretation** rather than a copy of the
+official asset. The generated cast stays entirely original; a game character is
+opted into, per day.
+
 ### Character consistency
 
 Image and video generators have no memory between calls, so a prompt that says
@@ -296,7 +346,7 @@ every runtime and scene count, regeneration and lock behaviour, storage
 migration, export completeness, and the content rules above — and the routing
 layer: that every route resolves to the right URL from every page, that each
 page marks only itself current, and that new-tab links carry the right `rel` and
-accessible name. 119 tests, no network, no API key needed.
+accessible name. 133 tests, no network, no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 

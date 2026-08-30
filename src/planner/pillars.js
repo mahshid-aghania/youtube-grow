@@ -1021,3 +1021,143 @@ for (const pillar of PILLARS) {
     Object.assign(seed, SCRIPTS[seed.id] ?? {});
   }
 }
+
+/**
+ * Where each concept is actually staged, in Roblox terms.
+ *
+ * The seeds were first written as story premises, which left their settings
+ * generic — "a bright examination room", "a rain-slick street". A prompt built
+ * from that produces a generic room, and the video stops looking like the game
+ * the audience knows. Every setting here names a place that exists in a Roblox
+ * world, and every prop is an object that would be built out of parts.
+ */
+const STAGING = {
+  'ah-smallest-patient': {
+    setting: 'A treatment room in the Animal Hospital: one low bed, a supply trolley, flat white walls',
+    props: ['patient chart clipboard', 'toy stethoscope', 'folded blanket on the trolley'],
+  },
+  'ah-night-shift': {
+    setting: 'The Animal Hospital ward at night, one lamp lit and monitor screens glowing against dark blocky walls',
+    props: ['bedside monitor', 'chart clipboard', 'desk lamp'],
+  },
+  'ah-wrong-chart': {
+    setting: 'A treatment room in the Animal Hospital with two beds side by side and a wall clock above them',
+    props: ['two chart clipboards', 'tweezers', 'wall clock'],
+  },
+  'tr-storm-drain': {
+    setting: 'A Roblox town street at dusk, a storm drain set into the flat grey kerb',
+    props: ['flashlight', 'street lamp', 'drain grate'],
+  },
+  'tr-box-doorstep': {
+    setting: 'The front hallway of a Roblox house, a cardboard box sitting square in the middle of the floor',
+    props: ['cardboard box', 'folded towel', 'front door'],
+  },
+  'tr-last-one': {
+    setting: 'The Animal Hospital lobby at closing time, pet carriers lined along a bench',
+    props: ['pet carrier', 'clipboard', 'wall clock'],
+  },
+  'cmp-what-they-see': {
+    setting: 'An obby platform floating over an empty void, the next jump clearly visible ahead',
+    props: ['checkpoint pad', 'floating platform', 'leaderboard'],
+  },
+  'cmp-first-day-last-day': {
+    setting: 'The opening section of an obby, the same platform run framed identically both times',
+    props: ['checkpoint pad', 'spinning obstacle', 'timer display'],
+  },
+  'cmp-two-budgets': {
+    setting: 'Two adjacent build plots on a flat baseplate, one stacked with parts and one nearly bare',
+    props: ['stack of coloured parts', 'single plank', 'plot boundary marker'],
+  },
+  'tp-copycat': {
+    setting: 'An open Roblox game lobby with a flat patterned floor and other players idling in the background',
+    props: ['spawn pad', 'lobby sign'],
+  },
+  'tp-fake-door': {
+    setting: 'A corridor of identical doors in a Roblox map, one of them built flat into a blank wall',
+    props: ['door', 'corridor light', 'queue of waiting players'],
+  },
+  'tp-swapped-seats': {
+    setting: 'A Roblox classroom, desks in strict grid rows facing a blocky whiteboard',
+    props: ['school desk', 'chair', 'whiteboard'],
+  },
+  'fc-one-sound': {
+    setting: 'A Roblox suburban house, kitchen open to a living room with a blocky sofa',
+    props: ['sofa', 'television', 'ice maker'],
+  },
+  'fc-homework-negotiation': {
+    setting: 'The kitchen counter island of a Roblox house, two stools facing each other across it',
+    props: ['homework sheet', 'pen', 'stool'],
+  },
+  'fc-quiet-competition': {
+    setting: 'A Roblox living room with one obviously better seat facing the television',
+    props: ['sofa', 'armchair', 'television'],
+  },
+  'tf-abandoned-build': {
+    setting: 'A half-built structure on a bare baseplate, parts missing and one wall leaning out of square',
+    props: ['loose building parts', 'leaning wall panel', 'toolbox'],
+  },
+  'tf-one-item': {
+    setting: 'A Roblox avatar shop interior, mirrors and item racks along flat blocky walls',
+    props: ['mirror', 'item rack', 'price sign'],
+  },
+  'tf-quiet-upgrade': {
+    setting: 'A bedroom in a Roblox house, a desk setup pushed against the wall',
+    props: ['desk', 'monitor', 'tape'],
+  },
+  'hs-too-good': {
+    setting: 'A hide-and-seek map interior: a cluttered attic stacked with crates',
+    props: ['crate', 'attic beam', 'seeker countdown display'],
+  },
+  'hs-wrong-game': {
+    setting: 'A Roblox town square where nobody else is playing the game',
+    props: ['bench', 'fountain', 'lamp post'],
+  },
+  'hs-swap': {
+    setting: 'A hide-and-seek map with a long corridor of identical lockers',
+    props: ['locker', 'corridor light', 'countdown timer'],
+  },
+  'ch-one-rule': {
+    setting: 'A difficult obby section, narrow platforms strung over an empty void',
+    props: ['narrow platform', 'checkpoint pad', 'spinning obstacle'],
+  },
+  'ch-last-second': {
+    setting: 'A timed obby run, the timer display mounted above the finish arch',
+    props: ['timer display', 'finish arch', 'checkpoint pad'],
+  },
+  'ch-handicap': {
+    setting: 'The start line of an obby, two players side by side on the spawn pad',
+    props: ['spawn pad', 'start gate', 'leaderboard'],
+  },
+  'my-one-frame': {
+    setting: 'A Roblox bedroom squared to the grid, with one thing subtly out of place',
+    props: ['bed', 'wall poster', 'bedside lamp'],
+  },
+  'my-locked-room': {
+    setting: 'A small locked room in a Roblox map, one door and a hatch high in the ceiling',
+    props: ['door', 'ceiling hatch', 'floor vent'],
+  },
+  'my-missing-name': {
+    setting: 'The Animal Hospital reception desk, a printed roster pinned to the wall behind it',
+    props: ['roster board', 'reception desk', 'pen'],
+  },
+  'ex-single-take': {
+    setting: 'A Roblox map with a plain flat wall behind the subject and the world running on past the frame',
+    props: ['background props', 'plain wall panel'],
+  },
+  'ex-no-cut-dialogue': {
+    setting: 'A long flat Roblox road with nothing built on either side',
+    props: ['road surface', 'distant baseplate edge'],
+  },
+  'ex-reverse': {
+    setting: 'A Roblox room with a toppled stack of parts across the floor',
+    props: ['stacked parts', 'dropped key', 'doorway'],
+  },
+};
+
+// Restage every seed in its Roblox world. Kept separate from the premises so
+// the story and the place it happens in can be reviewed independently.
+for (const pillar of PILLARS) {
+  for (const seed of pillar.seeds) {
+    Object.assign(seed, STAGING[seed.id] ?? {});
+  }
+}

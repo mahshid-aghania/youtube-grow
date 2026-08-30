@@ -55,9 +55,9 @@ export function dayMarkdown(plan) {
     out.push(line('Age', c.ageCategory));
     out.push(line('Personality', c.personality));
     out.push(line('Build', c.build));
-    out.push(line('Face', c.face));
-    out.push(line('Eyes', c.eyes));
-    out.push(line('Eyebrows', c.brows));
+    out.push(line('Head', c.head));
+    out.push(line('Printed face', c.faceDecal));
+    out.push(line('Headwear', c.hat));
     out.push(line('Hair', c.hair));
     out.push(line('Outfit', c.outfit));
     out.push(line('Footwear', c.shoes));
@@ -171,7 +171,7 @@ export function castMarkdown(plan) {
   for (const c of plan.cast) {
     out.push(`\n## ${c.name} — ${c.storyRole}\n`);
     out.push(`- Age: ${c.ageCategory}\n- Personality: ${c.personality}\n- Build: ${c.build}\n`);
-    out.push(`- Face: ${c.face}\n- Eyes: ${c.eyes}\n- Eyebrows: ${c.brows}\n- Hair: ${c.hair}\n`);
+    out.push(`- Head: ${c.head}\n- Printed face: ${c.faceDecal}\n- Headwear: ${c.hat}\n- Hair: ${c.hair}\n`);
     out.push(`- Outfit: ${c.outfit}\n- Footwear: ${c.shoes}\n- Accessories: ${c.accessories}\n`);
     out.push(`- Colours: ${c.colors}\n- Feature: ${c.marks}\n- Height: ${c.heightNote}\n`);
     out.push(`\n${c.identityLock}\n`);

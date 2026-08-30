@@ -1091,3 +1091,45 @@ textarea.input { resize: vertical; font-family: inherit; }
   .wsgrid { grid-template-columns: minmax(0, 1fr); }
   .leader__thumb { width: 76px; height: 43px; }
 }
+
+/* ==========================================================================
+   13. Game characters
+   ========================================================================== */
+
+.gamecast {
+  margin-bottom: 1rem;
+  padding: .9rem 1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.gamecast__label { font-size: .84rem; font-weight: 620; }
+.gamecast__hint {
+  margin-top: .25rem; max-width: 68ch;
+  font-size: .76rem; line-height: 1.5; color: var(--muted);
+}
+.gamecast__chips { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .7rem; }
+
+.chip--add {
+  flex-direction: column; align-items: flex-start; gap: .1rem;
+  min-height: 44px; padding: .4rem .7rem;
+  text-align: left;
+}
+.chip__sub { font-size: .68rem; color: var(--muted); }
+
+.charcard__lore {
+  margin: .1rem 0 .8rem;
+  padding: .7rem .85rem;
+  background: var(--violet-wash);
+  border-left: 2px solid var(--violet);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: .8rem; line-height: 1.55; color: var(--text-2);
+}
+.charcard__lore-label {
+  font-size: .68rem; font-weight: 650; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--violet);
+  margin-bottom: .25rem;
+}
+.charcard__note { margin-top: .5rem; font-size: .74rem; color: var(--muted); }
+
+.pill--violet { color: var(--violet); border-color: rgba(139, 122, 255, .35); background: var(--violet-wash); }

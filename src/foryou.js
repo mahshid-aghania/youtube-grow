@@ -12,7 +12,9 @@ import { buildSignals } from './planner/signals.js';
 import { THEMES, PILLARS, pillarById } from './planner/pillars.js';
 import { recommendWeek, DAY_NAMES, addDays } from './planner/recommend.js';
 import { buildDayPlan, PRODUCTION_STATUSES, LOCKABLE } from './planner/plan.js';
-import { IMAGE_PLATFORM_OPTIONS, VIDEO_PLATFORM_OPTIONS, DEFAULT_STYLE } from './planner/prompts.js';
+import { IMAGE_PLATFORM_OPTIONS, VIDEO_PLATFORM_OPTIONS } from './planner/prompts.js';
+import { RIG_OPTIONS, RENDER_OPTIONS } from './planner/robloxstyle.js';
+import { GAME_CHARACTERS, gameCharacterById, gameCharactersForPillar } from './planner/games.js';
 import {
   loadState, saveState, clearState, dayRecord, setDay, variantMap, DEFAULT_PREFS, STORAGE_KEY,
 } from './planner/storage.js';
@@ -121,9 +123,13 @@ function strategyPanel() {
           'Used only when duration is set to "Fixed length".')}
         ${field('dialogue', 'Dialogue', select('dialogue', p.dialogue ? 'yes' : 'no', [
           { id: 'yes', label: 'With dialogue' }, { id: 'no', label: 'No dialogue — visual only' }]))}
-        ${field('visualStyle', 'Visual style',
-          `<textarea class="input" id="visualStyle" rows="2" data-pref="visualStyle"
-                     placeholder="${esc(DEFAULT_STYLE)}">${esc(p.visualStyle)}</textarea>`)}
+        ${field('avatarRig', 'Avatar rig',
+          select('avatarRig', p.avatarRig, [{ id: 'auto', label: 'Match the game' }, ...RIG_OPTIONS]),
+          'How characters are built. "Match the game" follows the pillar — an animal rig for '
+          + 'Animal Hospital, R15 for most others.')}
+        ${field('renderStyle', 'Render look',
+          select('renderStyle', p.renderStyle, RENDER_OPTIONS),
+          'Only the lighting and grading change. The blocky Roblox geometry is fixed either way.')}
         ${field('imagePlatform', 'Image generator', select('imagePlatform', p.imagePlatform, IMAGE_PLATFORM_OPTIONS))}
         ${field('videoPlatform', 'Image-to-video tool', select('videoPlatform', p.videoPlatform, VIDEO_PLATFORM_OPTIONS))}
         ${field('aspect', 'Aspect ratio', select('aspect', p.aspect, ['9:16', '1:1', '16:9']))}
@@ -276,9 +282,43 @@ function tabStory(plan) {
     </ol>`;
 }
 
+/**
+ * Cast an existing game character.
+ *
+ * Suggestions for this pillar's own game come first — casting Dr. Harlow in an
+ * Animal Hospital video is the obvious move, and it should take one click — but
+ * the whole library stays available, because a crossover is a legitimate idea.
+ */
+function gamecastPicker(plan) {
+  const cast = new Set(plan.cast.filter((c) => c.fromGame).map((c) => c.id));
+  const suggested = gameCharactersForPillar(plan.strategy.pillarId).filter((c) => !cast.has(c.id));
+  const others = GAME_CHARACTERS.filter((c) => !cast.has(c.id) && !suggested.includes(c));
+  if (!suggested.length && !others.length) return '';
+
+  const chip = (c, isSuggested) => `
+    <button type="button" class="chip chip--add" data-add-game="${esc(c.id)}"
+            title="${esc(c.lore)}">
+      <span aria-hidden="true">+</span> ${esc(c.name)}
+      <span class="chip__sub">${esc(c.gameLabel)}${isSuggested ? ' · fits this pillar' : ''}</span>
+    </button>`;
+
+  return `
+    <div class="gamecast">
+      <p class="gamecast__label">Cast a character from the game</p>
+      <p class="gamecast__hint">Recognisable characters your audience already knows. They lead the
+        cast, keep their own look across every scene, and are prompted as a fan interpretation
+        rather than as the official asset.</p>
+      <div class="gamecast__chips">
+        ${suggested.map((c) => chip(c, true)).join('')}
+        ${others.map((c) => chip(c, false)).join('')}
+      </div>
+    </div>`;
+}
+
 function tabCast(plan) {
   return `
     <div class="ws-actions">${copyBtn('Copy character bible', 'cast')}</div>
+    ${gamecastPicker(plan)}
     ${plan.cast.map((c) => `
       <article class="charcard">
         <header class="charcard__head">
@@ -287,17 +327,26 @@ function tabCast(plan) {
             <p class="charcard__role">${esc(c.storyRole)} · ${esc(c.archetype)}</p>
           </div>
           <div class="charcard__actions">
+            ${c.fromGame ? `<span class="pill pill--violet">${esc(c.fromGame)}</span>` : ''}
             ${c.reused ? '<span class="pill">Reused</span>' : ''}
-            <button type="button" class="btn btn--ghost btn--sm" data-save-char="${esc(c.roleKey)}">
-              ${c.reused ? 'Update saved' : 'Save character'}
-            </button>
-            ${c.reused ? `<button type="button" class="btn btn--ghost btn--sm" data-drop-char="${esc(c.roleKey)}">Stop reusing</button>` : ''}
+            ${c.fromGame
+              ? `<button type="button" class="btn btn--ghost btn--sm" data-drop-game="${esc(c.id)}">Remove from cast</button>`
+              : `<button type="button" class="btn btn--ghost btn--sm" data-save-char="${esc(c.roleKey)}">
+                   ${c.reused ? 'Update saved' : 'Save character'}
+                 </button>
+                 ${c.reused ? `<button type="button" class="btn btn--ghost btn--sm" data-drop-char="${esc(c.roleKey)}">Stop reusing</button>` : ''}`}
           </div>
         </header>
+        ${c.lore ? `<div class="charcard__lore">
+          <p class="charcard__lore-label">In the game</p>
+          <p>${esc(c.lore)}</p>
+          <p class="charcard__note">${esc(c.usageNote)}</p>
+        </div>` : ''}
         <dl class="kvgrid kvgrid--tight">
           ${kv('Age', c.ageCategory)} ${kv('Personality', c.personality)}
-          ${kv('Build', c.build)} ${kv('Face', c.face)} ${kv('Eyes', c.eyes)}
-          ${kv('Eyebrows', c.brows)} ${kv('Hair', c.hair)} ${kv('Outfit', c.outfit)}
+          ${kv('Avatar build', c.build)} ${kv('Head', c.head)}
+          ${kv('Printed face', c.faceDecal)} ${kv('Headwear', c.hat)}
+          ${kv('Hair accessory', c.hair)} ${kv('Outfit', c.outfit)}
           ${kv('Footwear', c.shoes)} ${kv('Accessories', c.accessories)}
           ${kv('Signature colours', c.colors)} ${kv('Distinguishing feature', c.marks)}
           ${kv('Material', c.material)} ${kv('Expressions', c.expressions)}
@@ -495,6 +544,7 @@ function planFor(rec) {
     locks: record.locks,
     status: record.status,
     sceneMarks: record.sceneMarks,
+    gameCharacters: record.gameCharacters,
     savedCharacters: state.characters,
   });
 }
@@ -687,6 +737,24 @@ function wire() {
       state = { ...state, characters: chars }; persist(); render(); return;
     }
 
+    // Casting a game character is stored per day, so one day can feature
+    // Dr. Harlow without every other day inheriting him.
+    if (t.dataset.addGame && openDay) {
+      const current = dayRecord(state, openDay).gameCharacters ?? [];
+      if (!current.includes(t.dataset.addGame)) {
+        state = setDay(state, openDay, { gameCharacters: [...current, t.dataset.addGame] });
+        persist();
+      }
+      render(); return;
+    }
+    if (t.dataset.dropGame && openDay) {
+      const current = dayRecord(state, openDay).gameCharacters ?? [];
+      state = setDay(state, openDay, {
+        gameCharacters: current.filter((id) => id !== t.dataset.dropGame),
+      });
+      persist(); render(); return;
+    }
+
     if (t.dataset.copy) { await handleCopy(t); return; }
     if (t.dataset.export) { handleExport(t.dataset.export); }
   });
@@ -766,7 +834,8 @@ async function handleCopy(button) {
   if (i < 0) return;
   const plan = planFor(week[i]);
   const key = button.dataset.copy;
-  const opts = { platform: state.prefs.imagePlatform, style: state.prefs.visualStyle, aspect: state.prefs.aspect };
+  const opts = { platform: state.prefs.imagePlatform, rig: state.prefs.avatarRig === 'auto'
+    ? undefined : state.prefs.avatarRig, render: state.prefs.renderStyle, aspect: state.prefs.aspect };
 
   if (key === 'day') return copyText(dayMarkdown(plan), button);
   if (key === 'cast') return copyText(castMarkdown(plan), button);

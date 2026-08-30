@@ -250,7 +250,10 @@ function positionFor(beat, cast) {
 }
 
 function expressionFor(beat, who) {
-  const base = who?.expressions ?? 'Readable, exaggerated slightly for small screens';
+  // The pool phrases end without a stop; the prompt runs another sentence
+  // straight after this one, so add one here rather than in every pool entry.
+  const raw = who?.expressions ?? 'Readable, exaggerated slightly for small screens';
+  const base = /[.!?]$/.test(raw) ? raw : `${raw}.`;
   switch (beat) {
     case 'hook': return `Alert and unguarded. ${base}`;
     case 'setup': return `Settled, focused on the task. ${base}`;

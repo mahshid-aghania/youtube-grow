@@ -23,7 +23,8 @@ export const DEFAULT_PREFS = {
   durationMode: 'auto',
   durationSec: 22,
   dialogue: true,
-  visualStyle: '',
+  avatarRig: 'auto',
+  renderStyle: 'ingame',
   imagePlatform: 'generic',
   videoPlatform: 'generic',
   aspect: '9:16',
@@ -104,6 +105,8 @@ export function dayRecord(state, iso) {
     status: d.status ?? 'idea',
     variant: Number.isInteger(d.variant) ? d.variant : 0,
     sceneMarks: d.sceneMarks ?? {},
+    // Ids from the game-character library cast into this day, if any.
+    gameCharacters: Array.isArray(d.gameCharacters) ? d.gameCharacters : [],
   };
 }
 

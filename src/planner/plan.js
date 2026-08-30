@@ -12,6 +12,11 @@ import { buildTimeline, buildScenes, timelineSummary } from './story.js';
 import { imagePrompt, videoPrompt } from './prompts.js';
 import { audioPlan, publishingPackage } from './publishing.js';
 import { pillarById } from './pillars.js';
+import { gameCharacterById, toCastMember, worldsForPillar } from './games.js';
+import { identityLock } from './characters.js';
+
+/** A cast member needs its lock compiled before any prompt repeats it. */
+const withIdentityLock = (c) => ({ ...c, identityLock: identityLock(c) });
 
 export const PRODUCTION_STATUSES = [
   { id: 'idea', label: 'Idea' },
@@ -50,9 +55,25 @@ export function buildDayPlan(rec, prefs, overrides = {}) {
   // A locked cast is restored verbatim; otherwise it is rebuilt, with saved
   // characters winning over generated ones so a recurring character keeps the
   // identity the user established.
-  const cast = Array.isArray(edits.cast) && edits.cast.length
+  const generatedCast = Array.isArray(edits.cast) && edits.cast.length
     ? edits.cast
     : buildCast(seed, `${rec.date}|${seed.id}|${rec.variant}`, savedCharacters);
+
+  // Game characters cast for this day lead the list: they are the recognisable
+  // face of the video, and the first cast member is who the framing and the
+  // publishing package build around.
+  const guests = (overrides.gameCharacters ?? [])
+    .map((id) => gameCharacterById(id))
+    .filter(Boolean)
+    .map((entry) => withIdentityLock(toCastMember(entry)));
+
+  // A guest that fills a story role displaces the generated character in it, so
+  // casting Dr. Harlow gives you one head doctor rather than two.
+  const taken = new Set(guests.map((g) => g.replacesRole).filter(Boolean));
+  const cast = guests.length
+    ? [...guests, ...generatedCast.filter((c) => !taken.has(c.roleKey)
+        && !guests.some((g) => g.name === c.name))]
+    : generatedCast;
 
   const timeline = buildTimeline(seconds, sceneCount);
   const scenes = buildScenes(seed, cast, timeline, {
@@ -60,9 +81,20 @@ export function buildDayPlan(rec, prefs, overrides = {}) {
     language: prefs.language,
   });
 
+  // The scene's rig comes from the game world this pillar is set in — the world
+  // sets the visual baseline, not whoever happens to be first in the cast. A
+  // character carrying its own rig still describes it in its own block, so an
+  // animal-headed vet can share an R15 frame with a blocky kid. A pinned
+  // preference beats both.
+  const world = worldsForPillar(rec.pillarId)[0];
+  const rig = prefs.avatarRig && prefs.avatarRig !== 'auto'
+    ? prefs.avatarRig
+    : (world?.rig ?? cast[0]?.rig ?? 'r15');
+
   const promptOpts = {
     platform: prefs.imagePlatform,
-    style: prefs.visualStyle,
+    rig,
+    render: prefs.renderStyle,
     aspect: prefs.aspect,
   };
   const videoOpts = { platform: prefs.videoPlatform };
