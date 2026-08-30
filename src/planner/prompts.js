@@ -86,6 +86,46 @@ const VIDEO_NEGATIVES = [
 ];
 
 /**
+ * One character's block inside a prompt.
+ *
+ * A character with a full build sheet prints the sheet, section by section,
+ * rather than the summary fields — the sheet is the thing that was written
+ * against a reference image, and paraphrasing it is how a character drifts.
+ * Everyone else prints the summary, which is all they have.
+ */
+function characterBlock(c) {
+  const head = [
+    `${c.name} — ${c.storyRole}, ${String(c.ageCategory).toLowerCase()}.`,
+    c.fromGame
+      ? `A fan interpretation of a character from the Roblox game ${c.fromGame}. `
+        + 'Build the character from the description below rather than copying any official asset.'
+      : null,
+  ].filter(Boolean).join(' ');
+
+  if (c.spec) {
+    return [
+      head,
+      ...c.spec.map(([title, lines]) =>
+        `${title.toUpperCase()}: ${lines.map((l) => l.replace(/\.$/, '')).join('; ')}.`),
+      c.heightNote,
+      c.identityLock,
+    ].filter(Boolean).join('\n');
+  }
+
+  return [
+    head,
+    `Avatar build: ${c.build}.`,
+    `Head: ${c.head}.`,
+    `Printed face decal: ${c.faceDecal}.`,
+    `Headwear: ${c.hat}. Hair accessory: ${c.hair}.`,
+    `Wearing: ${c.outfit}. Footwear: ${c.shoes}. Accessories: ${c.accessories}.`,
+    `Signature colours: ${c.colors}. Distinguishing feature: ${c.marks}. ${c.heightNote}`,
+    `Surfacing: ${c.material}.`,
+    c.identityLock,
+  ].filter(Boolean).join(' ');
+}
+
+/**
  * One standalone image prompt for a scene.
  *
  * @param {object} scene
@@ -103,21 +143,15 @@ export function imagePrompt(scene, cast, opts = {}) {
   // it in that character's own block.
   const rig = opts.rig || inFrame[0]?.rig || 'r15';
 
-  const characterBlocks = inFrame.map((c) => [
-    `${c.name} — ${c.storyRole}, ${String(c.ageCategory).toLowerCase()}.`,
-    c.fromGame
-      ? `A fan interpretation of a character from the Roblox game ${c.fromGame}. `
-        + 'Build the character from the description below rather than copying any official asset.'
-      : null,
-    `Avatar build: ${c.build}.`,
-    `Head: ${c.head}.`,
-    `Printed face decal: ${c.faceDecal}.`,
-    `Headwear: ${c.hat}. Hair accessory: ${c.hair}.`,
-    `Wearing: ${c.outfit}. Footwear: ${c.shoes}. Accessories: ${c.accessories}.`,
-    `Signature colours: ${c.colors}. Distinguishing feature: ${c.marks}. ${c.heightNote}`,
-    `Surfacing: ${c.material}.`,
-    c.identityLock,
-  ].filter(Boolean).join(' ')).join('\n\n');
+  const characterBlocks = inFrame.map(characterBlock).join('\n\n');
+
+  // A character carrying its own negative list is far stricter than the shared
+  // one; both are printed, its own first.
+  const negatives = [
+    ...inFrame.flatMap((c) => (c.spec ? c.negatives ?? [] : [])),
+    ...IMAGE_NEGATIVES,
+  ];
+  const uniqueNegatives = [...new Set(negatives)];
 
   const body = [
     platform.preface,
@@ -148,8 +182,8 @@ export function imagePrompt(scene, cast, opts = {}) {
       + 'at small phone size.',
     '',
     platform.negativeAsParam
-      ? `--no ${IMAGE_NEGATIVES.map((n) => n.replace(/^(no|not) /, '')).join(', ')}`
-      : `NEGATIVE PROMPT: ${IMAGE_NEGATIVES.join(', ')}.`,
+      ? `--no ${uniqueNegatives.map((n) => n.replace(/^(no|not) /, '')).join(', ')}`
+      : `NEGATIVE PROMPT: ${uniqueNegatives.join(', ')}.`,
     '',
     scene.onScreenText && scene.onScreenText !== '—'
       ? `ON-SCREEN TEXT: do not render any text in this image. Add "${scene.onScreenText}" during editing, `
@@ -222,7 +256,10 @@ export function videoPrompt(scene, cast, opts = {}) {
     '',
     `ENDING FRAME: ${scene.transition}. Leave the subject positioned so the next scene can cut cleanly.`,
     '',
-    `NEGATIVE: ${VIDEO_NEGATIVES.join(', ')}.`,
+    `NEGATIVE: ${[...new Set([
+      ...inFrame.flatMap((c) => (c.spec ? c.negatives ?? [] : [])),
+      ...VIDEO_NEGATIVES,
+    ])].join(', ')}.`,
   ].filter((line) => line != null && line !== false).join('\n');
 }
 

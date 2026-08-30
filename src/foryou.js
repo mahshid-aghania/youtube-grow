@@ -14,7 +14,9 @@ import { recommendWeek, DAY_NAMES, addDays } from './planner/recommend.js';
 import { buildDayPlan, PRODUCTION_STATUSES, LOCKABLE } from './planner/plan.js';
 import { IMAGE_PLATFORM_OPTIONS, VIDEO_PLATFORM_OPTIONS } from './planner/prompts.js';
 import { RIG_OPTIONS, RENDER_OPTIONS } from './planner/robloxstyle.js';
-import { GAME_CHARACTERS, gameCharacterById, gameCharactersForPillar } from './planner/games.js';
+import {
+  GAME_CHARACTERS, gameCharacterById, gameCharactersForPillar, referenceSheetPrompt,
+} from './planner/games.js';
 import {
   loadState, saveState, clearState, dayRecord, setDay, variantMap, DEFAULT_PREFS, STORAGE_KEY,
 } from './planner/storage.js';
@@ -341,6 +343,24 @@ function tabCast(plan) {
           <p class="charcard__lore-label">In the game</p>
           <p>${esc(c.lore)}</p>
           <p class="charcard__note">${esc(c.usageNote)}</p>
+        </div>` : ''}
+        ${c.spec ? `<details class="buildsheet">
+          <summary>Build sheet — ${c.spec.length} sections, printed in full in every prompt</summary>
+          <div class="buildsheet__body">
+            ${c.spec.map(([title, lines]) => `
+              <div class="buildsheet__section">
+                <h5>${esc(title)}</h5>
+                <ul>${lines.map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
+              </div>`).join('')}
+          </div>
+        </details>
+        <div class="lockbox">
+          <p class="lockbox__label">Character reference sheet — generate this first</p>
+          <p class="lockbox__hint">One full-body, front-on render on a plain background. Generate
+            it once, then attach the resulting image alongside every scene prompt — supplying a
+            reference image is what actually holds a character steady between separately
+            generated frames.</p>
+          ${copyBtn('Copy reference sheet prompt', `refsheet:${c.id}`)}
         </div>` : ''}
         <dl class="kvgrid kvgrid--tight">
           ${kv('Age', c.ageCategory)} ${kv('Personality', c.personality)}
@@ -839,6 +859,9 @@ async function handleCopy(button) {
 
   if (key === 'day') return copyText(dayMarkdown(plan), button);
   if (key === 'cast') return copyText(castMarkdown(plan), button);
+  if (key.startsWith('refsheet:')) {
+    return copyText(referenceSheetPrompt(gameCharacterById(key.slice(9))), button);
+  }
   if (key === 'all-images') return copyText(imagePromptsText(plan, opts), button);
   if (key === 'all-videos') return copyText(videoPromptsText(plan, { platform: state.prefs.videoPlatform }), button);
 

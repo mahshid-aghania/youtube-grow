@@ -15,7 +15,7 @@ import { buildTimeline, buildScenes } from '../src/planner/story.js';
 import { imagePrompt, videoPrompt } from '../src/planner/prompts.js';
 import { RIG_OPTIONS, RENDER_OPTIONS, styleBlock } from '../src/planner/robloxstyle.js';
 import {
-  GAME_CHARACTERS, GAME_WORLDS, gameCharacterById, worldById,
+  GAME_CHARACTERS, GAME_WORLDS, gameCharacterById, referenceSheetPrompt, worldById,
 } from '../src/planner/games.js';
 import { buildDayPlan, planRuntime, LOCKABLE } from '../src/planner/plan.js';
 import {
@@ -753,13 +753,75 @@ test('casting a game character replaces its role rather than duplicating it', ()
 test('a cast game character is prompted as a fan interpretation, with a full identity lock', () => {
   const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
   const harlow = plan.cast[0];
-  assert.match(harlow.identityLock, /IDENTITY LOCK — Dr\. Harlow/);
-  assert.ok(harlow.identityLock.includes(harlow.head), 'the lock repeats the moulded head');
-  assert.ok(harlow.identityLock.includes(harlow.faceDecal), 'the lock repeats the printed face');
+
+  // A supplied lock is used verbatim rather than rebuilt from summary fields.
+  assert.equal(harlow.identityLock, gameCharacterById('dr-harlow').identityLock);
+  assert.match(harlow.identityLock, /PERMANENT IDENTITY LOCK — Dr\. Harlow/);
+  for (const element of ['deer head shape', 'orange facial markings', 'grey antler silhouette',
+    'circular forehead reflector', 'electric-blue surgical mask', 'red tie', 'stethoscope',
+    'royal-blue trousers', 'golden-orange hands', 'TOP SECRET briefcase held in his right hand']) {
+    assert.ok(harlow.identityLock.includes(element), `the lock names the ${element}`);
+  }
+  assert.match(harlow.identityLock, /Do not replace, age, humanize, beautify, restyle, recolor or redesign/);
 
   const prompt = plan.scenes[0].imagePrompt;
   assert.match(prompt, /A fan interpretation of a character from the Roblox game Animal Hospital/);
   assert.match(prompt, /rather than copying any official asset/);
+});
+
+test('a character with a build sheet prints the whole sheet in every scene prompt', () => {
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const sheet = gameCharacterById('dr-harlow').spec;
+  assert.ok(sheet.length >= 8, 'the sheet is sectioned');
+
+  for (const scene of plan.scenes) {
+    for (const [title, lines] of sheet) {
+      assert.ok(scene.imagePrompt.includes(`${title.toUpperCase()}:`),
+        `scene ${scene.n} prints the "${title}" section`);
+      for (const line of lines) {
+        assert.ok(scene.imagePrompt.includes(line.replace(/\.$/, '')),
+          `scene ${scene.n} carries "${line.slice(0, 40)}…"`);
+      }
+    }
+    assert.ok(scene.imagePrompt.includes(plan.cast[0].identityLock),
+      `scene ${scene.n} repeats the permanent lock verbatim`);
+  }
+});
+
+test('a character’s own negatives ride along in every prompt it appears in', () => {
+  const plain = buildDayPlan(week[0], prefs);
+  const withHarlow = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const specific = ['no visible mouth', 'no missing antlers', 'no suitcase in the wrong hand',
+    'no ordinary brown suitcase', 'no altered briefcase label', 'no miner’s lamp'];
+
+  for (const needle of specific) {
+    assert.ok(withHarlow.scenes[0].imagePrompt.includes(needle), `image prompt carries "${needle}"`);
+    assert.ok(withHarlow.scenes[0].videoPrompt.includes(needle), `video prompt carries "${needle}"`);
+    assert.ok(!plain.scenes[0].imagePrompt.includes(needle),
+      `"${needle}" only appears when he is in frame`);
+  }
+  // The shared negatives are still there underneath, and nothing is listed twice.
+  const list = withHarlow.scenes[0].imagePrompt.match(/NEGATIVE PROMPT: (.+)\.$/m)[1].split(', ');
+  assert.ok(list.includes('not Pixar style'));
+  assert.equal(new Set(list).size, list.length, 'no negative is repeated');
+});
+
+test('the reference sheet is a full-body front-on render, not a scene', () => {
+  const sheet = referenceSheetPrompt(gameCharacterById('dr-harlow'));
+  assert.match(sheet, /character reference sheet for Dr\. Harlow/);
+  assert.match(sheet, /inside the video game Roblox/);
+  assert.match(sheet, /HEAD AND FACE\n/);
+  assert.match(sheet, /COLOUR LOCK\n/);
+  assert.match(sheet, /Full-body character visible from antler tips to shoes/);
+  assert.match(sheet, /Clean dark navy background/);
+  assert.match(sheet, /PERMANENT IDENTITY LOCK/);
+  // Framing rules that only make sense for a sheet, and must not leak into scenes.
+  for (const needle of ['no cropped feet', 'no side view', 'no action pose', 'no environment clutter']) {
+    assert.ok(sheet.includes(needle), `the sheet rules out "${needle}"`);
+  }
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  assert.ok(!plan.scenes[0].imagePrompt.includes('no action pose'),
+    'a scene prompt is not constrained to a neutral pose');
 });
 
 test('a game character carries every field the character bible renders', () => {
@@ -803,4 +865,25 @@ test('exports carry the Roblox character fields, never an undefined', () => {
   assert.match(castMarkdown(plan), /Dr\. Harlow/);
   assert.ok(!weekJson([plan], WEEK, prefs).includes('"face"'),
     'the old human-face field is gone from the JSON too');
+});
+
+test('displacing a character removes them from everyone else’s height notes', () => {
+  const plain = buildDayPlan(week[0], prefs);
+  const displaced = plain.cast.find((c) => c.roleKey === 'vet').name;
+
+  const withGuest = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  assert.ok(!withGuest.cast.some((c) => c.name === displaced),
+    `${displaced} is no longer in the cast`);
+
+  for (const c of withGuest.cast) {
+    assert.ok(c.heightNote, `${c.name} has a relative height`);
+    assert.ok(!c.heightNote.includes(displaced),
+      `${c.name} is not measured against ${displaced}, who is not in the video`);
+    const others = withGuest.cast.filter((o) => o.name !== c.name).map((o) => o.name);
+    assert.ok(others.some((n) => c.heightNote.includes(n)),
+      `${c.name} is measured against someone who is actually in frame`);
+  }
+
+  // The guest is the senior vet, so the cast reads tallest-last as before.
+  assert.match(withGuest.cast.find((c) => c.name === 'Dr. Harlow').heightNote, /Tallest of the cast/);
 });

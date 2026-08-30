@@ -1133,3 +1133,40 @@ textarea.input { resize: vertical; font-family: inherit; }
 .charcard__note { margin-top: .5rem; font-size: .74rem; color: var(--muted); }
 
 .pill--violet { color: var(--violet); border-color: rgba(139, 122, 255, .35); background: var(--violet-wash); }
+
+/* The supplied build sheet, collapsed by default — it is long by design. */
+.buildsheet {
+  margin: .1rem 0 .8rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.buildsheet > summary {
+  padding: .6rem .85rem;
+  font-size: .8rem; font-weight: 560; color: var(--text-2);
+  cursor: pointer; list-style: none;
+  min-height: 44px; display: flex; align-items: center;
+}
+.buildsheet > summary::-webkit-details-marker { display: none; }
+.buildsheet > summary:hover { color: var(--text); }
+.buildsheet[open] > summary { border-bottom: 1px solid var(--border); }
+.buildsheet__body {
+  display: grid; gap: .9rem; padding: .85rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.buildsheet__section h5 {
+  font-size: .68rem; font-weight: 650; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--violet); margin-bottom: .3rem;
+}
+.buildsheet__section ul { list-style: none; display: grid; gap: .2rem; }
+.buildsheet__section li {
+  font-size: .76rem; line-height: 1.45; color: var(--text-2);
+  padding-left: .7rem; position: relative;
+}
+.buildsheet__section li::before {
+  content: "·"; position: absolute; left: 0; color: var(--muted);
+}
+.lockbox__hint {
+  margin: .3rem 0 .6rem; max-width: 68ch;
+  font-size: .76rem; line-height: 1.5; color: var(--muted);
+}

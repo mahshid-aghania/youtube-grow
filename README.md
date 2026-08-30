@@ -256,6 +256,32 @@ prompt built from one asks for **a fan interpretation** rather than a copy of th
 official asset. The generated cast stays entirely original; a game character is
 opted into, per day.
 
+#### Build sheets
+
+A library entry can carry a full **build sheet** — a sectioned description
+written against a reference image (head and face, antlers, mask, proportions,
+outfit, stethoscope, hands and briefcase, materials, colour lock). Where one
+exists it is reproduced verbatim, not paraphrased: the point of a character sheet
+is that it does not drift, and a summary of a lock is not a lock. Every scene
+prompt that has the character in frame prints the whole sheet, followed by that
+character's own **permanent identity lock**, which is used in place of the
+generated one.
+
+A sheet also carries its own negative list, which is far stricter than the shared
+one — *no visible mouth*, *no missing antlers*, *no suitcase in the wrong hand*,
+*no ordinary brown suitcase* — and those ride along in both the image and video
+prompts, but only in scenes the character actually appears in.
+
+#### The reference sheet
+
+Every character with a build sheet gets a **Copy reference sheet prompt** button.
+That produces a one-off full-body, front-on render on a plain background —
+different framing rules from a scene, so it is built separately rather than bent
+out of a scene prompt. Generate it once and attach the resulting image alongside
+every scene prompt: supplying a reference image is what actually holds a
+character steady between separately generated frames, more reliably than text
+alone.
+
 ### Character consistency
 
 Image and video generators have no memory between calls, so a prompt that says
@@ -346,7 +372,7 @@ every runtime and scene count, regeneration and lock behaviour, storage
 migration, export completeness, and the content rules above — and the routing
 layer: that every route resolves to the right URL from every page, that each
 page marks only itself current, and that new-tab links carry the right `rel` and
-accessible name. 133 tests, no network, no API key needed.
+accessible name. 137 tests, no network, no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 

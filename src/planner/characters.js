@@ -263,16 +263,14 @@ export function buildCharacter(roleKey, seedStr) {
 const HEIGHT_ORDER = ['patient', 'kid', 'intern', 'noob', 'helper', 'pro', 'rival', 'parent', 'vet'];
 
 /**
- * Build the full cast a seed calls for, with relative heights resolved.
+ * Write each character's height relative to the others, in place.
  *
- * `saved` lets a user's stored character take over its role, so a recurring
- * character keeps its established identity across every plan that uses it.
+ * Exported because the cast can change after it is built — casting a game
+ * character displaces the one it replaces, and a note reading "shorter than
+ * Dr. Wren" is worse than useless once Dr. Wren is not in the video. Whoever
+ * assembles the final cast re-runs this over it.
  */
-export function buildCast(seed, seedStr, saved = {}) {
-  const cast = seed.roles.map((roleKey) => saved[roleKey]
-    ? { ...saved[roleKey], roleKey, reused: true }
-    : buildCharacter(roleKey, seedStr));
-
+export function resolveHeights(cast) {
   const ordered = [...cast].sort(
     (a, b) => HEIGHT_ORDER.indexOf(a.roleKey) - HEIGHT_ORDER.indexOf(b.roleKey));
 
@@ -284,4 +282,18 @@ export function buildCast(seed, seedStr, saved = {}) {
   });
 
   return cast;
+}
+
+/**
+ * Build the full cast a seed calls for, with relative heights resolved.
+ *
+ * `saved` lets a user's stored character take over its role, so a recurring
+ * character keeps its established identity across every plan that uses it.
+ */
+export function buildCast(seed, seedStr, saved = {}) {
+  const cast = seed.roles.map((roleKey) => saved[roleKey]
+    ? { ...saved[roleKey], roleKey, reused: true }
+    : buildCharacter(roleKey, seedStr));
+
+  return resolveHeights(cast);
 }

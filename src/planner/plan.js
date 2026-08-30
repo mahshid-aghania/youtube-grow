@@ -13,10 +13,13 @@ import { imagePrompt, videoPrompt } from './prompts.js';
 import { audioPlan, publishingPackage } from './publishing.js';
 import { pillarById } from './pillars.js';
 import { gameCharacterById, toCastMember, worldsForPillar } from './games.js';
-import { identityLock } from './characters.js';
+import { identityLock, resolveHeights } from './characters.js';
 
-/** A cast member needs its lock compiled before any prompt repeats it. */
-const withIdentityLock = (c) => ({ ...c, identityLock: identityLock(c) });
+/**
+ * A cast member needs its lock compiled before any prompt repeats it — unless
+ * it already carries one written against a reference image, which wins.
+ */
+const withIdentityLock = (c) => ({ ...c, identityLock: c.identityLock || identityLock(c) });
 
 export const PRODUCTION_STATUSES = [
   { id: 'idea', label: 'Idea' },
@@ -71,8 +74,11 @@ export function buildDayPlan(rec, prefs, overrides = {}) {
   // casting Dr. Harlow gives you one head doctor rather than two.
   const taken = new Set(guests.map((g) => g.replacesRole).filter(Boolean));
   const cast = guests.length
-    ? [...guests, ...generatedCast.filter((c) => !taken.has(c.roleKey)
-        && !guests.some((g) => g.name === c.name))]
+    // Heights are re-resolved over the final list: the notes name other cast
+    // members, and displacing one leaves the rest measured against someone who
+    // is no longer in the video.
+    ? resolveHeights([...guests, ...generatedCast.filter((c) => !taken.has(c.roleKey)
+        && !guests.some((g) => g.name === c.name))])
     : generatedCast;
 
   const timeline = buildTimeline(seconds, sceneCount);
