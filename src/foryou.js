@@ -342,6 +342,12 @@ function tabCast(plan) {
         ${c.lore ? `<div class="charcard__lore">
           <p class="charcard__lore-label">In the game</p>
           <p>${esc(c.lore)}</p>
+          ${c.beats?.length ? `
+            <p class="charcard__lore-label" style="margin-top:.6rem">Moments he is known for</p>
+            <ul class="charcard__beats">
+              ${c.beats.map((b) => `<li${c.storyBeat && b.startsWith('delivers the performance')
+                ? ' data-current="true"' : ''}>${esc(b)}</li>`).join('')}
+            </ul>` : ''}
           <p class="charcard__note">${esc(c.usageNote)}</p>
         </div>` : ''}
         ${c.spec ? `<details class="buildsheet">

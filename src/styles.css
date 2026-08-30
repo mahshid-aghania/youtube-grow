@@ -1170,3 +1170,15 @@ textarea.input { resize: vertical; font-family: inherit; }
   margin: .3rem 0 .6rem; max-width: 68ch;
   font-size: .76rem; line-height: 1.5; color: var(--muted);
 }
+
+/* The moments a game character is known for. The one this plan uses is marked. */
+.charcard__beats { list-style: none; display: grid; gap: .2rem; margin-top: .2rem; }
+.charcard__beats li {
+  position: relative; padding-left: .8rem;
+  font-size: .78rem; color: var(--text-2);
+}
+.charcard__beats li::before { content: "·"; position: absolute; left: 0; color: var(--muted); }
+.charcard__beats li[data-current] { color: var(--text); font-weight: 550; }
+.charcard__beats li[data-current]::after {
+  content: " — in this plan"; color: var(--violet); font-weight: 600; font-size: .72rem;
+}
