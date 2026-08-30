@@ -144,6 +144,24 @@ export const GAME_CHARACTERS = [
       'unlocks a new area and walks the player into it',
       'arrives mid-emergency with a bonus',
     ],
+    /**
+     * The moment he is known for, folded into the beat it belongs to.
+     *
+     * In the game he arrives at the end of a shift and grades it, so his beat
+     * is the payoff — casting him should give the video the scene the audience
+     * already associates with him, not a generic close with his face on it.
+     */
+    storyBeat: {
+      beat: 'payoff',
+      // Used when the beat does not already have him in it.
+      action: '{name} arrives at the end of the shift, looks over what happened, '
+        + 'and hands across the performance report.',
+      // Used when it does — several seeds already end on the senior vet
+      // arriving, and appending the full sentence would have him arrive twice.
+      continuation: 'He looks over what happened and hands across the performance report.',
+      line: 'Shift report. You did better than you think.',
+      caption: 'SHIFT REPORT',
+    },
     rig: 'animal',
     ageCategory: 'Adult',
     personality: 'Calm, exacting, encouraging without softening the grade',
@@ -427,6 +445,8 @@ export function toCastMember(entry) {
     // The full build sheet, printed in every prompt he appears in.
     spec: entry.spec ?? null,
     reference: entry.reference ?? null,
+    beats: entry.beats ?? [],
+    storyBeat: entry.storyBeat ?? null,
     // A supplied lock wins over a generated one: it was written against the
     // reference image, and a summary of a lock is not a lock.
     identityLock: entry.identityLock ?? '',

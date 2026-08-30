@@ -79,19 +79,39 @@ function musicBrief(seed) {
  * Title patterns are structural — question, contrast, reveal — rather than
  * copies of any observed title.
  */
+/** "a" or "an", so a generated caption does not read "a animal hospital series". */
+const article = (word) => (/^[aeiou]/i.test(String(word).trim()) ? 'an' : 'a');
+
 export function publishingPackage(rec, seed, cast, opts = {}) {
   const rand = makeRandom(hashString(`${rec.date}|${seed.id}|pub|${rec.variant}`));
   const lead = cast[0]?.name ?? 'the lead';
+  // A recognisable character is the strongest thing a title has, so it leads.
+  const guest = cast.find((c) => c.fromGame);
 
   const titles = [
     { style: 'Question', text: titleCase(`${firstClause(seed.conflict)}?`) },
-    { style: 'Contrast', text: titleCase(`${firstClause(seed.premise)} — until ${firstClause(seed.turn).toLowerCase()}`) },
-    { style: 'Character', text: titleCase(`${lead} and ${firstClause(seed.conflict).toLowerCase()}`) },
+    { style: 'Contrast', text: titleCase(contrastTitle(seed, 80)) },
+    { style: 'Character', text: titleCase(`${lead} — ${firstClause(seed.conflict)}`) },
+    // A title carrying a recognisable name has less room for the premise, so it
+    // takes the shortest clause that still fits rather than being trimmed.
+    ...(guest ? [{
+      style: 'Recognisable character',
+      text: titleCase(`${guest.name} — ${
+        fittingClause(guest.name, [seed.turn, seed.conflict, seed.premise], 80)}`),
+    }] : []),
   ].map((t) => ({ ...t, text: trimTo(t.text, 80) }));
 
-  const recommended = titles[Math.floor(rand() * titles.length) % titles.length];
+  // A title naming a character the audience already knows outperforms one that
+  // does not, so it is the recommendation whenever there is one.
+  const recommended = guest
+    ? titles[titles.length - 1]
+    : titles[Math.floor(rand() * titles.length) % titles.length];
 
   const base = ['roblox', 'robloxshorts', 'shorts'];
+  const guestTags = guest
+    ? [guest.fromGame.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      guest.name.toLowerCase().replace(/[^a-z0-9]/g, '')]
+    : [];
   const pillarTags = {
     'animal-hospital': ['animalhospital', 'robloxanimation', 'robloxroleplay'],
     'tiny-rescue': ['rescuestory', 'robloxanimation', 'wholesome'],
@@ -114,9 +134,11 @@ export function publishingPackage(rec, seed, cast, opts = {}) {
       '',
       `${firstClause(seed.conflict)} — and it does not go the way anyone expects.`,
       '',
-      `Part of a ${rec.pillarLabel.toLowerCase()} series.`,
+      guest
+        ? `${guest.name} from ${guest.fromGame}. Part of an ${rec.pillarLabel.toLowerCase()} series.`
+        : `Part of ${article(rec.pillarLabel)} ${rec.pillarLabel.toLowerCase()} series.`,
     ].join('\n'),
-    hashtags: [...new Set([...base, ...pillarTags])].slice(0, 8).map((h) => `#${h}`),
+    hashtags: [...new Set([...base, ...guestTags, ...pillarTags])].slice(0, 8).map((h) => `#${h}`),
     thumbnailFrame: `Pull the thumbnail from the turn at roughly ${
       (rec.duration.seconds * 0.6).toFixed(0)}s — the frame where ${lead}'s expression changes.`,
     thumbnailText: thumbnailText(seed),
@@ -142,7 +164,40 @@ export function publishingPackage(rec, seed, cast, opts = {}) {
 }
 
 const firstClause = (text) => String(text ?? '').split(/[;.]/)[0].trim();
-const trimTo = (text, n) => (text.length <= n ? text : `${text.slice(0, n - 1).trimEnd()}…`);
+/**
+ * Trim to a length, at a word boundary.
+ *
+ * A title cut mid-word is not a title anyone can publish, so the cut lands on
+ * the last space rather than the last character.
+ */
+const trimTo = (text, n) => {
+  if (text.length <= n) return text;
+  const cut = text.slice(0, n - 1);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > n * 0.6 ? cut.slice(0, space) : cut).trimEnd()}…`;
+};
+
+/**
+ * "Premise — until turn", or just the turn when the pair will not fit.
+ *
+ * Trimming the pair leaves a dangling "— until…", which is worse than a shorter
+ * title: the connective promises a second half that is not there.
+ */
+function contrastTitle(seed, limit) {
+  const pair = `${firstClause(seed.premise)} — until ${firstClause(seed.turn).toLowerCase()}`;
+  if (pair.length <= limit) return pair;
+  const short = `${firstClause(seed.conflict)} — until ${firstClause(seed.turn).toLowerCase()}`;
+  return short.length <= limit ? short : firstClause(seed.turn);
+}
+
+/** The first of these clauses that fits the limit once the name is on it. */
+const fittingClause = (name, candidates, limit) => {
+  for (const c of candidates) {
+    const clause = firstClause(c);
+    if (clause && `${name} — ${clause}`.length <= limit) return clause;
+  }
+  return firstClause(candidates[candidates.length - 1]);
+};
 const titleCase = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
 function thumbnailText(seed) {

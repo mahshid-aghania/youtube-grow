@@ -272,6 +272,32 @@ one — *no visible mouth*, *no missing antlers*, *no suitcase in the wrong hand
 *no ordinary brown suitcase* — and those ride along in both the image and video
 prompts, but only in scenes the character actually appears in.
 
+#### What casting one changes
+
+A game character is not a costume on the same plan — the whole package follows:
+
+| | With no guest | With Dr. Harlow cast |
+| --- | --- | --- |
+| Cast | generated vet, intern, patient | he leads and takes the vet's slot |
+| Storyboard | "the vet arrives to find it handled" | he arrives, looks over the shift and hands across the performance report |
+| Dialogue | the seed's line | "Shift report. You did better than you think." |
+| On-screen text | the seed's caption | `SHIFT REPORT` |
+| Image prompts | summary description | the full nine-section build sheet |
+| Video prompts | identity lock only | the same build sheet, so the clip matches the still |
+| Titles | premise and conflict | a title led by his name, recommended over the rest |
+| Caption | "Part of an animal hospital series" | "Dr. Harlow from Animal Hospital. Part of an…" |
+| Hashtags | pillar tags | plus `#drharlow` and `#animalhospital` |
+
+The story change comes from the character's own `storyBeat` — the moment they are
+known for, folded into the beat it belongs to. Dr. Harlow's is the end of a
+shift, so it lands on the payoff; a seed that already ends on the senior vet
+arriving gets a shorter form so he does not arrive twice.
+
+Seeds are written before anyone is cast, so they say "the vet arrives". Each role
+now lists the phrases a seed uses for it, and the scene builder swaps them for
+the name of whoever is playing that role — so the storyboard reads "Dr. Harlow
+arrives", never "the vet".
+
 #### The reference sheet
 
 Every character with a build sheet gets a **Copy reference sheet prompt** button.
@@ -372,7 +398,7 @@ every runtime and scene count, regeneration and lock behaviour, storage
 migration, export completeness, and the content rules above — and the routing
 layer: that every route resolves to the right URL from every page, that each
 page marks only itself current, and that new-tab links carry the right `rel` and
-accessible name. 137 tests, no network, no API key needed.
+accessible name. 142 tests, no network, no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 

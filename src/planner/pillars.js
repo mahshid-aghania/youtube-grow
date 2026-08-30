@@ -11,16 +11,51 @@
  */
 
 /** Roles the story templates reference; the character generator fills them in. */
+/**
+ * `refers` lists the generic phrases a seed uses for this role.
+ *
+ * Seeds are written before anyone is cast, so they say "the vet arrives" —
+ * which reads as a placeholder once there is an actual character standing
+ * there, and reads worse when that character is Dr. Harlow. The scene builder
+ * swaps these for the cast member's name.
+ */
 export const ROLES = {
-  vet: { role: 'Lead veterinarian', archetype: 'calm expert' },
-  intern: { role: 'Nervous intern', archetype: 'eager rookie' },
-  patient: { role: 'Tiny animal patient', archetype: 'vulnerable innocent' },
-  rival: { role: 'Overconfident rival', archetype: 'showy antagonist' },
-  parent: { role: 'Exasperated parent', archetype: 'weary authority' },
-  kid: { role: 'Chaotic younger sibling', archetype: 'agent of chaos' },
-  noob: { role: 'Beginner player', archetype: 'earnest underdog' },
-  pro: { role: 'Veteran player', archetype: 'unbothered master' },
-  helper: { role: 'Quiet helper', archetype: 'unsung support' },
+  vet: {
+    role: 'Lead veterinarian', archetype: 'calm expert',
+    refers: ['the lead veterinarian', 'the vet', 'the doctor'],
+  },
+  intern: {
+    role: 'Nervous intern', archetype: 'eager rookie',
+    refers: ['the night-shift intern', 'the intern'],
+  },
+  patient: {
+    role: 'Tiny animal patient', archetype: 'vulnerable innocent',
+    refers: ['the missing one', 'the patient', 'a tiny creature', 'the frightened animal'],
+  },
+  rival: {
+    role: 'Overconfident rival', archetype: 'showy antagonist',
+    refers: ['the copycat', 'the prankster', 'the expensive build', 'the rival'],
+  },
+  parent: {
+    role: 'Exasperated parent', archetype: 'weary authority',
+    refers: ['the parent'],
+  },
+  kid: {
+    role: 'Chaotic younger sibling', archetype: 'agent of chaos',
+    refers: ['the youngest character', 'the child', 'the kid'],
+  },
+  noob: {
+    role: 'Beginner player', archetype: 'earnest underdog',
+    refers: ['the modest builder', 'the modest one', 'the beginner', 'the former seeker'],
+  },
+  pro: {
+    role: 'Veteran player', archetype: 'unbothered master',
+    refers: ['the expert', 'the seeker'],
+  },
+  helper: {
+    role: 'Quiet helper', archetype: 'unsung support',
+    refers: ['the rescuer', 'the hider', 'the helper', 'the narrator'],
+  },
 };
 
 /**

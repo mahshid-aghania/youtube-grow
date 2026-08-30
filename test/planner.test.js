@@ -887,3 +887,75 @@ test('displacing a character removes them from everyone else’s height notes', 
   // The guest is the senior vet, so the cast reads tallest-last as before.
   assert.match(withGuest.cast.find((c) => c.name === 'Dr. Harlow').heightNote, /Tallest of the cast/);
 });
+
+/* ---------- a cast guest reaches the whole plan ---------- */
+
+test('casting a game character changes the story, not just the pictures', () => {
+  const plain = buildDayPlan(week[0], prefs);
+  const guested = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const beat = gameCharacterById('dr-harlow').storyBeat;
+
+  const target = guested.scenes.filter((s) => s.beat === beat.beat).pop();
+  assert.ok(target, 'the beat he owns exists in the storyboard');
+  assert.ok(target.action.includes('performance report'),
+    'his beat is written into the action');
+  assert.equal(target.dialogue, beat.line, 'he speaks his own line');
+  assert.equal(target.onScreenText, beat.caption, 'and carries his own caption');
+
+  const plainTarget = plain.scenes.filter((s) => s.beat === beat.beat).pop();
+  assert.ok(!plainTarget.action.includes('performance report'),
+    'none of that happens when he is not cast');
+});
+
+test('a seed that already has him arriving does not have him arrive twice', () => {
+  const guested = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const payoff = guested.scenes[guested.scenes.length - 1];
+  const arrivals = (payoff.action.match(/arrives/g) ?? []).length;
+  assert.ok(arrivals <= 1, `the payoff has him arrive once, not ${arrivals} times`);
+  assert.ok(payoff.action.includes('performance report'), 'and still delivers his beat');
+});
+
+test('the story names the cast instead of saying "the vet"', () => {
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const prose = plan.scenes.map((s) => s.action).join(' ');
+  for (const generic of ['the vet ', 'The vet ', 'the intern ', 'The intern ']) {
+    assert.ok(!prose.includes(generic), `the storyboard does not say "${generic.trim()}"`);
+  }
+  assert.ok(plan.scenes.some((s) => s.action.includes('Dr. Harlow')),
+    'it names him instead');
+});
+
+test('publishing leads with the recognisable character and stays publishable', () => {
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  const pub = plan.publishing;
+
+  assert.ok(pub.recommendedTitle.startsWith('Dr. Harlow'), 'he leads the recommended title');
+  assert.ok(pub.recommendedTitle.length <= 80, 'and it fits');
+  assert.ok(!pub.recommendedTitle.includes('…'), 'a recommended title is never truncated');
+  assert.ok(pub.hashtags.includes('#drharlow') && pub.hashtags.includes('#animalhospital'));
+  assert.match(pub.longCaption, /Dr\. Harlow from Animal Hospital/);
+
+  // Across the whole week, guest or not, a title is chosen to fit rather than
+  // trimmed — a truncated title is not one anyone can publish, and a trimmed
+  // "— until…" promises a second half that is not there.
+  for (const guests of [[], ['dr-harlow']]) {
+    for (const rec of week) {
+      for (const t of buildDayPlan(rec, prefs, { gameCharacters: guests }).publishing.titles) {
+        assert.ok(t.text.length <= 80, `${rec.date} ${t.style} fits: ${t.text}`);
+        assert.ok(!t.text.includes('…'), `${rec.date} ${t.style} is not truncated: ${t.text}`);
+      }
+    }
+  }
+  // The article bug: "Part of a animal hospital series".
+  assert.ok(!buildDayPlan(week[0], prefs).publishing.longCaption.includes('a animal'));
+});
+
+test('the video prompt carries the same build sheet the image prompt does', () => {
+  const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
+  for (const s of plan.scenes) {
+    for (const [title] of gameCharacterById('dr-harlow').spec) {
+      assert.ok(s.videoPrompt.includes(`${title.toUpperCase()}:`),
+        `scene ${s.n}'s video prompt carries "${title}"`);
+    }
+  }
+});

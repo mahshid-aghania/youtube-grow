@@ -226,8 +226,11 @@ export function videoPrompt(scene, cast, opts = {}) {
     `STARTING FRAME: the supplied image — ${scene.framing.toLowerCase()}, ${scene.angle.toLowerCase()}, `
       + `${scene.position}. Treat it as frame one and preserve its composition.`,
     '',
+    // The same build sheet the still was generated from. Handing the animator a
+    // one-paragraph summary of a character it is supposed to hold frame-for-frame
+    // is how a character drifts between the image and the clip.
     'IDENTITY — must hold for every frame:',
-    inFrame.map((c) => c.identityLock).join('\n'),
+    inFrame.map(characterBlock).join('\n\n'),
     '',
     'MOTION SCHEDULE:',
     `  0.0–${p1}s — ${scene.expression.split('.')[0]}. Subtle head settle, one natural blink.`,

@@ -1,3 +1,5 @@
+import { ROLES } from './pillars.js';
+
 /**
  * Story structure and scene breakdown.
  *
@@ -142,6 +144,7 @@ const TRANSITION = {
  */
 export function buildScenes(seed, cast, timeline, opts = {}) {
   const useDialogue = opts.dialogue !== false;
+  const namer = nameRoles(cast);
   const lead = cast[0];
   const second = cast[1] ?? cast[0];
   const third = cast[2] ?? second;
@@ -154,12 +157,32 @@ export function buildScenes(seed, cast, timeline, opts = {}) {
   // that asks a character to narrate their own stage direction produces
   // exactly that.
   const beatContent = {
-    hook: { action: seed.conflict, who: lead, ...script(seed, 'hook', useDialogue) },
-    setup: { action: seed.premise, who: lead, ...script(seed, 'setup', useDialogue) },
-    escalation: { action: seed.escalation, who: second, ...script(seed, 'escalation', useDialogue) },
-    turn: { action: seed.turn, who: lead, ...script(seed, 'turn', useDialogue) },
-    payoff: { action: seed.payoff, who: third, ...script(seed, 'payoff', useDialogue) },
+    hook: { action: namer(seed.conflict), who: lead, ...script(seed, 'hook', useDialogue) },
+    setup: { action: namer(seed.premise), who: lead, ...script(seed, 'setup', useDialogue) },
+    escalation: { action: namer(seed.escalation), who: second, ...script(seed, 'escalation', useDialogue) },
+    turn: { action: namer(seed.turn), who: lead, ...script(seed, 'turn', useDialogue) },
+    payoff: { action: namer(seed.payoff), who: third, ...script(seed, 'payoff', useDialogue) },
   };
+
+  // A cast game character brings the moment they are known for. Dr. Harlow's is
+  // the end of a shift, so his beat lands on the payoff — the video gets the
+  // scene the audience already associates with him instead of a generic close.
+  const guest = cast.find((c) => c.storyBeat);
+  if (guest) {
+    const b = guest.storyBeat;
+    const target = beatContent[b.beat] ?? beatContent.payoff;
+    // Several seeds already end on the senior vet arriving, and by now the
+    // namer has put the guest's name in that sentence. Adding the full arrival
+    // on top would have him arrive twice, so the beat has a shorter form for
+    // when he is already on screen.
+    const already = target.action.includes(guest.name);
+    const addition = (already && b.continuation ? b.continuation : b.action)
+      .replace(/\{name\}/g, guest.name);
+    target.action = `${target.action} ${addition}`;
+    if (useDialogue && b.line) target.line = b.line.replace(/\{name\}/g, guest.name);
+    if (b.caption) target.text = b.caption;
+    target.who = guest;
+  }
 
   // Number the scenes within each beat so repeated beats read as a progression.
   const beatIndex = {};
@@ -210,6 +233,30 @@ export function buildScenes(seed, cast, timeline, opts = {}) {
       retention: retentionFor(t.beat),
     };
   });
+}
+
+/**
+ * Swap a seed's generic role words for the names of the cast playing them.
+ *
+ * "The vet arrives to find it already handled" becomes "Dr. Harlow arrives to
+ * find it already handled". Longest phrases are replaced first so "the
+ * night-shift intern" is not half-consumed by "the intern", and the leading
+ * capital is preserved so a sentence still starts with one.
+ */
+function nameRoles(cast) {
+  const pairs = [];
+  for (const member of cast) {
+    for (const phrase of ROLES[member.roleKey]?.refers ?? []) {
+      pairs.push([phrase, member.name]);
+    }
+  }
+  pairs.sort((a, b) => b[0].length - a[0].length);
+  if (!pairs.length) return (text) => text;
+
+  return (text) => pairs.reduce((out, [phrase, name]) => {
+    const pattern = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    return out.replace(pattern, (match) => (/^[A-Z]/.test(match) ? name : name));
+  }, String(text ?? ''));
 }
 
 /**
