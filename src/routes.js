@@ -35,9 +35,9 @@ export const ROUTES = [
     dir: '',
     label: 'Overview',
     title: 'Overview',
-    description: 'An executive summary of Roblox YouTube Shorts performance in the tracked '
-      + '7-day window — headline metrics, the leading Short, the fastest mover, the leading '
-      + 'channel and the strongest breakout.',
+    description: 'An executive summary of verified million-view entertainment and science '
+      + 'videos — headline metrics, the leading video, the fastest mover, the leading channel '
+      + 'and the strongest breakout, across 2021–2026.',
     icon: svg('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
   },
   {
@@ -45,18 +45,19 @@ export const ROUTES = [
     dir: 'for-you',
     label: 'For You',
     title: 'For You',
-    description: 'A personalised seven-day Roblox Shorts production plan built from current '
-      + 'performance signals — concepts, characters, storyboards, generation prompts, audio '
-      + 'and publishing packages. Data-informed and rule-based, not predictions.',
+    description: 'A personalised production plan built from what the tracked entertainment '
+      + 'and science videos have in common — concepts, cast, storyboards, generation prompts, '
+      + 'audio and publishing packages. Data-informed and rule-based, not predictions.',
     icon: svg('<rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="m9.5 14 1.8 1.8L15 12.5"/>'),
   },
   {
-    id: 'top-shorts',
-    dir: 'top-shorts',
-    label: 'Top Shorts',
-    title: 'Top Shorts',
-    description: 'Every tracked Roblox Short ranked by lifetime views, with views per hour, '
-      + 'channel and subscriber context, duration and direct YouTube links.',
+    id: 'top-videos',
+    dir: 'top-videos',
+    label: 'Top Videos',
+    title: 'Top Videos',
+    description: 'Every tracked entertainment and science video ranked by lifetime views, with '
+      + 'views per hour, channel and subscriber context, duration and direct YouTube links. '
+      + 'Filter by minimum views and length.',
     icon: svg('<rect x="2" y="4" width="20" height="16" rx="4"/><path d="m10 9 5 3-5 3z"/>'),
   },
   {
@@ -64,8 +65,8 @@ export const ROUTES = [
     dir: 'trending',
     label: 'Trending Now',
     title: 'Trending Now',
-    description: 'Roblox Shorts ranked by average views per hour since publication — the '
-      + 'fastest-moving videos in the tracked window, computed from snapshot data.',
+    description: 'Entertainment and science videos ranked by average views per hour since '
+      + 'publication — the fastest-moving videos in the tracked set, computed from snapshot data.',
     icon: svg('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
   },
   {
@@ -73,8 +74,8 @@ export const ROUTES = [
     dir: 'top-channels',
     label: 'Top Channels',
     title: 'Top Channels',
-    description: 'Channels ranked by total views across every Short they published in the '
-      + 'tracked window, with Shorts represented, subscribers and average views per Short.',
+    description: 'Channels ranked by total views across every tracked video they published, '
+      + 'with videos represented, subscribers and average views per video.',
     icon: svg('<path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="3.5"/><path d="M22 20v-2a4 4 0 0 0-3-3.9"/>'),
   },
   {
@@ -82,22 +83,23 @@ export const ROUTES = [
     dir: 'breakout-videos',
     label: 'Breakout Videos',
     title: 'Breakout Videos',
-    description: 'Roblox Shorts earning unusually high reach relative to their channel’s '
-      + 'subscriber base, ranked by views per subscriber.',
+    description: 'Entertainment and science videos earning unusually high reach relative to '
+      + 'their channel’s subscriber base, ranked by views per subscriber.',
     icon: svg('<path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/>'),
   },
   {
     id: 'shot-analyzer',
     dir: 'shot-analyzer',
-    label: 'Shot Analyzer',
-    title: 'Shot Analyzer',
-    description: 'Reverse-engineer a Roblox Short scene by scene — how long each scene holds, '
-      + 'what the character does and says, how the camera moves, and where the payoff lands.',
+    label: 'Scene Analyzer',
+    title: 'Scene Analyzer',
+    description: 'Reverse-engineer a video scene by scene — how long each scene holds, what '
+      + 'happens on screen and in narration, how the camera moves, and where the payoff lands. '
+      + 'Shown only for videos with a recorded analysis.',
     icon: svg('<rect x="2.5" y="5" width="13" height="14" rx="2"/><path d="M18 8v8M21.5 10v4"/>'),
   },
 ];
 
-export const SITE_NAME = 'Shorts Intelligence';
+export const SITE_NAME = 'Watchtower';
 export const SITE_ORIGIN = 'https://mahshid-aghania.github.io/youtube-grow/';
 
 export const routeById = (id) => ROUTES.find((r) => r.id === id) ?? null;

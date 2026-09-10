@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { buildReport, isShort, withinWindow } from '../src/shorts.js';
 import { normaliseShotlist } from '../src/shotlist.js';
 import { buildSignals, tokenize, keywordCounts, durationBands, leadingBand, sceneSignals } from '../src/planner/signals.js';
 import { PILLARS, THEMES, pillarById } from '../src/planner/pillars.js';
@@ -26,10 +25,31 @@ import { dayMarkdown, weekMarkdown, weekJson, castMarkdown } from '../src/planne
 
 /* ---------- fixtures ---------- */
 
-const snapshot = JSON.parse(readFileSync(new URL('../data/roblox-shorts.json', import.meta.url)));
-const report = buildReport(snapshot);
-const videos = withinWindow(snapshot.videos.filter(isShort),
-  { start: snapshot.windowStart, end: snapshot.windowEnd });
+// The planner is, by design, a short-form production engine (kept structurally
+// intact when the product's discovery scope moved to long-form entertainment
+// and science). Its tests run against a representative short-form fixture rather
+// than the committed discovery snapshot, so the engine stays covered on its own
+// terms and independently of whatever the live snapshot happens to hold.
+const mk = (id, title, durationSec, views, vph, subs, day) => ({
+  id, title, channel: `Ch ${id}`, channelId: `c-${id}`, country: 'US', subs,
+  publishedAt: `2026-08-${day}T12:00:00Z`, durationSec, views,
+  likes: Math.round(views * 0.03), comments: Math.round(views * 0.001), vph,
+});
+// Animal Hospital dominates the window, and the fastest-moving quarter (by vph)
+// is long-form Animal Hospital too — so it reads as data-supported and the
+// recommender targets a full-length storyboard.
+const videos = [
+  mk('a', 'Dr Harlow night shift Animal Hospital Roblox', 15, 12_000_000, 300000, 79900, '19'),
+  mk('b', 'Tiny Anomaly Animal Hospital Roblox', 18, 8_400_000, 250000, 2_610_000, '21'),
+  mk('c', 'Intern got caught Animal Hospital Roblox', 14, 6_700_000, 200000, 2_090_000, '20'),
+  mk('d', 'Nurse friends Animal Hospital Roblox funny', 16, 8_900_000, 90000, 419000, '22'),
+  mk('e', 'WiFi Challenge who will win Roblox', 19, 9_900_000, 68000, 42100, '20'),
+  mk('f', 'Obby showdown noob vs pro Roblox', 13, 8_400_000, 65000, 134000, '21'),
+  mk('g', 'Speed keyboard escape Roblox', 17, 13_300_000, 60000, 359000, '19'),
+  mk('h', 'Hide and seek with mom Roblox', 16, 7_200_000, 55000, 2_320_000, '23'),
+  mk('i', 'Bacon flips a truck in Roblox', 20, 6_200_000, 42000, 25600, '20'),
+  mk('j', 'Every lie makes you heavier Roblox', 15, 6_500_000, 30000, 281000, '21'),
+];
 const shotlists = ['gpBA12uEBIA', 'Snpt7oqfzP4', 'xQXojdSP54s'].map((id) =>
   normaliseShotlist(JSON.parse(readFileSync(new URL(`../data/shotlists/${id}.json`, import.meta.url)))));
 const signals = buildSignals(videos, shotlists, THEMES);
@@ -50,8 +70,8 @@ test('keywordCounts counts each word once per video', () => {
   assert.equal(roblox.count, 2, 'not 4 — repetition inside one title cannot inflate a keyword');
 });
 
-test('signals read real structure out of the committed snapshot', () => {
-  assert.equal(signals.sampleSize, 68);
+test('signals read real structure out of the sample window', () => {
+  assert.equal(signals.sampleSize, videos.length);
   assert.ok(signals.keywords.length > 0);
   const ah = signals.themes.find((t) => t.id === 'animal-hospital');
   assert.ok(ah.count >= 3, 'Animal Hospital is genuinely present in the window');
@@ -98,7 +118,7 @@ test('addDays crosses a month boundary in UTC', () => {
 test('supportFor labels evidence honestly across the three levels', () => {
   const ah = supportFor(pillarById('animal-hospital'), signals);
   assert.equal(ah.level, 'data-supported');
-  assert.match(ah.evidence, /\d+ of 68 tracked Shorts/);
+  assert.match(ah.evidence, new RegExp(`\\d+ of ${videos.length} tracked Shorts`));
 
   const exp = supportFor(pillarById('experimental'), signals);
   assert.equal(exp.level, 'experimental');

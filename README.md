@@ -1,8 +1,19 @@
-# Shorts Intelligence
+# Watchtower
 
-A focused analytics dashboard for discovering breakout Roblox YouTube Shorts,
-tracking viral momentum, and reverse-engineering successful videos scene by scene.
-Ships pointed at `roblox` over a rolling 7-day window.
+A focused analytics dashboard for discovering verified **million-view, long-form
+YouTube videos about entertainment and science**, published **2021–2026**,
+tracking their momentum, and reverse-engineering successful videos scene by
+scene.
+
+Every tracked video meets all of these, verified against authoritative video
+metadata at collection time:
+
+- **Topic** — entertainment, science, or the overlap between them.
+- **Duration** — at least **8 minutes** by default (configurable).
+- **Views** — at least **1,000,000** verified views (configurable: 1M / 5M / 10M / 25M / 50M).
+- **Published** — 1 Jan 2021 through 31 Dec 2026 inclusive, never a future date.
+- **Format** — published, watchable, long-form videos. No Shorts, no upcoming
+  premieres, no active live streams.
 
 **Live:** https://mahshid-aghania.github.io/youtube-grow/
 
@@ -19,12 +30,12 @@ Seven pages, each with its own address, each a real file on disk:
 | URL | Page |
 | --- | --- |
 | `/youtube-grow/` | Overview — executive summary |
-| `/youtube-grow/for-you/` | For You — the weekly production planner |
-| `/youtube-grow/top-shorts/` | Top Shorts by views |
+| `/youtube-grow/for-you/` | For You — the production planner |
+| `/youtube-grow/top-videos/` | Top Videos by views |
 | `/youtube-grow/trending/` | Trending Now — views per hour |
 | `/youtube-grow/top-channels/` | Top Channels |
 | `/youtube-grow/breakout-videos/` | Breakout Videos |
-| `/youtube-grow/shot-analyzer/` | Shot Analyzer |
+| `/youtube-grow/shot-analyzer/` | Scene Analyzer |
 
 **There is no client-side router.** `npm run build` writes one directory per
 route, each holding a complete `index.html`, so `/youtube-grow/trending/` is a
@@ -58,8 +69,8 @@ arrow icon never has to carry that meaning alone.
 | Shell behaviour | `src/nav.js` | The mobile drawer and the dataset status strip |
 | Presentation logic | `src/insights.js` | Overview metrics and grounded observations |
 | Formatting | `src/format.js` | One implementation per number, duration and date format |
-| Analysis | `src/shorts.js`, `src/shotlist.js` | Unchanged business logic |
-| Weekly planner | `src/foryou.js`, `src/planner/` | The For You workspace and the engine behind it |
+| Analysis | `src/shorts.js`, `src/shotlist.js` | Eligibility rules, rankings and rollups; scene-list parsing |
+| Planner | `src/foryou.js`, `src/planner/` | The For You workspace and the engine behind it |
 
 The shell exists once. Adding a page means one row in `src/routes.js`, one body
 fragment in `src/pages/`, and one module — no HTML is copied between pages.
@@ -99,48 +110,56 @@ Analytics.
 
 | Path | Purpose |
 | --- | --- |
-| `src/shorts.js` | Shorts-report analysis: windowing, totals, rankings, per-channel and per-day rollups |
-| `scripts/fetch-shorts.js` | Pulls a topic's Shorts from the YouTube Data API into `data/` |
+| `src/shorts.js` | Eligibility rules, windowing, totals, rankings, per-channel/per-year rollups, topic mix |
+| `scripts/fetch-videos.js` | Discovers eligible videos across topics and years from the YouTube Data API into `data/` |
 | `scripts/build.js` | Renders one page per route and copies `src/` and `data/` into `public/` |
 | `src/pages/` | A body fragment and a controller module for each of the seven pages |
-| `data/roblox-shorts.json` | Committed snapshot — the site works with no API key |
+| `data/videos.json` | Committed snapshot of verified eligible videos — the site works with no API key |
 | `src/planner/` | The For You engine: signals, recommendations, characters, story, prompts, storage, export |
-| `src/planner/robloxstyle.js` | How a Roblox frame is built — rigs, construction rules, render presets |
-| `src/planner/games.js` | Roblox game worlds and their known characters |
 | `test/` | Unit tests on Node's built-in runner — no dependencies, no network |
 | `public/` | Build output — every file is generated; nothing here is hand-written |
 | `.github/workflows/ci.yml` | Runs the test suite on every push and pull request |
 | `.github/workflows/deploy.yml` | Publishes `public/` to GitHub Pages on every push to `main` |
-| `.github/workflows/refresh.yml` | Daily: re-fetches the window and commits it when the numbers move |
+| `.github/workflows/refresh.yml` | Daily: re-discovers eligible videos and commits when the numbers move |
 
-## The Shorts tracker
+## The video tracker
 
-Reports on every Short published for a topic in a rolling window — by default
-`roblox` over the last 7 days. It gives you total and median views, engagement
-rate, a per-day breakdown, the top Shorts by views and by views-per-hour, the
-channels taking the most views, and breakout videos ranked by views per
-subscriber.
+Reports on the verified eligible videos it discovers. It gives you total and
+median views, engagement rate, a per-year breakdown, the entertainment/science
+topic mix, the top videos by views and by views-per-hour, the channels taking
+the most views, and breakout videos ranked by views per subscriber.
+
+Every candidate is re-fetched through `videos.list` and judged on its **actual**
+publication date, duration and view count — never on a search filter or snippet
+alone. Shorts, upcoming premieres and live streams are excluded; results are
+de-duplicated by video id; anything missing the metadata needed to prove
+eligibility is dropped. Queries are spread across topics and every year 2021–2026
+so no single subject, creator or recent year dominates.
 
 ```bash
-npm run fetch:shorts                              # refresh data/roblox-shorts.json
-node scripts/fetch-shorts.js --topic minecraft    # any topic
-node scripts/fetch-shorts.js --days 30 --pages 8  # wider window, deeper search
-npm run build && npx http-server public           # view the report
+npm run fetch:videos                                        # refresh data/videos.json
+node scripts/fetch-videos.js --min-views 5000000            # raise the view floor
+node scripts/fetch-videos.js --min-duration 1200 --pages 3  # 20-minute floor, deeper search
+npm run build && npx http-server public                     # view the report
 ```
 
-### Scene-by-scene shot lists
+The **minimum-views** (1M / 5M / 10M / 25M / 50M) and **minimum-length** (8 min
+through 1 hour) filters on the Top Videos, Trending and Breakout pages raise
+those floors in the interface too — they only ever hide verified videos, never
+invent them, and never silently relax below the committed rules.
 
-The site has a **Scene-by-scene shot list** section: paste a YouTube Short link and
-it renders every scene — timecode, how long the scene holds and what share of the
-runtime that is, what the character does, what they say, and how the camera moves —
-plus the hook, its thumbnail, and why the first three seconds work. The longest
-scene is highlighted, since in a Short that is almost always the payoff.
+### Scene-by-scene analysis
+
+The site has a **Scene Analyzer**: paste a YouTube video link and it renders every
+scene — timecode, how long the scene holds and what share of the runtime that is,
+what happens on screen, what is said, and how the camera moves — plus the hook, its
+thumbnail, and why the first seconds work. The longest scene is highlighted.
 
 Each row also carries a frame. YouTube publishes exactly three stills per video
 (`1.jpg`, `2.jpg`, `3.jpg`, at roughly a quarter, half and three-quarters through),
 and those are the only per-timestamp images available without downloading the file.
 `frameForScene` maps each scene to the nearest one and reports whether that still
-actually falls inside the scene — a Short with more scenes than stills necessarily
+actually falls inside the scene — a video with more scenes than stills necessarily
 shares frames, and a shared still is dimmed and marked `≈` rather than presented as
 that scene's own shot. True per-scene frames would require downloading the video and
 extracting them with ffmpeg.
@@ -161,13 +180,24 @@ public API that returns a shot list. So the flow is:
 2. Claude writes `data/shotlists/<videoId>.json` and adds the id to `index.json`
 3. `npm test` validates it, and the next push deploys it
 
-Three shot lists ship with the repo, covering the top Roblox Shorts of the window.
+A few sample shot lists ship with the repo. None yet exists for the long-form
+videos in the current snapshot, so pasting one of them shows the honest
+"no scene analysis recorded yet" state rather than a fabricated breakdown.
 
-## For You — the weekly planner
+## For You — the production planner
 
-`For You` turns the tracked window into a seven-day production plan: one Short
-per day, each with a full package — concept, cast, storyboard, image prompts,
+`For You` turns the tracked snapshot into a production plan: one concept per day,
+each with a full package — concept, cast, storyboard, image prompts,
 image-to-video prompts, an audio and editing guide, and a publishing kit.
+
+> **Note on scope.** For You is a **short-form production engine** that predates
+> the move to long-form entertainment/science *discovery*. It is retained and
+> reframed at the surface (labels and page copy), but its concept library,
+> character system and render presets remain structurally as built. It reads the
+> same snapshot the rest of the app does and never crashes on it, but it is a
+> creative-generation tool, not part of the discovery pipeline — the sections
+> below describe that retained engine. The rest of this README describes the
+> discovery product.
 
 It runs entirely in the browser. There is no API key, no server and no private
 endpoint; a static GitHub Pages deployment is the whole product.
@@ -364,12 +394,14 @@ enforces that.
 
 **The totals are the head of the distribution, not a census.** YouTube's Search
 API does not expose a complete index of everything published, and it caps any
-single query's result set. `scripts/fetch-shorts.js` pages through the top
-results by view count, so what you get is the biggest Shorts for the topic in
-the window — enough to see what's working, not enough to say "Roblox Shorts got
-exactly N views this week". Every snapshot carries `coverage` and
-`coverageNote` fields, and the page prints them above the numbers so a reader
-can't mistake one for the other.
+single query's result set. `scripts/fetch-videos.js` pages through the top
+results by view count across many topics and years, so what you get is a broad,
+curated head of the distribution for eligible entertainment and science videos —
+enough to see what's working, not enough to say "these are *the* N biggest videos
+of 2021–2026". Every snapshot carries `coverage` and `coverageNote` fields, and
+the page prints them above the numbers so a reader can't mistake one for the
+other. Empty, loading and error states are honest and distinct: "no matching
+videos found" is never confused with an API failure or quota limit.
 
 ### Getting an API key
 
@@ -379,12 +411,15 @@ can't mistake one for the other.
 4. Add it to the repo as a secret named `YOUTUBE_API_KEY`
    (**Settings → Secrets and variables → Actions**)
 
-Without the key, `fetch:shorts` exits cleanly and the committed snapshot is
+Without the key, `fetch:videos` exits cleanly and the committed snapshot is
 used, so CI, PRs, and forks all still pass. The daily refresh workflow passes
 `--require-key` so it fails loudly rather than silently committing stale data.
+Credentials stay server-side — the key lives only in the Actions secret and the
+static site never sees it.
 
-Quota: one search page costs 100 units against a 10,000/day default, so the
-4-page default run is roughly 400 units — about 25 refreshes a day.
+Quota: one search page costs 100 units against a 10,000/day default. The default
+run searches many topic × year queries, so keep `--pages` small (the default is
+2 pages per query).
 
 ## Run the tests locally
 
@@ -392,13 +427,14 @@ Quota: one search page costs 100 units against a 10,000/day default, so the
 npm test          # or: node --test
 ```
 
-The suite covers the report analysis, the API-response mapping, the shape of the
-committed snapshot itself, the whole For You planner — timeline arithmetic across
-every runtime and scene count, regeneration and lock behaviour, storage
-migration, export completeness, and the content rules above — and the routing
-layer: that every route resolves to the right URL from every page, that each
-page marks only itself current, and that new-tab links carry the right `rel` and
-accessible name. 142 tests, no network, no API key needed.
+The suite covers the eligibility rules and report analysis (duration, view and
+publication-date boundaries, future-date exclusion, topic relevance and the
+committed snapshot's shape), the discovery pipeline's verification (missing
+metadata, live/upcoming exclusion, de-duplication and topic classification), the
+For You planner engine, and the routing layer: that every route resolves to the
+right URL from every page, that each page marks only itself current, and that
+new-tab links carry the right `rel` and accessible name. 151 tests, no network,
+no API key needed.
 
 No `npm install` needed — the tests use `node:test` and `node:assert`, both built into Node 18+.
 

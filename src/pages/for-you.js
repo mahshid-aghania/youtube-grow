@@ -23,7 +23,7 @@ export default async function mount() {
   } catch (err) {
     statusUnavailable();
     setHTML('#foryou-board', errorState('Data unavailable',
-      `The Shorts snapshot could not be loaded — ${err.message}. The planner reads its `
-      + 'signals from that snapshot, so it cannot build a week without it.'));
+      `The video snapshot could not be loaded — ${err.message}. The planner reads its `
+      + 'signals from that snapshot, so it cannot build a plan without it.'));
   }
 }

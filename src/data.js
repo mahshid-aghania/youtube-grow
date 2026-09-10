@@ -15,7 +15,7 @@
  * base path hard-coded anywhere.
  */
 
-import { buildReport, isShort, withinWindow, rankBy, byChannel, breakouts } from './shorts.js';
+import { buildReport, isEligible, withinWindow, reportWindow, rankBy, byChannel, breakouts } from './shorts.js';
 
 /** Absolute URL for a path relative to the site root. */
 export const asset = (path) => new URL(path, import.meta.url).href;
@@ -35,7 +35,7 @@ async function getJson(path) {
 }
 
 /** The committed snapshot. */
-export const loadSnapshot = () => once('snapshot', () => getJson('data/roblox-shorts.json'));
+export const loadSnapshot = () => once('snapshot', () => getJson('data/videos.json'));
 
 /** The list of videos with a recorded scene breakdown. */
 export const loadShotlistIndex = () => once('shotlist-index', async () => {
@@ -73,8 +73,11 @@ export async function loadAllShotlists(videoIds) {
 export const loadReport = () => once('report', async () => {
   const snapshot = await loadSnapshot();
   const report = buildReport(snapshot);
-  const videos = withinWindow(snapshot.videos.filter(isShort),
-    { start: snapshot.windowStart, end: snapshot.windowEnd });
+  const minViews = report.minViews;
+  const minDurationSec = report.minDurationSec;
+  const videos = withinWindow(
+    snapshot.videos.filter((v) => isEligible(v, { minViews, minDurationSec })),
+    reportWindow(snapshot));
 
   return {
     snapshot,

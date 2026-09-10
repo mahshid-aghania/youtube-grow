@@ -1,10 +1,10 @@
       <header class="pagehead">
         <div>
-          <p class="pagehead__eyebrow" style="--tone: var(--amber)">Momentum</p>
-          <h1>Fastest right now</h1>
+          <p class="pagehead__eyebrow" style="--tone: var(--red)">Reach</p>
+          <h1>Top videos by views</h1>
           <p class="pagehead__sub">
-            Videos generating the highest average views per hour since they were published —
-            the closest this dataset gets to what is moving at this moment.
+            Every tracked entertainment and science video ranked by the total reach it has
+            accumulated, with the channel behind it and the pace it is still travelling at.
           </p>
         </div>
         <div class="pagehead__status" id="head-status" aria-live="polite">
@@ -13,22 +13,22 @@
       </header>
 
       <section class="section" style="padding-top:0" aria-labelledby="chart-h">
-        <h2 class="sr-only" id="chart-h">Relative momentum across the fastest videos</h2>
-        <div id="chart-vph"></div>
+        <h2 class="sr-only" id="chart-h">Views across the leading videos</h2>
+        <div id="chart-views"></div>
       </section>
 
       <section class="section" aria-labelledby="table-h">
         <div class="section__head">
           <div>
-            <h2 id="table-h">Full ranking by views per hour</h2>
+            <h2 id="table-h">Full ranking</h2>
             <p class="section__desc">
               Sort any column, filter by minimum views and length, search by title or channel,
               and expand to the whole list.
             </p>
           </div>
           <div class="section__tools">
-            <label class="sr-only" for="search-vph">Search trending videos by title or channel</label>
-            <input class="input section__search" id="search-vph" type="search"
+            <label class="sr-only" for="search-views">Search top videos by title or channel</label>
+            <input class="input section__search" id="search-views" type="search"
                    placeholder="Search title or channel…" autocomplete="off">
             <select class="input section__filter" id="filter-views" aria-label="Minimum views">
               <option value="1000000">1M+ views</option>
@@ -46,12 +46,12 @@
             </select>
           </div>
         </div>
-        <div id="table-vph">
+        <div id="table-views">
           <div class="tablecard">
             <div class="skeleton skeleton--row"></div>
             <div class="skeleton skeleton--row"></div>
             <div class="skeleton skeleton--row"></div>
           </div>
         </div>
-        <div class="notes" id="notes-trending"></div>
+        <div class="notes" id="notes-top-videos"></div>
       </section>

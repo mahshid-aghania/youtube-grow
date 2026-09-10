@@ -97,7 +97,7 @@ export function renderPage(route, body) {
       </span>
       <span>
         <span class="brand__name">${esc(SITE_NAME)}</span><br>
-        <span class="brand__sub">Roblox · 7-day window</span>
+        <span class="brand__sub">Entertainment &amp; science · 2021–2026</span>
       </span>
     </a>
 
@@ -110,7 +110,7 @@ ${nav(route)}
     <div class="sidebar__foot">
       <p>Deployed from GitHub Actions</p>
       <p><a href="https://github.com/mahshid-aghania/youtube-grow" target="_blank" rel="noopener noreferrer">Source repository</a></p>
-      <p>Refresh data with <code>npm run fetch:shorts</code></p>
+      <p>Refresh data with <code>npm run fetch:videos</code></p>
     </div>
   </aside>
 

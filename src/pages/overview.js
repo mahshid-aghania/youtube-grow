@@ -47,17 +47,17 @@ function workspaceLink(routeId, label) {
 }
 
 function renderLeaders(deep) {
-  const short = deep.topByViews[0];
+  const top = deep.topByViews[0];
   const fastest = deep.topByVph[0];
   const channel = deep.topChannels[0];
   const breakout = deep.breakouts[0];
 
   const cards = [
-    short && leaderCard({
-      tone: 'red', eyebrow: 'Leading Short', route: 'top-shorts',
-      title: short.title, href: watchUrl(short.id), thumb: thumbUrl(short.id),
-      meta: `${short.channel} · ${shortDuration(short.durationSec)}`,
-      stat: compactNumber(short.views), statLabel: 'lifetime views',
+    top && leaderCard({
+      tone: 'red', eyebrow: 'Leading video', route: 'top-videos',
+      title: top.title, href: watchUrl(top.id), thumb: thumbUrl(top.id),
+      meta: `${top.channel} · ${shortDuration(top.durationSec)}`,
+      stat: compactNumber(top.views), statLabel: 'lifetime views',
     }),
     fastest && leaderCard({
       tone: 'amber', eyebrow: 'Highest views per hour', route: 'trending',
@@ -68,8 +68,8 @@ function renderLeaders(deep) {
     channel && leaderCard({
       tone: 'cyan', eyebrow: 'Leading channel', route: 'top-channels',
       title: channel.channel, href: channelUrl(channel.channelId), thumb: '',
-      meta: `${plural(channel.videoCount, 'tracked Short')} · ${compactNumber(channel.subs)} subscribers`,
-      stat: compactNumber(channel.views), statLabel: 'views across this window',
+      meta: `${plural(channel.videoCount, 'tracked video')} · ${compactNumber(channel.subs)} subscribers`,
+      stat: compactNumber(channel.views), statLabel: 'views across this set',
     }),
     breakout && leaderCard({
       tone: 'emerald', eyebrow: 'Strongest breakout', route: 'breakout-videos',
@@ -90,10 +90,10 @@ function renderLeaders(deep) {
 function previewFor(id, deep, report) {
   switch (id) {
     case 'for-you':
-      return ['7 planned Shorts, Saturday to Friday',
-        'Concepts, characters, storyboards and prompts',
+      return ['A production plan, one concept per day',
+        'Concepts, cast, storyboards and prompts',
         'Built from this snapshot — rule-based, not predictions'];
-    case 'top-shorts':
+    case 'top-videos':
       return deep.topByViews.slice(0, 3)
         .map((v) => `${compactNumber(v.views)} · ${v.title}`);
     case 'trending':
@@ -106,11 +106,11 @@ function previewFor(id, deep, report) {
       return deep.breakouts.slice(0, 3)
         .map((v) => `${multiple(v.viewsPerSub)} · ${v.title}`);
     case 'shot-analyzer':
-      return ['Paste any YouTube Shorts link',
-        'Scene timings, dialogue, camera and hook analysis',
+      return ['Paste any YouTube video link',
+        'Scene timings, on-screen action, camera and hook analysis',
         'Frames pulled from the stills YouTube publishes'];
     default:
-      return [`${exactNumber(report.totals.videoCount)} Shorts tracked`];
+      return [`${exactNumber(report.totals.videoCount)} videos tracked`];
   }
 }
 

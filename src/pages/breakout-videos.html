@@ -24,6 +24,20 @@
             <label class="sr-only" for="search-breakouts">Search breakout videos by title or channel</label>
             <input class="input section__search" id="search-breakouts" type="search"
                    placeholder="Search title or channel…" autocomplete="off">
+            <select class="input section__filter" id="filter-views" aria-label="Minimum views">
+              <option value="1000000">1M+ views</option>
+              <option value="5000000">5M+ views</option>
+              <option value="10000000">10M+ views</option>
+              <option value="25000000">25M+ views</option>
+              <option value="50000000">50M+ views</option>
+            </select>
+            <select class="input section__filter" id="filter-duration" aria-label="Minimum length">
+              <option value="480">8 min+</option>
+              <option value="900">15 min+</option>
+              <option value="1200">20 min+</option>
+              <option value="1800">30 min+</option>
+              <option value="3600">1 hour+</option>
+            </select>
           </div>
         </div>
         <div id="table-breakouts">

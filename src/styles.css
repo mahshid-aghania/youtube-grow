@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Shorts Intelligence — design system
+   Watchtower — design system
 
    Dark-only by design: one committed look, so the interface renders the same
    whatever the viewer's OS is set to. Every colour below is unconditional.
@@ -398,6 +398,7 @@ a:hover > .ext { opacity: 1; }
 .section__tools { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
 /* Keeps the 44px touch target the other controls have. */
 .section__search { width: min(15rem, 60vw); padding: .5rem .7rem; font-size: .82rem; }
+.section__filter { width: auto; padding: .5rem .7rem; font-size: .82rem; }
 
 /* --- 7. Data tables ----------------------------------------------------- */
 .tablecard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }

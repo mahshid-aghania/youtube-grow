@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { buildReport } from '../src/shorts.js';
 import { overviewMetrics, keyInsights, viewsChartRows } from '../src/insights.js';
 
-const snapshot = JSON.parse(readFileSync(new URL('../data/roblox-shorts.json', import.meta.url)));
+const snapshot = JSON.parse(readFileSync(new URL('../data/videos.json', import.meta.url)));
 const report = buildReport(snapshot);
 
 test('overviewMetrics returns six cards, each with a value and a caption', () => {
@@ -20,7 +20,7 @@ test('overviewMetrics returns six cards, each with a value and a caption', () =>
 
 test('overviewMetrics reads real figures off the committed snapshot', () => {
   const byId = Object.fromEntries(overviewMetrics(report).map((c) => [c.id, c]));
-  assert.equal(byId.shorts.value, '68');
+  assert.equal(byId.videos.value, String(report.totals.videoCount));
   assert.equal(byId.views.exact, report.totals.views.toLocaleString('en-US'));
   assert.equal(byId.channels.value, String(report.totals.channelCount));
   assert.equal(byId.leader.caption, report.topByViews[0].title);

@@ -24,11 +24,11 @@ export function overviewMetrics(report) {
 
   return [
     {
-      id: 'shorts',
-      label: 'Shorts analysed',
+      id: 'videos',
+      label: 'Videos tracked',
       value: compactNumber(t.videoCount),
       exact: exactNumber(t.videoCount),
-      caption: `Published in the tracked window`,
+      caption: 'Verified million-view long-form videos',
       tone: 'neutral',
       icon: 'film',
     },
@@ -37,7 +37,7 @@ export function overviewMetrics(report) {
       label: 'Combined views',
       value: compactNumber(t.views),
       exact: exactNumber(t.views),
-      caption: 'Lifetime views across every tracked Short',
+      caption: 'Lifetime views across every tracked video',
       tone: 'red',
       icon: 'play',
     },
@@ -61,7 +61,7 @@ export function overviewMetrics(report) {
     },
     {
       id: 'leader',
-      label: 'Leading Short',
+      label: 'Leading video',
       value: leader ? compactNumber(leader.views) : '—',
       exact: leader ? exactNumber(leader.views) : '—',
       caption: leader ? leader.title : 'No videos in range',
@@ -100,9 +100,9 @@ export function keyInsights(report) {
     const share = t.views > 0 ? (leader.views / t.views) * 100 : 0;
     out.push({
       id: 'leader',
-      headline: `${leader.channel} holds the top Short`,
+      headline: `${leader.channel} holds the top video`,
       detail: `“${leader.title}” has ${compactNumber(leader.views)} views — `
-        + `${share.toFixed(1)}% of all views in this window, from ${compactNumber(leader.subs)} subscribers.`,
+        + `${share.toFixed(1)}% of all views tracked here, from ${compactNumber(leader.subs)} subscribers.`,
     });
   }
 
@@ -129,13 +129,34 @@ export function keyInsights(report) {
   if (t.videoCount > 0) {
     out.push({
       id: 'format',
-      headline: `The typical Short here runs ${shortDuration(t.medianDurationSec)}`,
+      headline: `The typical video here runs ${shortDuration(t.medianDurationSec)}`,
       detail: `Median views are ${compactNumber(t.medianViews)} against a mean of ${compactNumber(t.meanViews)}, `
-        + `so a small number of large videos is pulling the average up.`,
+        + `so a small number of very large videos is pulling the average up.`,
+    });
+  }
+
+  // The topic mix is only worth stating when both topics are actually present.
+  const mix = (report.topics_breakdown ?? []).filter((b) => b.count > 0);
+  if (mix.length > 1) {
+    const parts = mix.map((b) => `${b.count} ${topicLabel(b.topic)}`);
+    out.push({
+      id: 'topics',
+      headline: 'Discovery spans entertainment and science',
+      detail: `This selection holds ${listPhrase(parts)} — judged from each video's `
+        + `title, description and category, not a single keyword.`,
     });
   }
 
   return out;
+}
+
+/** "science" -> "science", "entertainment" -> "entertainment". A hook for future topics. */
+const topicLabel = (topic) => ({ science: 'science', entertainment: 'entertainment' }[topic] ?? topic);
+
+/** ["3 science", "2 entertainment"] -> "3 science and 2 entertainment". */
+function listPhrase(parts) {
+  if (parts.length <= 1) return parts.join('');
+  return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
 }
 
 /**

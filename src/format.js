@@ -26,14 +26,18 @@ export function exactNumber(n) {
   return Number.isFinite(n) ? n.toLocaleString('en-US') : '—';
 }
 
-/** 15 -> "0:15", 75 -> "1:15". */
+/** 75 -> "1:15", 11869 -> "3:17:49". Hours appear only when there are any. */
 export function duration(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) return '—';
   const whole = Math.floor(seconds);
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+  const h = Math.floor(whole / 3600);
+  const m = Math.floor((whole % 3600) / 60);
+  const s = whole % 60;
+  const pad = (n) => String(n).padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 }
 
-/** 15 -> "15s". Compact badge form for a Short's runtime. */
+/** 45 -> "45s", 75 -> "1:15", 11869 -> "3:17:49". Compact badge form for a runtime. */
 export function shortDuration(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) return '—';
   return seconds >= 60 ? duration(seconds) : `${Math.round(seconds)}s`;
@@ -73,12 +77,26 @@ export function shortDate(iso) {
   }).format(date);
 }
 
-/** "19 Aug – 26 Aug 2026" from a window's two ends. */
+/**
+ * "19 Aug – 26 Aug 2026", or "Jan 2021 – Sep 2026" when the ends are years
+ * apart — a window spanning multiple years should say so rather than print only
+ * the end year against a start day from a different one.
+ */
 export function dateRange(startIso, endIso) {
+  const start = new Date(startIso);
   const end = new Date(endIso);
   if (Number.isNaN(end.getTime())) return '—';
-  const year = new Intl.DateTimeFormat('en-GB', { year: 'numeric', timeZone: 'UTC' }).format(end);
-  return `${shortDate(startIso)} – ${shortDate(endIso)} ${year}`;
+  const yearOf = (d) => new Intl.DateTimeFormat('en-GB', { year: 'numeric', timeZone: 'UTC' }).format(d);
+  const startYear = Number.isNaN(start.getTime()) ? null : yearOf(start);
+  const endYear = yearOf(end);
+
+  if (startYear && startYear !== endYear) {
+    const monthYear = (iso) => new Intl.DateTimeFormat('en-GB', {
+      month: 'short', year: 'numeric', timeZone: 'UTC',
+    }).format(new Date(iso));
+    return `${monthYear(startIso)} – ${monthYear(endIso)}`;
+  }
+  return `${shortDate(startIso)} – ${shortDate(endIso)} ${endYear}`;
 }
 
 /**
@@ -93,6 +111,7 @@ export function relativeTime(iso, now = Date.now()) {
   if (seconds < 0) return 'just now';
 
   const units = [
+    ['year', 31557600], ['month', 2629800], ['week', 604800],
     ['day', 86400], ['hour', 3600], ['minute', 60],
   ];
   for (const [unit, size] of units) {

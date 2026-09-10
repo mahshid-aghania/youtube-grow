@@ -1,27 +1,32 @@
-name: Refresh Shorts
+name: Refresh videos
 
-# Pulls a fresh 7-day window from the YouTube Data API and commits it when the
-# numbers have moved. Pushing to main triggers Deploy, so the site follows.
+# Re-discovers popular long-form entertainment and science videos from the
+# YouTube Data API and commits the snapshot when the numbers have moved. Pushing
+# to main triggers Deploy, so the site follows.
 on:
   schedule:
     # 06:15 UTC daily — off the hour, where scheduled runs queue up.
     - cron: '15 6 * * *'
   workflow_dispatch:
     inputs:
-      topic:
-        description: 'Search topic'
-        default: 'roblox'
+      minViews:
+        description: 'Minimum verified views'
+        default: '1000000'
         required: false
-      days:
-        description: 'Window length in days'
-        default: '7'
+      minDuration:
+        description: 'Minimum duration in seconds'
+        default: '480'
+        required: false
+      pages:
+        description: 'Search pages per topic/year query'
+        default: '2'
         required: false
 
 permissions:
   contents: write
 
 concurrency:
-  group: refresh-shorts
+  group: refresh-videos
   cancel-in-progress: false
 
 jobs:
@@ -36,12 +41,13 @@ jobs:
 
       # Fails loudly here rather than silently committing a stale snapshot:
       # a scheduled refresh that cannot reach the API is a broken refresh.
-      - name: Fetch latest window
+      - name: Discover latest videos
         run: >-
-          node scripts/fetch-shorts.js
+          node scripts/fetch-videos.js
           --require-key
-          --topic "${{ inputs.topic || 'roblox' }}"
-          --days "${{ inputs.days || '7' }}"
+          --min-views "${{ inputs.minViews || '1000000' }}"
+          --min-duration "${{ inputs.minDuration || '480' }}"
+          --pages "${{ inputs.pages || '2' }}"
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
 
@@ -57,5 +63,5 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/
-          git commit -m "chore(data): refresh Shorts snapshot for $(date -u +%Y-%m-%d)"
+          git commit -m "chore(data): refresh video snapshot for $(date -u +%Y-%m-%d)"
           git push

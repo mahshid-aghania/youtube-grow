@@ -6,7 +6,7 @@
  * every load, so this file only wires interaction to those pure functions.
  */
 
-import { isShort, withinWindow } from './shorts.js';
+import { isEligible, withinWindow, reportWindow } from './shorts.js';
 import { normaliseShotlist } from './shotlist.js';
 import { buildSignals } from './planner/signals.js';
 import { THEMES, PILLARS, pillarById } from './planner/pillars.js';
@@ -109,9 +109,9 @@ function strategyPanel() {
         ${field('weekStart', 'Week start date',
           `<input class="input" id="weekStart" type="date" value="${esc(currentWeekStart())}">`)}
         ${field('weekStartDay', 'Week starts on', select('weekStartDay', p.weekStartDay, DAY_NAMES))}
-        ${field('perDay', 'Shorts per day',
+        ${field('perDay', 'Videos per day',
           `<input class="input" id="perDay" type="number" min="1" max="3" value="${p.perDay}" data-pref="perDay">`,
-          'Each day plans one complete Short; higher values repeat the day\'s concept.')}
+          'Each day plans one complete video; higher values repeat the day\'s concept.')}
         ${field('niche', 'Primary niche',
           `<input class="input" id="niche" type="text" value="${esc(p.niche)}" data-pref="niche">`)}
         ${field('audience', 'Target audience',
@@ -131,7 +131,7 @@ function strategyPanel() {
           + 'Animal Hospital, R15 for most others.')}
         ${field('renderStyle', 'Render look',
           select('renderStyle', p.renderStyle, RENDER_OPTIONS),
-          'Only the lighting and grading change. The blocky Roblox geometry is fixed either way.')}
+          'Only the lighting and grading change. The underlying geometry is fixed either way.')}
         ${field('imagePlatform', 'Image generator', select('imagePlatform', p.imagePlatform, IMAGE_PLATFORM_OPTIONS))}
         ${field('videoPlatform', 'Image-to-video tool', select('videoPlatform', p.videoPlatform, VIDEO_PLATFORM_OPTIONS))}
         ${field('aspect', 'Aspect ratio', select('aspect', p.aspect, ['9:16', '1:1', '16:9']))}
@@ -619,7 +619,7 @@ function summaryStrip(plans) {
   const done = plans.filter((p) => ['ready', 'scheduled', 'published'].includes(p.status)).length;
 
   return `
-    <span class="pill">${plans.length} planned Shorts</span>
+    <span class="pill">${plans.length} planned videos</span>
     <span class="pill">${plans.reduce((t, p) => t + p.strategy.sceneCount, 0)} scenes total</span>
     <span class="pill">~${Math.round(minutes / 60)}h production</span>
     <span class="pill" style="color: var(--emerald)">${levels['data-supported'] ?? 0} data-supported</span>
@@ -885,8 +885,8 @@ function handleExport(kind) {
   const plans = week.map(planFor);
   const start = currentWeekStart();
 
-  if (kind === 'md') return download(`shorts-plan-${start}.md`, weekMarkdown(plans, start), 'text/markdown');
-  if (kind === 'json') return download(`shorts-plan-${start}.json`, weekJson(plans, start, state.prefs), 'application/json');
+  if (kind === 'md') return download(`video-plan-${start}.md`, weekMarkdown(plans, start), 'text/markdown');
+  if (kind === 'json') return download(`video-plan-${start}.json`, weekJson(plans, start, state.prefs), 'application/json');
   if (kind === 'print') { window.print(); return undefined; }
   return undefined;
 }
@@ -896,7 +896,7 @@ function handleExport(kind) {
 /**
  * Mount the feature.
  *
- * @param {object} snapshot   the raw Shorts snapshot
+ * @param {object} snapshot   the raw video snapshot
  * @param {object[]} rawShotlists  shot-list records, possibly empty
  */
 export function mountForYou(snapshot, rawShotlists = []) {
@@ -904,8 +904,7 @@ export function mountForYou(snapshot, rawShotlists = []) {
   if (!root) return;
 
   try {
-    const videos = withinWindow(snapshot.videos.filter(isShort),
-      { start: snapshot.windowStart, end: snapshot.windowEnd });
+    const videos = withinWindow(snapshot.videos.filter((v) => isEligible(v)), reportWindow(snapshot));
     const shotlists = rawShotlists.map((r) => {
       try { return normaliseShotlist(r); } catch { return null; }
     }).filter(Boolean);
@@ -913,7 +912,7 @@ export function mountForYou(snapshot, rawShotlists = []) {
     signals = buildSignals(videos, shotlists, THEMES);
 
     $('#foryou-basis').innerHTML = `
-      <span class="pill">${compactNumber(signals.sampleSize)} Shorts analysed</span>
+      <span class="pill">${compactNumber(signals.sampleSize)} videos analysed</span>
       ${signals.scenes.available
         ? `<span class="pill">${signals.scenes.sampleSize} shot lists · median ${signals.scenes.medianSceneSec}s per scene</span>`
         : '<span class="pill">No shot lists on file</span>'}

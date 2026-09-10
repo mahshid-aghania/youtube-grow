@@ -17,10 +17,12 @@ export default function mount() {
     })));
 
     mountTable('#table-vph', {
-      caption: 'Roblox Shorts ranked by average views per hour',
+      caption: 'Entertainment and science videos ranked by average views per hour',
       rows: deep.topByVph,
       initial: 10,
       searchInput: '#search-vph',
+      minViewsInput: '#filter-views',
+      minDurationInput: '#filter-duration',
       columns: [
         { key: 'rank', label: '#', cellClass: 'cell-rank', render: (_r, i) => rankCell(i) },
         { key: 'video', label: 'Video', primary: true, render: videoCell },

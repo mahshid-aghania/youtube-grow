@@ -8,8 +8,8 @@ import { chartRows, withReport } from './shared.js';
 
 const MOUNTS = ['#chart-channels', '#table-channels'];
 
-/** Average views per Short this channel has in the window, when it is meaningful. */
-const avgPerShort = (c) => (c.videoCount > 0 ? c.views / c.videoCount : 0);
+/** Average views per tracked video this channel has, when it is meaningful. */
+const avgPerVideo = (c) => (c.videoCount > 0 ? c.views / c.videoCount : 0);
 
 export default function mount() {
   withReport(MOUNTS, ({ deep, report }) => {
@@ -19,7 +19,7 @@ export default function mount() {
     }).map((row) => ({ ...row, label: `${row.channel}`, channel: 'Total views' }))));
 
     mountTable('#table-channels', {
-      caption: 'Channels ranked by total views across their Shorts in this window',
+      caption: 'Channels ranked by total views across their tracked videos',
       rows: deep.topChannels,
       initial: 10,
       searchInput: '#search-channels',
@@ -30,15 +30,15 @@ export default function mount() {
               ${extLink(channelUrl(c.channelId), esc(c.channel), 'cell-video__title')}
               <div class="cell-video__meta"><span>${compactNumber(c.subs)} subscribers</span></div>
             </div>` },
-        { key: 'count', label: 'Shorts', align: 'right', sortValue: (c) => c.videoCount,
-          tooltip: 'How many of this channel’s Shorts appear in the tracked window.',
-          render: (c) => numCell(String(c.videoCount), `${c.videoCount} Shorts in this window`) },
+        { key: 'count', label: 'Videos', align: 'right', sortValue: (c) => c.videoCount,
+          tooltip: 'How many of this channel’s tracked videos appear here.',
+          render: (c) => numCell(String(c.videoCount), `${c.videoCount} tracked videos`) },
         { key: 'subs', label: 'Subs', align: 'right', sortValue: (c) => c.subs,
           render: (c) => numCell(compactNumber(c.subs), exactNumber(c.subs)) },
-        { key: 'avg', label: 'Avg / Short', align: 'right', sortValue: avgPerShort,
-          tooltip: 'Total views divided by the number of this channel’s Shorts in the window.',
+        { key: 'avg', label: 'Avg / video', align: 'right', sortValue: avgPerVideo,
+          tooltip: 'Total views divided by the number of this channel’s tracked videos.',
           render: (c) => (c.videoCount > 0
-            ? numCell(compactNumber(avgPerShort(c)), `${exactNumber(Math.round(avgPerShort(c)))} views per tracked Short`)
+            ? numCell(compactNumber(avgPerVideo(c)), `${exactNumber(Math.round(avgPerVideo(c)))} views per tracked video`)
             : '<span class="muted">—</span>') },
         { key: 'views', label: 'Views', align: 'right', sortValue: (c) => c.views,
           tooltip: 'Every tracked Short from this channel, added together.',
@@ -47,12 +47,12 @@ export default function mount() {
     });
 
     setHTML('#notes-channels', noteCard('How this ranking is built', `
-      <p><strong>Views</strong> sums the lifetime views of every Short this channel published
-      inside the tracked window. A channel with one enormous video can outrank one with several
-      solid ones — the <strong>Shorts</strong> and <strong>Avg / Short</strong> columns are
+      <p><strong>Views</strong> sums the lifetime views of every tracked video this channel
+      published. A channel with one enormous video can outrank one with several
+      solid ones — the <strong>Videos</strong> and <strong>Avg / video</strong> columns are
       there to tell those two cases apart.</p>
-      <p><strong>Avg / Short</strong> is total views divided by tracked Shorts, so it describes
-      this window only, not the channel's catalogue.</p>
+      <p><strong>Avg / video</strong> is total views divided by tracked videos, so it describes
+      this tracked set only, not the channel's catalogue.</p>
       <p><strong>Subs</strong> is the channel's subscriber total at collection time. It is not
       window-scoped and says nothing about how many of those subscribers watched.</p>
       <p>${report.totals.channelCount} channels appear in this window. Channel names link to

@@ -26,13 +26,16 @@ test('exactNumber groups digits for precise readouts', () => {
   assert.equal(exactNumber(Number.NaN), '—');
 });
 
-test('duration and shortDuration format runtimes', () => {
+test('duration and shortDuration format runtimes, including hours for long-form', () => {
   assert.equal(duration(15), '0:15');
   assert.equal(duration(75), '1:15');
+  assert.equal(duration(11869), '3:17:49', 'hours appear for a feature-length video');
+  assert.equal(duration(3661), '1:01:01');
   assert.equal(duration(-1), '—');
   assert.equal(shortDuration(15), '15s');
   assert.equal(shortDuration(50), '50s');
   assert.equal(shortDuration(75), '1:15', 'past a minute it switches to m:ss');
+  assert.equal(shortDuration(1064), '17:44');
 });
 
 test('percent and multiple avoid false precision', () => {
@@ -48,6 +51,8 @@ test('timestamp and date helpers render in UTC regardless of host timezone', () 
   assert.equal(timestamp('2026-08-26T12:50:00Z'), '26 Aug 2026, 12:50 UTC');
   assert.equal(shortDate('2026-08-19T00:00:00Z'), '19 Aug');
   assert.equal(dateRange('2026-08-19T00:00:00Z', '2026-08-26T00:00:00Z'), '19 Aug – 26 Aug 2026');
+  assert.equal(dateRange('2021-01-01T00:00:00Z', '2026-09-09T00:00:00Z'), 'Jan 2021 – Sept 2026',
+    'a multi-year window names both years');
   assert.equal(timestamp('nonsense'), '—');
   assert.equal(dateRange('x', 'y'), '—');
 });

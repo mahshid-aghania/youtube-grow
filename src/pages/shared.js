@@ -20,8 +20,8 @@ export async function withReport(mounts, render) {
     if (ctx.report.totals.videoCount === 0) {
       statusUnavailable('Snapshot empty');
       for (const sel of mounts) {
-        setHTML(sel, emptyState('No videos in this window',
-          'The snapshot loaded, but it contains no Shorts for the tracked period.'));
+        setHTML(sel, emptyState('No eligible videos',
+          'The snapshot loaded, but it contains no videos meeting the discovery rules.'));
       }
       return;
     }
@@ -30,7 +30,7 @@ export async function withReport(mounts, render) {
     render(ctx);
   } catch (err) {
     statusUnavailable();
-    const message = `The Shorts snapshot could not be loaded — ${err.message}.`;
+    const message = `The video snapshot could not be loaded — ${err.message}.`;
     setHTML(mounts[0], errorState('Data unavailable', message));
     for (const sel of mounts.slice(1)) setHTML(sel, '');
   }

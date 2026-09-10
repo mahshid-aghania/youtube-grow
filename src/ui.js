@@ -113,21 +113,30 @@ export const noteCard = (title, body) => `
  * The rendered table re-sorts and re-filters in place; sorting is driven by
  * `sortValue`, never by the formatted string, so "1.2M" sorts above "900K".
  */
-export function mountTable(mountSel, { rows, columns, caption, initial = 10, searchInput, emptyText }) {
+export function mountTable(mountSel, {
+  rows, columns, caption, initial = 10, searchInput, emptyText,
+  minViewsInput, minDurationInput,
+}) {
   const mount = $(mountSel);
   if (!mount) return;
 
   let sortKey = null;
   let sortDir = 'desc';
   let query = '';
+  let minViews = 0;
+  let minDuration = 0;
   let expanded = false;
 
   const searchable = (row) =>
     `${row.title ?? ''} ${row.channel ?? ''}`.toLowerCase();
 
+  const thresholdActive = () => minViews > 0 || minDuration > 0;
+
   function visibleRows() {
     let out = rows;
     if (query) out = out.filter((r) => searchable(r).includes(query));
+    if (minViews > 0) out = out.filter((r) => (r.views ?? 0) >= minViews);
+    if (minDuration > 0) out = out.filter((r) => (r.durationSec ?? 0) >= minDuration);
     if (sortKey) {
       const col = columns.find((c) => c.key === sortKey);
       out = [...out].sort((a, b) => {
@@ -142,9 +151,18 @@ export function mountTable(mountSel, { rows, columns, caption, initial = 10, sea
     const all = visibleRows();
 
     if (all.length === 0) {
-      mount.innerHTML = query
-        ? emptyState('No matches', `Nothing matches “${query}”. Clear the search to see every row.`)
-        : emptyState('Nothing to show', emptyText ?? 'This window contains no qualifying videos.');
+      if (query) {
+        mount.innerHTML = emptyState('No matches',
+          `Nothing matches “${query}”. Clear the search to see every row.`);
+      } else if (thresholdActive()) {
+        mount.innerHTML = emptyState('No videos meet these thresholds',
+          'No eligible video clears the selected minimum views and length. '
+          + 'Lower a threshold to see more — the thresholds only ever hide verified '
+          + 'videos, never invent them.');
+      } else {
+        mount.innerHTML = emptyState('Nothing to show',
+          emptyText ?? 'This selection contains no qualifying videos.');
+      }
       return;
     }
 
@@ -211,6 +229,18 @@ export function mountTable(mountSel, { rows, columns, caption, initial = 10, sea
       });
     }
   }
+
+  // Minimum-views and minimum-duration selects follow the same one-listener
+  // pattern as search: a change re-filters the already-loaded rows in place.
+  // They can only ever hide verified rows — nothing is fetched or fabricated.
+  const bindThreshold = (sel, apply) => {
+    if (!sel) return;
+    const el = $(sel);
+    if (!el) return;
+    el.addEventListener('change', () => { apply(Number(el.value) || 0); expanded = false; render(); });
+  };
+  bindThreshold(minViewsInput, (v) => { minViews = v; });
+  bindThreshold(minDurationInput, (v) => { minDuration = v; });
 
   render();
 }

@@ -16,7 +16,9 @@ export default function mount() {
       rows: deep.breakouts,
       initial: 10,
       searchInput: '#search-breakouts',
-      emptyText: `No channel in this window clears the ${MIN_SUBS.toLocaleString('en-GB')}-subscriber floor.`,
+      minViewsInput: '#filter-views',
+      minDurationInput: '#filter-duration',
+      emptyText: `No channel in this set clears the ${MIN_SUBS.toLocaleString('en-GB')}-subscriber floor.`,
       columns: [
         { key: 'rank', label: '#', cellClass: 'cell-rank', render: (_r, i) => rankCell(i) },
         { key: 'video', label: 'Video', primary: true, render: videoCell },
@@ -40,9 +42,9 @@ export default function mount() {
       Below that floor the ratio stops describing anything: a channel with 3 subscribers and a
       modest video produces a five-figure multiple that says more about the denominator than
       the video. ${excluded > 0
-        ? `${excluded} of ${videos.length} tracked Shorts in this window sit below the floor and
+        ? `${excluded} of ${videos.length} tracked videos sit below the floor and
            are not listed here.`
-        : 'No tracked Short in this window sits below the floor.'}</p>
+        : 'No tracked video sits below the floor.'}</p>
       <p>Both halves of the ratio are point-in-time totals, so a video that went wide months ago
       is compared against today's subscriber count — which the video itself may have grown.</p>`));
   });

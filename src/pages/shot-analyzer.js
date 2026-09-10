@@ -197,8 +197,8 @@ export default async function mount() {
     e.preventDefault();
     const videoId = parseVideoId(input.value);
     if (!videoId) {
-      setHint('That does not look like a YouTube link. Paste a youtube.com/shorts, '
-        + 'youtube.com/watch or youtu.be URL, or the 11-character video ID.', 'error');
+      setHint('That does not look like a YouTube link. Paste a youtube.com/watch, '
+        + 'youtu.be or youtube.com/shorts URL, or the 11-character video ID.', 'error');
       input.focus();
       return;
     }
@@ -207,7 +207,7 @@ export default async function mount() {
 
   input.addEventListener('input', () => {
     if (input.getAttribute('aria-invalid') === 'true') {
-      setHint('Paste a YouTube Shorts link, or pick one of the analysed videos below.');
+      setHint('Paste a YouTube video link, or pick one of the analysed videos below.');
     }
   });
 
@@ -215,7 +215,7 @@ export default async function mount() {
   document.querySelector('.analyzer')?.addEventListener('click', (e) => {
     const chip = e.target.closest('[data-id]');
     if (!chip) return;
-    input.value = `https://www.youtube.com/shorts/${chip.dataset.id}`;
+    input.value = `https://www.youtube.com/watch?v=${chip.dataset.id}`;
     show(chip.dataset.id);
   });
 

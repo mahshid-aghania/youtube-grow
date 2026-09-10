@@ -20,7 +20,7 @@ const navLinks = (html) => attrs(html, 'a').filter((a) => a.includes('class="nav
 
 test('the route table covers every required destination exactly once', () => {
   assert.deepEqual(ROUTES.map((r) => r.id), [
-    'overview', 'for-you', 'top-shorts', 'trending',
+    'overview', 'for-you', 'top-videos', 'trending',
     'top-channels', 'breakout-videos', 'shot-analyzer',
   ]);
   assert.equal(new Set(ROUTES.map((r) => r.dir)).size, ROUTES.length, 'no two routes share a directory');
@@ -58,8 +58,8 @@ test('page titles are unique and none keeps the old generic title', () => {
   const titles = ROUTES.map(pageTitle);
   assert.equal(new Set(titles).size, titles.length);
   for (const t of titles) {
-    assert.match(t, / \| Shorts Intelligence$/);
-    assert.doesNotMatch(t, /Roblox Shorts — 7-day report/);
+    assert.match(t, / \| Watchtower$/);
+    assert.doesNotMatch(t, /Roblox/);
   }
 });
 

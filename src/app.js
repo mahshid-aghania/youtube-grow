@@ -13,7 +13,7 @@ import { mountShell } from './nav.js';
 const PAGES = {
   overview: () => import('./pages/overview.js'),
   'for-you': () => import('./pages/for-you.js'),
-  'top-shorts': () => import('./pages/top-shorts.js'),
+  'top-videos': () => import('./pages/top-videos.js'),
   trending: () => import('./pages/trending.js'),
   'top-channels': () => import('./pages/top-channels.js'),
   'breakout-videos': () => import('./pages/breakout-videos.js'),

@@ -1,19 +1,68 @@
 /**
- * Analysis for a snapshot of YouTube Shorts on a topic.
+ * Analysis for a snapshot of popular long-form entertainment and science videos.
  *
  * Pure functions over an array of video records — no network, no clock — so the
- * whole module is directly testable. Fetching lives in scripts/fetch-shorts.js.
+ * whole module is directly testable. Fetching lives in scripts/fetch-videos.js.
  *
  * A video record looks like:
- *   { id, title, channel, channelId, country, subs,
+ *   { id, title, topic, channel, channelId, country, subs,
  *     publishedAt, durationSec, views, likes, comments, engagementRate, vph }
+ *
+ * Eligibility (the discovery rules the whole product is built around):
+ *   - long-form: at least 8 minutes by default;
+ *   - popular:   at least 1,000,000 verified views;
+ *   - in range:  published 2021-01-01 through 2026-12-31 inclusive, never in the
+ *                future — enforced by withinWindow against the snapshot window,
+ *                whose end is the collection time (and is clamped to 2026).
  */
 
-/** YouTube's own cut-off for what counts as a Short. */
-export const MAX_SHORT_SECONDS = 180;
+/** Default minimum runtime for a long-form video: eight minutes. */
+export const MIN_LONGFORM_SECONDS = 8 * 60;
 
-export function isShort(video) {
-  return Number.isFinite(video.durationSec) && video.durationSec <= MAX_SHORT_SECONDS;
+/** Default minimum verified view count. */
+export const MIN_VIEWS = 1_000_000;
+
+/** The publication window the product covers. */
+export const ELIGIBLE_START = '2021-01-01T00:00:00Z';
+/** Exclusive upper bound: 2026-12-31 inclusive means "before 2027". */
+export const ELIGIBLE_END = '2027-01-01T00:00:00Z';
+
+/**
+ * The selectable minimum-view thresholds, wired to the filter controls.
+ * Each is a { value, label } the interface renders directly.
+ */
+export const VIEW_THRESHOLDS = [
+  { value: 1_000_000, label: '1M+' },
+  { value: 5_000_000, label: '5M+' },
+  { value: 10_000_000, label: '10M+' },
+  { value: 25_000_000, label: '25M+' },
+  { value: 50_000_000, label: '50M+' },
+];
+
+/** The selectable minimum-duration thresholds, wired to the filter controls. */
+export const DURATION_THRESHOLDS = [
+  { value: 480, label: '8 min+' },
+  { value: 900, label: '15 min+' },
+  { value: 1200, label: '20 min+' },
+  { value: 1800, label: '30 min+' },
+  { value: 3600, label: '1 hour+' },
+];
+
+/** Is this a watchable long-form video, at or above `minDurationSec`? */
+export function isLongForm(video, minDurationSec = MIN_LONGFORM_SECONDS) {
+  return Number.isFinite(video?.durationSec) && video.durationSec >= minDurationSec;
+}
+
+/**
+ * Does a record meet the duration and view thresholds?
+ *
+ * Publication-date eligibility is handled separately by withinWindow, because a
+ * pure record has no notion of "now"; the snapshot window carries the dates.
+ * Records missing the metadata needed to prove eligibility fail closed.
+ */
+export function isEligible(video, { minDurationSec = MIN_LONGFORM_SECONDS, minViews = MIN_VIEWS } = {}) {
+  return isLongForm(video, minDurationSec)
+    && Number.isFinite(video?.views) && video.views >= minViews;
 }
 
 /**
@@ -34,6 +83,19 @@ export function withinWindow(videos, { start, end }) {
   });
 }
 
+/**
+ * The publication window for a snapshot, with the end clamped so a future date
+ * can never slip in: never past the collection time, and never past 2026.
+ */
+export function reportWindow(snapshot) {
+  const start = snapshot.windowStart ?? ELIGIBLE_START;
+  const rawEnd = new Date(snapshot.windowEnd ?? snapshot.fetchedAt ?? ELIGIBLE_END).getTime();
+  const cap = new Date(ELIGIBLE_END).getTime();
+  const end = new Date(Math.min(Number.isNaN(rawEnd) ? cap : rawEnd, cap))
+    .toISOString().replace(/\.\d{3}Z$/, 'Z');
+  return { start, end };
+}
+
 /** Median of a numeric array. Returns 0 for an empty array. */
 export function median(values) {
   if (values.length === 0) return 0;
@@ -46,7 +108,7 @@ export function median(values) {
  * Headline totals for a set of videos.
  *
  * engagementRate is computed from the summed counts rather than averaged from
- * the per-video rates, so one tiny video can't swing it.
+ * the per-video rates, so one small video can't swing it.
  */
 export function summarize(videos) {
   const views = videos.reduce((t, v) => t + v.views, 0);
@@ -79,7 +141,7 @@ export function rankBy(videos, field, limit = 10) {
 /**
  * Roll the videos up per channel, best-performing channel first.
  * `subs` takes the largest value seen, since a channel can gain subscribers
- * between two videos in the same window.
+ * between two videos in the same set.
  */
 export function byChannel(videos, limit = 10) {
   const map = new Map();
@@ -114,6 +176,36 @@ export function byDay(videos) {
   return [...map.values()].sort((a, b) => a.day.localeCompare(b.day));
 }
 
+/**
+ * Bucket the videos by publication month (UTC), chronological.
+ * The covered window spans years, so a per-day series would be mostly empty —
+ * a per-month rollup is what actually describes the distribution over time.
+ */
+export function byMonth(videos) {
+  const map = new Map();
+  for (const v of videos) {
+    const month = v.publishedAt.slice(0, 7);
+    const row = map.get(month) ?? { month, videoCount: 0, views: 0 };
+    row.videoCount += 1;
+    row.views += v.views;
+    map.set(month, row);
+  }
+  return [...map.values()].sort((a, b) => a.month.localeCompare(b.month));
+}
+
+/** Videos and combined views bucketed by publication year (UTC), chronological. */
+export function byYear(videos) {
+  const map = new Map();
+  for (const v of videos) {
+    const year = v.publishedAt.slice(0, 4);
+    const row = map.get(year) ?? { year, videoCount: 0, views: 0 };
+    row.videoCount += 1;
+    row.views += v.views;
+    map.set(year, row);
+  }
+  return [...map.values()].sort((a, b) => a.year.localeCompare(b.year));
+}
+
 /** Pad a byDay() series so every date in [start, end) is present. */
 export function fillDays(series, { start, end }) {
   const bySlot = new Map(series.map((r) => [r.day, r]));
@@ -141,6 +233,18 @@ export function breakouts(videos, { minSubs = 1000, limit = 10 } = {}) {
     .slice(0, limit);
 }
 
+/** How the topic mix breaks down across a set of videos. */
+export function topicBreakdown(videos) {
+  const counts = new Map();
+  for (const v of videos) {
+    const topic = v.topic ?? 'other';
+    counts.set(topic, (counts.get(topic) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([topic, count]) => ({ topic, count, share: count / (videos.length || 1) }))
+    .sort((a, b) => b.count - a.count || a.topic.localeCompare(b.topic));
+}
+
 /** 43836834 -> "43.8M". Keeps big tables readable. */
 export function compact(n) {
   if (!Number.isFinite(n)) return '—';
@@ -154,14 +258,26 @@ export function compact(n) {
 /**
  * The whole report, from a raw snapshot to everything the page renders.
  *
- * @param {{windowStart: string, windowEnd: string, videos: object[]}} snapshot
+ * The minimum views and duration default to the snapshot's own thresholds (and
+ * fall back to the product defaults), but a caller can raise them — this is what
+ * the view-threshold and duration filter controls drive.
+ *
+ * @param {object} snapshot
+ * @param {{minViews?: number, minDurationSec?: number}} [filters]
  */
-export function buildReport(snapshot) {
-  const window = { start: snapshot.windowStart, end: snapshot.windowEnd };
-  const videos = withinWindow(snapshot.videos.filter(isShort), window);
+export function buildReport(snapshot, filters = {}) {
+  const window = reportWindow(snapshot);
+  const minViews = filters.minViews ?? snapshot.minViews ?? MIN_VIEWS;
+  const minDurationSec = filters.minDurationSec ?? snapshot.minDurationSec ?? MIN_LONGFORM_SECONDS;
+
+  const eligible = snapshot.videos.filter((v) => isEligible(v, { minViews, minDurationSec }));
+  const videos = withinWindow(eligible, window);
 
   return {
-    topic: snapshot.topic,
+    scope: snapshot.scope ?? 'entertainment-science',
+    topics: snapshot.topics ?? ['entertainment', 'science'],
+    minViews,
+    minDurationSec,
     window,
     fetchedAt: snapshot.fetchedAt,
     source: snapshot.source,
@@ -172,7 +288,8 @@ export function buildReport(snapshot) {
     topByViews: rankBy(videos, 'views', 10),
     topByVph: rankBy(videos, 'vph', 10),
     topChannels: byChannel(videos, 8),
-    daily: fillDays(byDay(videos), window),
+    yearly: byYear(videos),
+    topics_breakdown: topicBreakdown(videos),
     breakouts: breakouts(videos, { minSubs: 1000, limit: 8 }),
   };
 }
