@@ -143,10 +143,13 @@ node scripts/fetch-videos.js --min-duration 1200 --pages 3  # 20-minute floor, d
 npm run build && npx http-server public                     # view the report
 ```
 
-The **minimum-views** (1M / 5M / 10M / 25M / 50M) and **minimum-length** (8 min
-through 1 hour) filters on the Top Videos, Trending and Breakout pages raise
-those floors in the interface too — they only ever hide verified videos, never
-invent them, and never silently relax below the committed rules.
+The **minimum-views** (1M / 5M / 10M / 25M / 50M), **minimum-length** (8 min
+through 1 hour) and **topic** (entertainment / science) filters on the Top
+Videos, Trending and Breakout pages raise those floors in the interface too —
+they only ever hide verified videos, never invent them, and never silently relax
+below the committed rules. Every video row carries a colour-coded topic tag, and
+the Overview shows the topic mix and combined views by year, so the spread across
+entertainment, science and all six years 2021–2026 is visible at a glance.
 
 ### Scene-by-scene analysis
 

@@ -115,7 +115,7 @@ export const noteCard = (title, body) => `
  */
 export function mountTable(mountSel, {
   rows, columns, caption, initial = 10, searchInput, emptyText,
-  minViewsInput, minDurationInput,
+  minViewsInput, minDurationInput, topicInput,
 }) {
   const mount = $(mountSel);
   if (!mount) return;
@@ -125,18 +125,20 @@ export function mountTable(mountSel, {
   let query = '';
   let minViews = 0;
   let minDuration = 0;
+  let topic = '';
   let expanded = false;
 
   const searchable = (row) =>
     `${row.title ?? ''} ${row.channel ?? ''}`.toLowerCase();
 
-  const thresholdActive = () => minViews > 0 || minDuration > 0;
+  const thresholdActive = () => minViews > 0 || minDuration > 0 || topic !== '';
 
   function visibleRows() {
     let out = rows;
     if (query) out = out.filter((r) => searchable(r).includes(query));
     if (minViews > 0) out = out.filter((r) => (r.views ?? 0) >= minViews);
     if (minDuration > 0) out = out.filter((r) => (r.durationSec ?? 0) >= minDuration);
+    if (topic) out = out.filter((r) => r.topic === topic);
     if (sortKey) {
       const col = columns.find((c) => c.key === sortKey);
       out = [...out].sort((a, b) => {
@@ -242,6 +244,12 @@ export function mountTable(mountSel, {
   bindThreshold(minViewsInput, (v) => { minViews = v; });
   bindThreshold(minDurationInput, (v) => { minDuration = v; });
 
+  // The topic select filters entertainment vs science; '' means both.
+  if (topicInput) {
+    const el = $(topicInput);
+    if (el) el.addEventListener('change', () => { topic = el.value; expanded = false; render(); });
+  }
+
   render();
 }
 
@@ -249,6 +257,13 @@ export function mountTable(mountSel, {
 
 export const rankCell = (i) =>
   `<span class="rank${i < 3 ? ' rank--medal' : ''}" aria-label="Rank ${i + 1}">${i + 1}</span>`;
+
+/** Human labels for the topics; also the toggle for what a badge shows. */
+export const TOPIC_LABEL = { science: 'Science', entertainment: 'Entertainment' };
+
+/** A small topic tag, coloured per topic. Renders nothing for an unknown topic. */
+export const topicBadge = (topic) =>
+  TOPIC_LABEL[topic] ? `<span class="badge-topic" data-topic="${esc(topic)}">${TOPIC_LABEL[topic]}</span>` : '';
 
 export const videoCell = (v) => `
   <div class="cell-video">
@@ -260,6 +275,7 @@ export const videoCell = (v) => `
         <span>${esc(v.channel)}</span>
         <span aria-hidden="true">·</span>
         <span>${compactNumber(v.subs)} subs</span>
+        ${topicBadge(v.topic)}
         <span class="badge-dur">${shortDuration(v.durationSec)}</span>
       </div>
     </div>

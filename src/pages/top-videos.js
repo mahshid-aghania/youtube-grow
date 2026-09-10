@@ -21,6 +21,7 @@ export default function mount() {
       searchInput: '#search-views',
       minViewsInput: '#filter-views',
       minDurationInput: '#filter-duration',
+      topicInput: '#filter-topic',
       columns: [
         { key: 'rank', label: '#', cellClass: 'cell-rank', render: (_r, i) => rankCell(i) },
         { key: 'video', label: 'Video', primary: true, render: videoCell },

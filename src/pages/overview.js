@@ -10,11 +10,12 @@ import { ROUTES, routeById } from '../routes.js';
 import { keyInsights, overviewMetrics } from '../insights.js';
 import { compactNumber, exactNumber, multiple, shortDuration } from '../format.js';
 import {
-  ICON, channelUrl, emptyState, esc, extLink, insightCard, metricCard, setHTML, thumbUrl, watchUrl,
+  ICON, TOPIC_LABEL, barChart, channelUrl, emptyState, esc, extLink, insightCard,
+  metricCard, setHTML, thumbUrl, watchUrl,
 } from '../ui.js';
 import { withReport } from './shared.js';
 
-const MOUNTS = ['#metrics', '#insights', '#leaders', '#workspaces'];
+const MOUNTS = ['#metrics', '#insights', '#distribution', '#leaders', '#workspaces'];
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -131,6 +132,34 @@ function workspaceCard(route, deep, report) {
 
 /* ---------- page ---------- */
 
+/* ---------- distribution ---------- */
+
+const TOPIC_TONE = { science: 'cyan', entertainment: 'violet' };
+
+/** Topic-mix chips and a combined-views-by-year bar chart. */
+function renderDistribution(report) {
+  const mix = (report.topics_breakdown ?? []).filter((b) => b.count > 0);
+  const years = report.yearly ?? [];
+
+  const chips = mix.map((b) => `
+    <span class="pill" style="color: var(--${TOPIC_TONE[b.topic] ?? 'text-2'})">
+      ${esc(TOPIC_LABEL[b.topic] ?? b.topic)} · ${b.count}
+    </span>`).join('');
+
+  const peak = Math.max(...years.map((y) => y.views), 1);
+  const yearRows = years.map((y) => ({
+    channel: y.year,
+    label: `${y.videoCount} video${y.videoCount === 1 ? '' : 's'}`,
+    display: compactNumber(y.views),
+    exact: exactNumber(y.views),
+    ratio: y.views / peak,
+  }));
+
+  setHTML('#distribution', `
+    <div class="distchips">${chips}</div>
+    ${yearRows.length ? barChart(yearRows) : ''}`);
+}
+
 export default function mount() {
   withReport(MOUNTS, ({ report, deep }) => {
     setHTML('#metrics', overviewMetrics(report).map(metricCard).join(''));
@@ -140,6 +169,7 @@ export default function mount() {
       ? insights.map(insightCard).join('')
       : emptyState('No observations', 'The loaded window contains no videos to describe.'));
 
+    renderDistribution(report);
     renderLeaders(deep);
 
     setHTML('#workspaces', ROUTES

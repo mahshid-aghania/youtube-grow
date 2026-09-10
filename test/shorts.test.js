@@ -187,11 +187,15 @@ test('the committed snapshot is well-formed, eligible and free of future dates',
   const report = buildReport(snapshot);
 
   assert.equal(report.excluded, 0, 'every committed record is eligible and in range');
-  assert.ok(report.totals.videoCount >= 40, 'a substantial, diverse set ships');
+  assert.ok(report.totals.videoCount >= 60, 'a substantial, diverse set ships');
+  assert.ok(report.totals.channelCount >= 30, 'discovery is broad, not a handful of channels');
   assert.equal(new Set(snapshot.videos.map((v) => v.id)).size, snapshot.videos.length, 'no duplicate ids');
 
   const topics = new Set(snapshot.videos.map((v) => v.topic));
   assert.ok(topics.has('science') && topics.has('entertainment'), 'both topics are represented');
+  // Neither topic is a token handful — both are meaningfully represented.
+  const byTopic = report.topics_breakdown;
+  assert.ok(byTopic.every((t) => t.count >= 15), 'both entertainment and science are well represented');
 
   const years = new Set(snapshot.videos.map((v) => v.publishedAt.slice(0, 4)));
   assert.ok(years.size >= 4, 'coverage spans several publication years, not one');
