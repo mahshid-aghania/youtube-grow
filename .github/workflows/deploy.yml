@@ -31,8 +31,8 @@ jobs:
 
       # No-ops without the secret, so forks and PRs still build against the
       # committed snapshot instead of failing.
-      - name: Refresh Shorts snapshot
-        run: npm run fetch:shorts
+      - name: Refresh video snapshot
+        run: npm run fetch:videos
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
 
