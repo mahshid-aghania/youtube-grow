@@ -1,5 +1,5 @@
 /**
- * Analysis for a snapshot of popular long-form entertainment and science videos.
+ * Analysis for a snapshot of popular long-form couples and family videos.
  *
  * Pure functions over an array of video records — no network, no clock — so the
  * whole module is directly testable. Fetching lives in scripts/fetch-videos.js.
@@ -274,8 +274,8 @@ export function buildReport(snapshot, filters = {}) {
   const videos = withinWindow(eligible, window);
 
   return {
-    scope: snapshot.scope ?? 'entertainment-science',
-    topics: snapshot.topics ?? ['entertainment', 'science'],
+    scope: snapshot.scope ?? 'couples-family',
+    topics: snapshot.topics ?? ['couples', 'family'],
     minViews,
     minDurationSec,
     window,

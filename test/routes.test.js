@@ -58,7 +58,7 @@ test('page titles are unique and none keeps the old generic title', () => {
   const titles = ROUTES.map(pageTitle);
   assert.equal(new Set(titles).size, titles.length);
   for (const t of titles) {
-    assert.match(t, / \| Watchtower$/);
+    assert.match(t, / \| Hearth$/);
     assert.doesNotMatch(t, /Roblox/);
   }
 });

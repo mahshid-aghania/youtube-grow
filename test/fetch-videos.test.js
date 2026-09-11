@@ -22,13 +22,13 @@ test('parseDuration returns NaN for junk rather than a wrong number', () => {
 const item = {
   id: 'abc123',
   snippet: {
-    title: 'The Insane Engineering of a Megaproject',
-    description: 'A science and engineering documentary explaining how it works.',
+    title: 'Husband vs Wife Couples Challenge (funny reaction)',
+    description: 'A boyfriend and girlfriend relationship challenge for our anniversary.',
     channelTitle: 'Some Channel',
     channelId: 'UC123',
     publishedAt: '2024-08-20T12:00:00.000Z',
     defaultAudioLanguage: 'en-US',
-    categoryId: '28',
+    categoryId: '24',
     liveBroadcastContent: 'none',
   },
   contentDetails: { duration: 'PT14M39S' },
@@ -45,13 +45,13 @@ test('toRecord maps a verified item onto the analysis shape, with a topic', () =
   assert.equal(r.subs, 6970000);
   assert.equal(r.lang, 'en', 'locale is trimmed to a language code');
   assert.equal(r.publishedAt, '2024-08-20T12:00:00Z');
-  assert.equal(r.topic, 'science');
+  assert.equal(r.topic, 'couples');
   assert.equal(r.vph, Math.round((12880489 / 24) * 100) / 100);
 });
 
 test('classifyTopic uses title, description and category, not one signal alone', () => {
-  assert.equal(classifyTopic(item), 'science');
-  assert.equal(classifyTopic({ snippet: { title: 'Last To Leave Wins $500,000 challenge', description: 'competition', categoryId: '24' } }), 'entertainment');
+  assert.equal(classifyTopic(item), 'couples');
+  assert.equal(classifyTopic({ snippet: { title: 'Kids vs Parents family challenge', description: 'our mom and dad play with the kids', categoryId: '22' } }), 'family');
   assert.equal(classifyTopic({ snippet: { title: 'Official Music Video', description: 'a song', categoryId: '10' } }), null,
     'an off-topic video is rejected, not force-fit');
 });

@@ -26,8 +26,8 @@ import { dayMarkdown, weekMarkdown, weekJson, castMarkdown } from '../src/planne
 /* ---------- fixtures ---------- */
 
 // The planner is, by design, a short-form production engine (kept structurally
-// intact when the product's discovery scope moved to long-form entertainment
-// and science). Its tests run against a representative short-form fixture rather
+// intact when the product's discovery scope moved to long-form couples and
+// family videos). Its tests run against a representative short-form fixture rather
 // than the committed discovery snapshot, so the engine stays covered on its own
 // terms and independently of whatever the live snapshot happens to hold.
 const mk = (id, title, durationSec, views, vph, subs, day) => ({

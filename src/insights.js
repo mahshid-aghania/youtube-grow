@@ -141,7 +141,7 @@ export function keyInsights(report) {
     const parts = mix.map((b) => `${b.count} ${topicLabel(b.topic)}`);
     out.push({
       id: 'topics',
-      headline: 'Discovery spans entertainment and science',
+      headline: 'Discovery spans couples and family',
       detail: `This selection holds ${listPhrase(parts)} — judged from each video's `
         + `title, description and category, not a single keyword.`,
     });
@@ -150,10 +150,10 @@ export function keyInsights(report) {
   return out;
 }
 
-/** "science" -> "science", "entertainment" -> "entertainment". A hook for future topics. */
-const topicLabel = (topic) => ({ science: 'science', entertainment: 'entertainment' }[topic] ?? topic);
+/** Human-facing topic label. A hook for future topics. */
+const topicLabel = (topic) => ({ couples: 'couples', family: 'family & kids' }[topic] ?? topic);
 
-/** ["3 science", "2 entertainment"] -> "3 science and 2 entertainment". */
+/** ["3 couples", "2 family & kids"] -> "3 couples and 2 family & kids". */
 function listPhrase(parts) {
   if (parts.length <= 1) return parts.join('');
   return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;

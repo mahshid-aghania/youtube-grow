@@ -1,14 +1,14 @@
-# Watchtower
+# Hearth
 
 A focused analytics dashboard for discovering verified **million-view, long-form
-YouTube videos about entertainment and science**, published **2021–2026**,
-tracking their momentum, and reverse-engineering successful videos scene by
-scene.
+YouTube videos about couples & partners and kids/family fun**, published
+**2021–2026**, tracking their momentum, and reverse-engineering successful videos
+scene by scene.
 
 Every tracked video meets all of these, verified against authoritative video
 metadata at collection time:
 
-- **Topic** — entertainment, science, or the overlap between them.
+- **Topic** — couples, family, or the overlap between them.
 - **Duration** — at least **8 minutes** by default (configurable).
 - **Views** — at least **1,000,000** verified views (configurable: 1M / 5M / 10M / 25M / 50M).
 - **Published** — 1 Jan 2021 through 31 Dec 2026 inclusive, never a future date.
@@ -125,7 +125,7 @@ Analytics.
 ## The video tracker
 
 Reports on the verified eligible videos it discovers. It gives you total and
-median views, engagement rate, a per-year breakdown, the entertainment/science
+median views, engagement rate, a per-year breakdown, the couples/family
 topic mix, the top videos by views and by views-per-hour, the channels taking
 the most views, and breakout videos ranked by views per subscriber.
 
@@ -144,12 +144,12 @@ npm run build && npx http-server public                     # view the report
 ```
 
 The **minimum-views** (1M / 5M / 10M / 25M / 50M), **minimum-length** (8 min
-through 1 hour) and **topic** (entertainment / science) filters on the Top
+through 1 hour) and **topic** (couples / family) filters on the Top
 Videos, Trending and Breakout pages raise those floors in the interface too —
 they only ever hide verified videos, never invent them, and never silently relax
 below the committed rules. Every video row carries a colour-coded topic tag, and
 the Overview shows the topic mix and combined views by year, so the spread across
-entertainment, science and all six years 2021–2026 is visible at a glance.
+couples, family and all six years 2021–2026 is visible at a glance.
 
 ### Scene-by-scene analysis
 
@@ -194,7 +194,7 @@ each with a full package — concept, cast, storyboard, image prompts,
 image-to-video prompts, an audio and editing guide, and a publishing kit.
 
 > **Note on scope.** For You is a **short-form production engine** that predates
-> the move to long-form entertainment/science *discovery*. It is retained and
+> the move to long-form couples & family *discovery*. It is retained and
 > reframed at the surface (labels and page copy), but its concept library,
 > character system and render presets remain structurally as built. It reads the
 > same snapshot the rest of the app does and never crashes on it, but it is a
@@ -399,7 +399,7 @@ enforces that.
 API does not expose a complete index of everything published, and it caps any
 single query's result set. `scripts/fetch-videos.js` pages through the top
 results by view count across many topics and years, so what you get is a broad,
-curated head of the distribution for eligible entertainment and science videos —
+curated head of the distribution for eligible couples and family videos —
 enough to see what's working, not enough to say "these are *the* N biggest videos
 of 2021–2026". Every snapshot carries `coverage` and `coverageNote` fields, and
 the page prints them above the numbers so a reader can't mistake one for the

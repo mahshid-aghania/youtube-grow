@@ -35,7 +35,7 @@ export const ROUTES = [
     dir: '',
     label: 'Overview',
     title: 'Overview',
-    description: 'An executive summary of verified million-view entertainment and science '
+    description: 'An executive summary of verified million-view couples and family '
       + 'videos — headline metrics, the leading video, the fastest mover, the leading channel '
       + 'and the strongest breakout, across 2021–2026.',
     icon: svg('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>'),
@@ -45,8 +45,8 @@ export const ROUTES = [
     dir: 'for-you',
     label: 'For You',
     title: 'For You',
-    description: 'A personalised production plan built from what the tracked entertainment '
-      + 'and science videos have in common — concepts, cast, storyboards, generation prompts, '
+    description: 'A personalised production plan built from what the tracked couples '
+      + 'and family videos have in common — concepts, cast, storyboards, generation prompts, '
       + 'audio and publishing packages. Data-informed and rule-based, not predictions.',
     icon: svg('<rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="m9.5 14 1.8 1.8L15 12.5"/>'),
   },
@@ -55,7 +55,7 @@ export const ROUTES = [
     dir: 'top-videos',
     label: 'Top Videos',
     title: 'Top Videos',
-    description: 'Every tracked entertainment and science video ranked by lifetime views, with '
+    description: 'Every tracked couples and family video ranked by lifetime views, with '
       + 'views per hour, channel and subscriber context, duration and direct YouTube links. '
       + 'Filter by minimum views and length.',
     icon: svg('<rect x="2" y="4" width="20" height="16" rx="4"/><path d="m10 9 5 3-5 3z"/>'),
@@ -65,7 +65,7 @@ export const ROUTES = [
     dir: 'trending',
     label: 'Trending Now',
     title: 'Trending Now',
-    description: 'Entertainment and science videos ranked by average views per hour since '
+    description: 'Couples and family videos ranked by average views per hour since '
       + 'publication — the fastest-moving videos in the tracked set, computed from snapshot data.',
     icon: svg('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
   },
@@ -83,7 +83,7 @@ export const ROUTES = [
     dir: 'breakout-videos',
     label: 'Breakout Videos',
     title: 'Breakout Videos',
-    description: 'Entertainment and science videos earning unusually high reach relative to '
+    description: 'Couples and family videos earning unusually high reach relative to '
       + 'their channel’s subscriber base, ranked by views per subscriber.',
     icon: svg('<path d="m3 17 6-6 4 4 8-8"/><path d="M14 7h7v7"/>'),
   },
@@ -99,7 +99,7 @@ export const ROUTES = [
   },
 ];
 
-export const SITE_NAME = 'Watchtower';
+export const SITE_NAME = 'Hearth';
 export const SITE_ORIGIN = 'https://mahshid-aghania.github.io/youtube-grow/';
 
 export const routeById = (id) => ROUTES.find((r) => r.id === id) ?? null;

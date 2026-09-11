@@ -15,7 +15,7 @@ export default function mount() {
     setHTML('#chart-views', barChart(viewsChartRows(report, 8)));
 
     mountTable('#table-views', {
-      caption: 'Top entertainment and science videos ranked by lifetime views',
+      caption: 'Top couples and family videos ranked by lifetime views',
       rows: deep.topByViews,
       initial: 10,
       searchInput: '#search-views',
@@ -41,6 +41,6 @@ export default function mount() {
       <p><strong>Subscriber counts</strong> are the channel's total at collection time. Each
       title links to the video on YouTube.</p>
       <p>This snapshot is the head of the distribution for ${compactNumber(report.totals.videoCount)}
-      tracked videos across entertainment and science, not a census of everything published.</p>`));
+      tracked videos across couples and family, not a census of everything published.</p>`));
   });
 }

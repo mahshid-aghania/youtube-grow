@@ -17,7 +17,7 @@ export default function mount() {
     })));
 
     mountTable('#table-vph', {
-      caption: 'Entertainment and science videos ranked by average views per hour',
+      caption: 'Couples and family videos ranked by average views per hour',
       rows: deep.topByVph,
       initial: 10,
       searchInput: '#search-vph',

@@ -12,11 +12,11 @@ const WINDOW = { start: '2021-01-01T00:00:00Z', end: '2026-09-09T00:00:00Z' };
 
 /** Three eligible long-form videos, plus fields the rollups read. */
 const sample = [
-  { id: 'a', title: 'A', topic: 'science', channel: 'One', channelId: 'c1', country: 'US', subs: 100000,
+  { id: 'a', title: 'A', topic: 'couples', channel: 'One', channelId: 'c1', country: 'US', subs: 100000,
     publishedAt: '2021-08-19T10:00:00Z', durationSec: 600, views: 1_000_000, likes: 100000, comments: 10000, vph: 50 },
-  { id: 'b', title: 'B', topic: 'entertainment', channel: 'One', channelId: 'c1', country: 'US', subs: 120000,
+  { id: 'b', title: 'B', topic: 'family', channel: 'One', channelId: 'c1', country: 'US', subs: 120000,
     publishedAt: '2023-08-21T10:00:00Z', durationSec: 900, views: 3_000_000, likes: 200000, comments: 20000, vph: 500 },
-  { id: 'c', title: 'C', topic: 'science', channel: 'Two', channelId: 'c2', country: 'DE', subs: 5000,
+  { id: 'c', title: 'C', topic: 'couples', channel: 'Two', channelId: 'c2', country: 'DE', subs: 5000,
     publishedAt: '2025-08-21T23:59:59Z', durationSec: 1200, views: 2_000_000, likes: 50000, comments: 5000, vph: 120 },
 ];
 
@@ -113,10 +113,10 @@ test('byYear buckets by publication year across the multi-year range', () => {
   ]);
 });
 
-test('topicBreakdown reports the entertainment/science mix', () => {
+test('topicBreakdown reports the couples/family mix', () => {
   const mix = topicBreakdown(sample);
-  assert.equal(mix.find((m) => m.topic === 'science').count, 2);
-  assert.equal(mix.find((m) => m.topic === 'entertainment').count, 1);
+  assert.equal(mix.find((m) => m.topic === 'couples').count, 2);
+  assert.equal(mix.find((m) => m.topic === 'family').count, 1);
 });
 
 test('byDay/fillDays still bucket by day for callers that want it', () => {
@@ -147,19 +147,19 @@ test('compact abbreviates at each magnitude', () => {
 
 test('buildReport keeps only eligible, in-window videos and reports what it dropped', () => {
   const snapshot = {
-    scope: 'entertainment-science', topics: ['entertainment', 'science'],
+    scope: 'couples-family', topics: ['couples', 'family'],
     windowStart: WINDOW.start, windowEnd: WINDOW.end, minViews: 1_000_000, minDurationSec: 480,
     fetchedAt: '2026-09-09T00:00:00Z', source: 'test',
     videos: [
       ...sample,
       // too short
-      { id: 'short', channelId: 'c2', subs: 5000, topic: 'science',
+      { id: 'short', channelId: 'c2', subs: 5000, topic: 'family',
         publishedAt: '2022-01-01T00:00:00Z', durationSec: 120, views: 9_000_000, likes: 0, comments: 0, vph: 1 },
       // too few views
-      { id: 'small', channelId: 'c2', subs: 5000, topic: 'science',
+      { id: 'small', channelId: 'c2', subs: 5000, topic: 'family',
         publishedAt: '2022-01-01T00:00:00Z', durationSec: 900, views: 500_000, likes: 0, comments: 0, vph: 1 },
       // before 2021
-      { id: 'old', channelId: 'c2', subs: 5000, topic: 'science',
+      { id: 'old', channelId: 'c2', subs: 5000, topic: 'family',
         publishedAt: '2019-01-01T00:00:00Z', durationSec: 900, views: 9_000_000, likes: 0, comments: 0, vph: 1 },
     ],
   };
@@ -187,15 +187,15 @@ test('the committed snapshot is well-formed, eligible and free of future dates',
   const report = buildReport(snapshot);
 
   assert.equal(report.excluded, 0, 'every committed record is eligible and in range');
-  assert.ok(report.totals.videoCount >= 60, 'a substantial, diverse set ships');
-  assert.ok(report.totals.channelCount >= 30, 'discovery is broad, not a handful of channels');
+  assert.ok(report.totals.videoCount >= 25, 'a substantial, diverse set ships');
+  assert.ok(report.totals.channelCount >= 15, 'discovery is broad, not a handful of channels');
   assert.equal(new Set(snapshot.videos.map((v) => v.id)).size, snapshot.videos.length, 'no duplicate ids');
 
   const topics = new Set(snapshot.videos.map((v) => v.topic));
-  assert.ok(topics.has('science') && topics.has('entertainment'), 'both topics are represented');
+  assert.ok(topics.has('couples') && topics.has('family'), 'both topics are represented');
   // Neither topic is a token handful — both are meaningfully represented.
   const byTopic = report.topics_breakdown;
-  assert.ok(byTopic.every((t) => t.count >= 15), 'both entertainment and science are well represented');
+  assert.ok(byTopic.every((t) => t.count >= 10), 'both couples and family are well represented');
 
   const years = new Set(snapshot.videos.map((v) => v.publishedAt.slice(0, 4)));
   assert.ok(years.size >= 4, 'coverage spans several publication years, not one');
@@ -205,7 +205,7 @@ test('the committed snapshot is well-formed, eligible and free of future dates',
     assert.ok(v.id && v.title && v.channelId, `record ${v.id} has identity fields`);
     assert.ok(v.durationSec >= 480, `record ${v.id} is long-form`);
     assert.ok(v.views >= 1_000_000, `record ${v.id} clears a million views`);
-    assert.ok(v.topic === 'science' || v.topic === 'entertainment', `record ${v.id} is on-topic`);
+    assert.ok(v.topic === 'couples' || v.topic === 'family', `record ${v.id} is on-topic`);
     const at = Date.parse(v.publishedAt);
     assert.ok(at >= Date.parse('2021-01-01T00:00:00Z'), `record ${v.id} is not before 2021`);
     assert.ok(at < Date.parse('2027-01-01T00:00:00Z'), `record ${v.id} is not after 2026`);

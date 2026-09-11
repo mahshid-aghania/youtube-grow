@@ -2,9 +2,9 @@
 /**
  * Refresh data/videos.json from the YouTube Data API v3.
  *
- * Discovers highly popular, long-form YouTube videos about entertainment and
- * science, published 2021-01-01 through the current date (capped at 2026-12-31),
- * at least 8 minutes long and with at least 1,000,000 verified views.
+ * Discovers highly popular, long-form YouTube videos about couples/partners and
+ * kids/family fun, published 2021-01-01 through the current date (capped at
+ * 2026-12-31), at least 8 minutes long and with at least 1,000,000 verified views.
  *
  * Usage:
  *   YOUTUBE_API_KEY=... node scripts/fetch-videos.js \
@@ -42,42 +42,41 @@ const RANGE_END_EXCLUSIVE = '2027-01-01T00:00:00Z'; // 2026-12-31 inclusive
  * a fixed channel list. Interpreted across relevant creators and subjects.
  */
 const TOPIC_QUERIES = {
-  science: [
-    'space documentary', 'black hole universe explained', 'astronomy cosmos',
-    'physics experiment explained', 'chemistry reaction experiment',
-    'biology human body evolution', 'nature wildlife documentary',
-    'engineering megaproject how it works', 'artificial intelligence robotics',
-    'science documentary full', 'inventions technology explained',
+  couples: [
+    'couple challenge boyfriend girlfriend', 'husband wife prank funny',
+    'how we met relationship story', 'couples q and a assumptions',
+    'boyfriend vs girlfriend', 'relationship goals couple',
+    'proposal reaction engagement', 'long distance relationship reunion',
+    'couple goals date night', 'partner story time',
   ],
-  entertainment: [
-    'challenge competition win', 'game show contest', 'comedy sketch',
-    'documentary true story', 'travel adventure expedition',
-    'food challenge street food tour', 'behind the scenes',
-    'pop culture explained', 'world record stunt', 'reality competition',
+  family: [
+    'family vlog day in the life', 'kids vs parents challenge',
+    'family fun challenge kids', 'gender reveal surprise family',
+    'siblings challenge funny', 'parenting kids funny',
+    'family game night', 'kids surprise birthday party',
+    'mom dad kids challenge', 'family friendly challenge fun',
   ],
 };
 
-/** Terms that mark a video as science-leaning, checked against title+description. */
-const SCIENCE_TERMS = [
-  'science', 'scientist', 'physics', 'chemistry', 'biology', 'astronomy', 'space',
-  'universe', 'cosmos', 'galaxy', 'black hole', 'quantum', 'nasa', 'telescope',
-  'nature', 'wildlife', 'animal', 'species', 'ecosystem', 'evolution', 'dna',
-  'engineering', 'engineer', 'technology', 'robot', 'robotics', 'artificial intelligence',
-  ' ai ', 'experiment', 'documentary', 'invention', 'explained', 'research', 'discovery',
-  'climate', 'geology', 'neuroscience', 'brain', 'planet', 'megaproject',
+/** Terms that mark a video as couples/partner-leaning, checked against title+description. */
+const COUPLES_TERMS = [
+  'couple', 'couples', 'boyfriend', 'girlfriend', 'husband', 'wife', 'partner',
+  'relationship', 'dating', 'date night', 'marriage', 'married', 'wedding',
+  'proposal', 'engaged', 'anniversary', 'love story', 'how we met', 'my ex',
+  'long distance', 'romantic', 'couple goals', 'his and hers', 'q&a',
 ];
 
-/** Terms that mark a video as entertainment-leaning. */
-const ENTERTAINMENT_TERMS = [
-  'challenge', 'competition', 'contest', 'game show', 'comedy', 'funny', 'prank',
-  'reaction', 'sketch', 'story', 'storytelling', 'travel', 'adventure', 'expedition',
-  'food', 'eating', 'street food', 'cooking', 'mukbang', 'behind the scenes',
-  'world record', 'stunt', 'survive', 'survival', 'win', '$', 'vs', 'versus', 'record',
+/** Terms that mark a video as kids/family-leaning. */
+const FAMILY_TERMS = [
+  'family', 'kids', 'kid', 'children', 'mom', 'dad', 'mum', 'parents', 'parent',
+  'parenting', 'toddler', 'baby', 'newborn', 'pregnant', 'pregnancy', 'siblings',
+  'brother', 'sister', 'son', 'daughter', 'family vlog', 'gender reveal',
+  'birthday', 'family friendly', 'playtime', 'family challenge', 'grandma', 'grandpa',
 ];
 
 /** YouTube category ids that lean each way (used alongside the term lists). */
-const SCIENCE_CATEGORIES = new Set(['28', '27', '15']); // Sci&Tech, Education, Pets&Animals
-const ENTERTAINMENT_CATEGORIES = new Set(['24', '23', '17', '19', '20']); // Entertainment, Comedy, Sports, Travel, Gaming
+const COUPLES_CATEGORIES = new Set(['24', '22']); // Entertainment, People & Blogs
+const FAMILY_CATEGORIES = new Set(['22', '24', '1', '26']); // People & Blogs, Entertainment, Film & Animation, Howto & Style
 
 function parseArgs(argv) {
   const args = { ...DEFAULTS };
@@ -104,20 +103,22 @@ export function parseDuration(iso) {
 }
 
 /**
- * Classify a video as science, entertainment, or neither, from its title,
- * description and category — never a single keyword or category alone. Returns
- * the stronger of the two topics, or null when nothing relevant is found.
+ * Classify a video as couples, family, or neither, from its title, description
+ * and category — never a single keyword or category alone. Returns the stronger
+ * of the two topics, or null when nothing relevant is found.
  */
 export function classifyTopic(item) {
   const haystack = ` ${(item.snippet?.title ?? '')} ${(item.snippet?.description ?? '')} `.toLowerCase();
   const categoryId = item.snippet?.categoryId;
-  const count = (terms) => terms.reduce((n, t) => (haystack.includes(t) ? n + 1 : n), 0);
+  // Whole-word matching, so "son" doesn't match "song" and "kid" doesn't match "kidney".
+  const has = (t) => new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(haystack);
+  const count = (terms) => terms.reduce((n, t) => (has(t) ? n + 1 : n), 0);
 
-  const science = count(SCIENCE_TERMS) + (SCIENCE_CATEGORIES.has(categoryId) ? 2 : 0);
-  const entertainment = count(ENTERTAINMENT_TERMS) + (ENTERTAINMENT_CATEGORIES.has(categoryId) ? 2 : 0);
+  const couples = count(COUPLES_TERMS) + (COUPLES_CATEGORIES.has(categoryId) ? 1 : 0);
+  const family = count(FAMILY_TERMS) + (FAMILY_CATEGORIES.has(categoryId) ? 1 : 0);
 
-  if (science === 0 && entertainment === 0) return null;
-  return science >= entertainment ? 'science' : 'entertainment';
+  if (couples === 0 && family === 0) return null;
+  return couples >= family ? 'couples' : 'family';
 }
 
 async function get(path, params, key) {
@@ -294,23 +295,23 @@ async function main() {
   console.log(`Kept ${videos.length}. Dropped:`, dropped);
 
   const snapshot = {
-    scope: 'entertainment-science',
-    topics: ['entertainment', 'science'],
-    query: 'Popular long-form entertainment and science videos',
+    scope: 'couples-family',
+    topics: ['couples', 'family'],
+    query: 'Popular long-form couples and family videos',
     format: 'long',
     minDurationSec: args.minDuration,
     minViews: args.minViews,
     windowStart: RANGE_START,
     windowEnd: new Date(endCap).toISOString().replace(/\.\d{3}Z$/, 'Z'),
     fetchedAt: new Date(now).toISOString().replace(/\.\d{3}Z$/, 'Z'),
-    source: 'YouTube Data API v3 search.list (order=viewCount) across science and entertainment '
-      + 'topics and publication years, verified with videos.list',
+    source: 'YouTube Data API v3 search.list (order=viewCount) across couples/partner and '
+      + 'kids/family topics and publication years, verified with videos.list',
     coverage: 'partial',
     coverageNote:
       `${videos.length} verified videos: long-form (≥${Math.round(args.minDuration / 60)} min), `
       + `at least ${args.minViews.toLocaleString('en-US')} views, published 2021-01-01 through the `
       + 'collection date. YouTube search exposes no complete index, so this is the head of the '
-      + 'distribution across entertainment and science — not a census of every qualifying video.',
+      + 'distribution across couples and family — not a census of every qualifying video.',
     videos,
   };
 

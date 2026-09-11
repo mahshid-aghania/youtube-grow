@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Watchtower — design system
+   Hearth — design system
 
    Dark-only by design: one committed look, so the interface renders the same
    whatever the viewer's OS is set to. Every colour below is unconditional.
@@ -485,18 +485,18 @@ td.col-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
   font-size: .7rem; font-variant-numeric: tabular-nums; color: var(--text-2);
 }
 
-/* Topic tag: one colour per topic, so science and entertainment read apart. */
+/* Topic tag: one colour per topic, so couples and family read apart. */
 .badge-topic {
   padding: .05rem .4rem;
   border-radius: 4px;
   font-size: .68rem; font-weight: 600; letter-spacing: .01em;
   border: 1px solid transparent;
 }
-.badge-topic[data-topic="science"] {
+.badge-topic[data-topic="couples"] {
   color: var(--cyan); background: var(--cyan-wash);
   border-color: color-mix(in srgb, var(--cyan) 32%, transparent);
 }
-.badge-topic[data-topic="entertainment"] {
+.badge-topic[data-topic="family"] {
   color: var(--violet); background: var(--violet-wash);
   border-color: color-mix(in srgb, var(--violet) 32%, transparent);
 }

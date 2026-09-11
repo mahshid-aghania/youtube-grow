@@ -244,7 +244,7 @@ export function mountTable(mountSel, {
   bindThreshold(minViewsInput, (v) => { minViews = v; });
   bindThreshold(minDurationInput, (v) => { minDuration = v; });
 
-  // The topic select filters entertainment vs science; '' means both.
+  // The topic select filters couples vs family; '' means both.
   if (topicInput) {
     const el = $(topicInput);
     if (el) el.addEventListener('change', () => { topic = el.value; expanded = false; render(); });
@@ -259,7 +259,7 @@ export const rankCell = (i) =>
   `<span class="rank${i < 3 ? ' rank--medal' : ''}" aria-label="Rank ${i + 1}">${i + 1}</span>`;
 
 /** Human labels for the topics; also the toggle for what a badge shows. */
-export const TOPIC_LABEL = { science: 'Science', entertainment: 'Entertainment' };
+export const TOPIC_LABEL = { couples: 'Couples', family: 'Family & Kids' };
 
 /** A small topic tag, coloured per topic. Renders nothing for an unknown topic. */
 export const topicBadge = (topic) =>
