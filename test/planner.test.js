@@ -12,7 +12,7 @@ import {
 import { buildCharacter, buildCast, identityLock } from '../src/planner/characters.js';
 import { buildTimeline, buildScenes } from '../src/planner/story.js';
 import { imagePrompt, videoPrompt } from '../src/planner/prompts.js';
-import { RIG_OPTIONS, RENDER_OPTIONS, styleBlock } from '../src/planner/robloxstyle.js';
+import { LOOK_OPTIONS, RENDER_OPTIONS, styleBlock } from '../src/planner/humanstyle.js';
 import {
   GAME_CHARACTERS, GAME_WORLDS, gameCharacterById, referenceSheetPrompt, worldById,
 } from '../src/planner/games.js';
@@ -208,7 +208,7 @@ test('buildCharacter is deterministic and fully specified', () => {
   assert.deepEqual(a, b);
   assert.notEqual(buildCharacter('vet', 'seed-2').name, a.name);
 
-  for (const field of ['name', 'rig', 'head', 'faceDecal', 'hat', 'hair', 'outfit', 'shoes',
+  for (const field of ['name', 'look', 'face', 'eyes', 'headwear', 'hair', 'outfit', 'shoes',
     'accessories', 'colors', 'marks']) {
     assert.ok(a[field] && a[field].length > 0, `${field} is populated`);
   }
@@ -218,13 +218,13 @@ test('buildCharacter is deterministic and fully specified', () => {
 test('identityLock names every attribute a generator would otherwise drift on', () => {
   const c = buildCharacter('intern', 'x');
   const lock = identityLock(c);
-  for (const needle of [c.name, c.head, c.faceDecal, c.hat, c.hair, c.outfit, c.shoes,
+  for (const needle of [c.name, c.face, c.eyes, c.headwear, c.hair, c.outfit, c.shoes,
     c.accessories, c.colors]) {
     assert.ok(lock.includes(needle), `lock repeats "${needle.slice(0, 24)}…"`);
   }
-  assert.match(lock, /Do not redesign, replace, age, humanise/);
-  // The single most common drift: the generator sculpts a real face.
-  assert.match(lock, /it stays a printed decal/);
+  assert.match(lock, /do not recast, replace, age, restyle/i);
+  // The single most common drift: the generator cartoonifies or stylises the face.
+  assert.match(lock, /keep the face a real human face/i);
 });
 
 test('buildCast resolves relative heights across the whole cast', () => {
@@ -357,13 +357,13 @@ test('a speaking scene demands one delivery; a silent scene forbids lip movement
 
   const spoken = buildScenes(seed, cast, timeline, { dialogue: true })[0];
   assert.match(videoPrompt(spoken, cast, {}), /deliver the dialogue exactly once/);
-  assert.match(videoPrompt(spoken, cast, {}), /printed decal swapping between open and closed/);
+  assert.match(videoPrompt(spoken, cast, {}), /mouth and jaw move naturally with the words/i);
   assert.match(videoPrompt(spoken, cast, {}), /Do not repeat, restart, paraphrase, echo/);
 
   const silent = buildScenes(seed, cast, timeline, { dialogue: false })[0];
   const sp = videoPrompt(silent, cast, {});
   assert.match(sp, /does not speak/);
-  assert.match(sp, /Do not generate any mouth movement/);
+  assert.match(sp, /Do not generate any mouth or lip movement/);
 });
 
 /* ---------- plan assembly ---------- */
@@ -614,7 +614,7 @@ test('a silent scene tells the generator to keep the mouth closed', () => {
     const prompt = videoPrompt(s, plan.cast, { platform: 'veo' });
     if (s.dialogue === '—') {
       assert.match(prompt, /does not speak/);
-      assert.match(prompt, /Do not generate any mouth movement/);
+      assert.match(prompt, /Do not generate any mouth or lip movement/);
     } else {
       assert.ok(prompt.includes(`"${s.dialogue}"`), `scene ${s.n} carries its line verbatim`);
       assert.match(prompt, /deliver the dialogue exactly once/);
@@ -654,90 +654,90 @@ test('consecutive scenes in the same beat do not repeat the same frame', () => {
   }
 });
 
-/* ---------- Roblox visual language ---------- */
+/* ---------- realistic visual language ---------- */
 
-test('every image prompt states it is a Roblox scene before anything else', () => {
+test('every image prompt states it is real live-action before anything else', () => {
   const plan = buildDayPlan(week[0], prefs);
   for (const s of plan.scenes) {
     const head = s.imagePrompt.slice(0, 400);
-    assert.match(head, /inside the video game Roblox/,
-      `scene ${s.n} names the world in its opening lines`);
-    assert.match(s.imagePrompt, /AVATAR CONSTRUCTION:/);
-    assert.match(s.imagePrompt, /flat 2D decal printed on the front surface of the head/);
+    assert.match(head, /real, live-action short/,
+      `scene ${s.n} names the medium in its opening lines`);
+    assert.match(s.imagePrompt, /CASTING:/);
+    assert.match(s.imagePrompt, /real human with a real, sculpted face/);
   }
 });
 
-test('prompts forbid the generic-3D drift they used to produce', () => {
+test('prompts forbid the cartoon / game-render drift', () => {
   const plan = buildDayPlan(week[0], prefs);
   for (const s of plan.scenes) {
-    for (const needle of ['not Pixar style', 'not a realistic human', 'no sculpted facial features',
-      'no individual hair strands', 'no skin texture or pores']) {
+    for (const needle of ['not a cartoon', 'not 3D animation', 'not Roblox or any video-game avatar',
+      'no plastic, waxy or doll-like skin', 'no flat, printed or decal face']) {
       assert.ok(s.imagePrompt.includes(needle), `scene ${s.n} rules out "${needle}"`);
       assert.ok(s.videoPrompt.includes(needle), `scene ${s.n} video prompt rules out "${needle}"`);
     }
-    // The old style string is exactly what produced a Pixar render.
-    assert.doesNotMatch(s.imagePrompt, /Premium cinematic 3D game-inspired animation/);
+    // The old world string is exactly what produced a game render.
+    assert.doesNotMatch(s.imagePrompt, /inside the video game Roblox/);
   }
 });
 
-test('a video prompt animates rigid parts and a decal, not a face', () => {
+test('a video prompt animates a real person, not a rig', () => {
   const plan = buildDayPlan(week[0], prefs);
   const p = plan.scenes[0].videoPrompt;
-  assert.match(p, /this is a scene inside the video game Roblox/);
-  assert.match(p, /separate rigid Roblox parts/);
-  assert.match(p, /the face is a printed decal/);
-  assert.match(p, /never bend where a Roblox limb cannot/);
+  assert.match(p, /real live-action footage of real people/);
+  assert.match(p, /believable human with a real face/);
+  assert.match(p, /natural human micro-expressions/);
+  assert.match(p, /anatomically correct/);
 });
 
-test('the rig follows the pillar and every rig produces a real spec', () => {
-  for (const rig of RIG_OPTIONS) {
-    const block = styleBlock({ rig: rig.id, render: 'ingame' });
-    assert.match(block, /AVATAR CONSTRUCTION:/);
-    assert.ok(block.length > 900, `${rig.id} carries the full construction spec`);
+test('the casting look follows the pillar and every look produces a real spec', () => {
+  for (const look of LOOK_OPTIONS) {
+    const block = styleBlock({ look: look.id, render: 'candid' });
+    assert.match(block, /CASTING:/);
+    assert.ok(block.length > 700, `${look.id} carries the full realism spec`);
   }
-  // Animal Hospital is played with animal-headed avatars, so a plan set there
-  // must not describe a plain blocky avatar.
+  // Whatever the pillar, the people are always real humans — never an avatar.
   const rec = week.find((r) => r.pillarId === 'animal-hospital');
-  assert.ok(rec, 'the fixture week includes an Animal Hospital day');
-  assert.match(buildDayPlan(rec, prefs).scenes[0].imagePrompt,
-    /Roblox avatar rig wearing a large moulded animal head/);
+  assert.ok(rec, 'the fixture week includes a clinic day');
+  const img = buildDayPlan(rec, prefs).scenes[0].imagePrompt;
+  assert.match(img, /real human|real people|believable human/);
+  assert.doesNotMatch(img, /moulded animal head|antler/);
 
-  // Pinning a rig in preferences overrides the pillar's default.
-  assert.match(buildDayPlan(rec, { ...prefs, avatarRig: 'r6' }).scenes[0].imagePrompt,
-    /Classic R6 avatar construction/);
+  // Pinning a look in preferences overrides the pillar's default.
+  assert.match(buildDayPlan(rec, { ...prefs, castingLook: 'gritty' }).scenes[0].imagePrompt,
+    /unglamorous|documentary honesty/);
 });
 
-test('render presets change only the lighting, never the geometry', () => {
+test('render presets change only the lighting, never the realism', () => {
   for (const preset of RENDER_OPTIONS) {
-    const block = styleBlock({ rig: 'r15', render: preset.id });
+    const block = styleBlock({ look: 'natural', render: preset.id });
     assert.match(block, /RENDER:/);
-    // Whatever the treatment, the construction rules are still in the prompt.
-    assert.match(block, /flat 2D decal/);
-    assert.match(block, /separate solid parts|rigid solid/);
+    // Whatever the treatment, the realism rules are still in the prompt.
+    assert.match(block, /REALISM RULES/);
+    assert.match(block, /real skin|real human|photoreal/);
   }
 });
 
-test('characters are described the way Roblox builds, not the way people look', () => {
+test('characters are described the way real people look, not as game avatars', () => {
   for (const roleKey of ['vet', 'intern', 'kid', 'noob', 'pro']) {
     const c = buildCharacter(roleKey, 'x');
-    assert.match(`${c.head} ${c.faceDecal}`, /head|decal|printed/i);
-    assert.match(c.faceDecal, /printed/i, `${roleKey}'s face is a decal`);
-    assert.ok(['r6', 'r15', 'rthro', 'animal'].includes(c.rig), `${roleKey} names a real rig`);
-    // The vocabulary that produced Pixar characters.
-    const blob = `${c.head} ${c.faceDecal} ${c.hair} ${c.outfit}`.toLowerCase();
-    for (const banned of ['smile lines', 'freckles', 'pores', 'strand of hair', 'soft jaw']) {
+    assert.match(`${c.face} ${c.eyes}`, /face|eyes|skin|hair/i);
+    assert.match(c.face, /face|skin/i, `${roleKey} has a real described face`);
+    assert.ok(['natural', 'polished', 'gritty'].includes(c.look), `${roleKey} names a real casting look`);
+    // The vocabulary that produced game avatars.
+    const blob = `${c.face} ${c.eyes} ${c.hair} ${c.outfit}`.toLowerCase();
+    for (const banned of ['decal', 'moulded', 'printed face', 'plastic', 'low-poly', 'avatar']) {
       assert.ok(!blob.includes(banned), `${roleKey} avoids "${banned}"`);
     }
   }
 });
 
-test('every concept is staged somewhere that exists in a Roblox world', () => {
+test('every concept is staged in a real, specific place with real props', () => {
   for (const p of PILLARS) {
     for (const s of p.seeds) {
-      assert.match(s.setting,
-        /roblox|obby|animal hospital|baseplate|hide-and-seek|spawn|lobby/i,
-        `${s.id} is staged in a Roblox place`);
-      assert.ok(s.props.length >= 2, `${s.id} names props that can be built from parts`);
+      assert.ok(s.setting && s.setting.length > 15, `${s.id} names a specific place`);
+      assert.doesNotMatch(s.setting, /roblox|\bobby\b|baseplate|spawn pad/i,
+        `${s.id} is staged in a real place, not a game world`);
+      assert.ok(s.props.length >= 2, `${s.id} names real props for the scene`);
     }
   }
 });
@@ -747,8 +747,8 @@ test('every concept is staged somewhere that exists in a Roblox world', () => {
 test('the game-character library records what the character actually does', () => {
   const harlow = gameCharacterById('dr-harlow');
   assert.ok(harlow, 'Dr. Harlow is in the library');
-  assert.equal(harlow.gameLabel, 'Animal Hospital');
-  for (const needle of ['head doctor', 'mentor', 'supervisor', 'lobby', 'Supplies Shop',
+  assert.equal(harlow.gameLabel, 'the clinic series');
+  for (const needle of ['head doctor', 'mentor', 'supervisor', 'staff room', 'supply room',
     'performance report', 'emergencies']) {
     assert.ok(harlow.lore.toLowerCase().includes(needle.toLowerCase()),
       `the lore records "${needle}"`);
@@ -777,15 +777,15 @@ test('a cast game character is prompted as a fan interpretation, with a full ide
   // A supplied lock is used verbatim rather than rebuilt from summary fields.
   assert.equal(harlow.identityLock, gameCharacterById('dr-harlow').identityLock);
   assert.match(harlow.identityLock, /PERMANENT IDENTITY LOCK — Dr\. Harlow/);
-  for (const element of ['deer head shape', 'orange facial markings', 'grey antler silhouette',
-    'circular forehead reflector', 'electric-blue surgical mask', 'red tie', 'stethoscope',
-    'royal-blue trousers', 'golden-orange hands', 'TOP SECRET briefcase held in his right hand']) {
+  for (const element of ['silver-rimmed glasses', 'steel-grey hair', 'circular forehead head mirror',
+    'electric-blue surgical mask', 'red tie', 'stethoscope',
+    'royal-blue trousers', 'TOP SECRET briefcase held in his right hand']) {
     assert.ok(harlow.identityLock.includes(element), `the lock names the ${element}`);
   }
-  assert.match(harlow.identityLock, /Do not replace, age, humanize, beautify, restyle, recolor or redesign/);
+  assert.match(harlow.identityLock, /Do not recast, age further, restyle, beautify, recolour, cartoonify or redesign/);
 
   const prompt = plan.scenes[0].imagePrompt;
-  assert.match(prompt, /A fan interpretation of a character from the Roblox game Animal Hospital/);
+  assert.match(prompt, /A fan interpretation of a character from the clinic series/);
   assert.match(prompt, /rather than copying any official asset/);
 });
 
@@ -811,8 +811,8 @@ test('a character with a build sheet prints the whole sheet in every scene promp
 test('a character’s own negatives ride along in every prompt it appears in', () => {
   const plain = buildDayPlan(week[0], prefs);
   const withHarlow = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
-  const specific = ['no visible mouth', 'no missing antlers', 'no suitcase in the wrong hand',
-    'no ordinary brown suitcase', 'no altered briefcase label', 'no miner’s lamp'];
+  const specific = ['no antlers', 'no animal head', 'no briefcase in the wrong hand',
+    'no ordinary brown briefcase', 'no altered briefcase label', 'no miner’s lamp'];
 
   for (const needle of specific) {
     assert.ok(withHarlow.scenes[0].imagePrompt.includes(needle), `image prompt carries "${needle}"`);
@@ -822,17 +822,17 @@ test('a character’s own negatives ride along in every prompt it appears in', (
   }
   // The shared negatives are still there underneath, and nothing is listed twice.
   const list = withHarlow.scenes[0].imagePrompt.match(/NEGATIVE PROMPT: (.+)\.$/m)[1].split(', ');
-  assert.ok(list.includes('not Pixar style'));
+  assert.ok(list.includes('not a cartoon'));
   assert.equal(new Set(list).size, list.length, 'no negative is repeated');
 });
 
 test('the reference sheet is a full-body front-on render, not a scene', () => {
   const sheet = referenceSheetPrompt(gameCharacterById('dr-harlow'));
   assert.match(sheet, /character reference sheet for Dr\. Harlow/);
-  assert.match(sheet, /inside the video game Roblox/);
-  assert.match(sheet, /HEAD AND FACE\n/);
+  assert.match(sheet, /real, live-action short/);
+  assert.match(sheet, /FACE AND HEAD\n/);
   assert.match(sheet, /COLOUR LOCK\n/);
-  assert.match(sheet, /Full-body character visible from antler tips to shoes/);
+  assert.match(sheet, /Full-body character visible from head to shoes/);
   assert.match(sheet, /Clean dark navy background/);
   assert.match(sheet, /PERMANENT IDENTITY LOCK/);
   // Framing rules that only make sense for a sheet, and must not leak into scenes.
@@ -870,21 +870,22 @@ test('every game world names real locations and buildable props', () => {
   for (const w of GAME_WORLDS) {
     assert.ok(w.locations.length >= 3, `${w.id} names somewhere to stage a scene`);
     assert.ok(w.props.length >= 3, `${w.id} names props`);
-    assert.ok(['r6', 'r15', 'rthro', 'animal'].includes(w.rig), `${w.id} names a real rig`);
+    assert.ok(['natural', 'polished', 'gritty'].includes(w.look), `${w.id} names a real casting look`);
   }
-  assert.equal(worldById('animal-hospital').rig, 'animal');
+  assert.equal(worldById('animal-hospital').look, 'natural');
 });
 
-test('exports carry the Roblox character fields, never an undefined', () => {
+test('exports carry the human character fields, never an undefined', () => {
   const plan = buildDayPlan(week[0], prefs, { gameCharacters: ['dr-harlow'] });
   for (const text of [castMarkdown(plan), dayMarkdown(plan), weekMarkdown([plan], WEEK)]) {
     assert.ok(!text.includes('undefined'), 'no field renders as undefined');
-    assert.match(text, /Printed face/);
+    assert.match(text, /Face/);
     assert.match(text, /Headwear/);
   }
   assert.match(castMarkdown(plan), /Dr\. Harlow/);
-  assert.ok(!weekJson([plan], WEEK, prefs).includes('"face"'),
-    'the old human-face field is gone from the JSON too');
+  const json = weekJson([plan], WEEK, prefs);
+  assert.ok(!json.includes('"faceDecal"') && !json.includes('"rig"'),
+    'the old Roblox character fields are gone from the JSON');
 });
 
 test('displacing a character removes them from everyone else’s height notes', () => {
@@ -952,8 +953,8 @@ test('publishing leads with the recognisable character and stays publishable', (
   assert.ok(pub.recommendedTitle.startsWith('Dr. Harlow'), 'he leads the recommended title');
   assert.ok(pub.recommendedTitle.length <= 80, 'and it fits');
   assert.ok(!pub.recommendedTitle.includes('…'), 'a recommended title is never truncated');
-  assert.ok(pub.hashtags.includes('#drharlow') && pub.hashtags.includes('#animalhospital'));
-  assert.match(pub.longCaption, /Dr\. Harlow from Animal Hospital/);
+  assert.ok(pub.hashtags.includes('#drharlow') && pub.hashtags.includes('#lifelessons'));
+  assert.match(pub.longCaption, /Dr\. Harlow from the clinic series/);
 
   // Across the whole week, guest or not, a title is chosen to fit rather than
   // trimmed — a truncated title is not one anyone can publish, and a trimmed

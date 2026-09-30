@@ -1,25 +1,24 @@
 /**
  * Image and image-to-video prompts.
  *
- * Every prompt is standalone: it repeats the full Roblox construction spec, the
- * identity lock, the outfit, the environment and the framing, because
- * generators have no memory between calls and a prompt that says "same
- * character as before" produces a different character. The repetition is the
- * mechanism, not redundancy.
+ * Every prompt is standalone: it repeats the full realism spec, the identity
+ * lock, the outfit, the environment and the framing, because generators have no
+ * memory between calls and a prompt that says "same character as before"
+ * produces a different person. The repetition is the mechanism, not redundancy.
  *
- * The construction spec leads, before the scene. A generator weights the
- * opening of a prompt most heavily, and if it does not know it is building a
- * Roblox scene, nothing after that matters — it returns a polished 3D character
- * that happens to be wearing the right colours.
+ * The realism spec leads, before the scene. A generator weights the opening of a
+ * prompt most heavily, and if it does not know it is producing real live-action
+ * footage, nothing after that matters — it returns a cartoon or a 3D render that
+ * happens to be wearing the right colours.
  */
 
-import { ROBLOX_NEGATIVES, styleBlock } from './robloxstyle.js';
+import { HUMAN_NEGATIVES, styleBlock } from './humanstyle.js';
 
 /** Per-platform phrasing. The scene and identity content never varies. */
 const IMAGE_PLATFORMS = {
   chatgpt: {
     label: 'ChatGPT Image Generation',
-    preface: 'Create a single vertical 9:16 illustration.',
+    preface: 'Create a single vertical 9:16 photorealistic image.',
     tail: 'Render the frame exactly as described. Do not add any text, captions, logos or watermarks.',
   },
   midjourney: {
@@ -30,17 +29,17 @@ const IMAGE_PLATFORMS = {
   },
   imagen: {
     label: 'Google Imagen',
-    preface: 'Generate a vertical 9:16 image.',
-    tail: 'Photorealistic lighting on stylised geometry. No text rendered in image.',
+    preface: 'Generate a vertical 9:16 photorealistic image.',
+    tail: 'Photographic lighting on real people and real materials. No text rendered in image.',
   },
   leonardo: {
     label: 'Leonardo',
-    preface: 'Vertical 9:16 cinematic still.',
+    preface: 'Vertical 9:16 cinematic photoreal still.',
     tail: 'Alchemy on, high contrast, character-consistent rendering.',
   },
   generic: {
     label: 'General-purpose prompt',
-    preface: 'Vertical 9:16 image.',
+    preface: 'Vertical 9:16 photorealistic image.',
     tail: 'Deliver one frame matching every detail above.',
   },
 };
@@ -61,22 +60,22 @@ export const VIDEO_PLATFORM_OPTIONS = Object.entries(VIDEO_PLATFORMS)
 /**
  * The negative list every image prompt carries.
  *
- * The Roblox negatives come first and matter most: left to itself a generator
- * drifts straight back to smooth cinematic 3D, which is the single most common
- * way one of these prompts fails.
+ * The realism negatives come first and matter most: left to itself a generator
+ * drifts toward cartoon or smooth 3D, which is the single most common way one of
+ * these prompts fails.
  */
 const IMAGE_NEGATIVES = [
-  ...ROBLOX_NEGATIVES,
+  ...HUMAN_NEGATIVES,
   'no watermark', 'no logo', 'no signature', 'no rendered text or captions',
   'no duplicate of the same character in frame', 'no extra limbs',
-  'no outfit change', 'no hair accessory change', 'no facial identity drift',
+  'no outfit change', 'no hair change', 'no facial identity drift',
   'no unexplained props', 'no horizontal or square composition', 'no cropped face',
   'no blurred subject', 'no inconsistency with the previous scene',
 ];
 
 /** The negative list every video prompt carries. */
 const VIDEO_NEGATIVES = [
-  ...ROBLOX_NEGATIVES,
+  ...HUMAN_NEGATIVES,
   'no repeated speech', 'no duplicated dialogue', 'no echo', 'no added words',
   'no new characters entering frame', 'no character morphing', 'no facial changes',
   'no outfit changes', 'no uncontrolled camera movement', 'no excessive motion',
@@ -97,7 +96,7 @@ function characterBlock(c) {
   const head = [
     `${c.name} — ${c.storyRole}, ${String(c.ageCategory).toLowerCase()}.`,
     c.fromGame
-      ? `A fan interpretation of a character from the Roblox game ${c.fromGame}. `
+      ? `A fan interpretation of a character from ${c.fromGame}. `
         + 'Build the character from the description below rather than copying any official asset.'
       : null,
   ].filter(Boolean).join(' ');
@@ -114,13 +113,13 @@ function characterBlock(c) {
 
   return [
     head,
-    `Avatar build: ${c.build}.`,
-    `Head: ${c.head}.`,
-    `Printed face decal: ${c.faceDecal}.`,
-    `Headwear: ${c.hat}. Hair accessory: ${c.hair}.`,
+    `Build: ${c.build}.`,
+    `Face: ${c.face}.`,
+    `Eyes: ${c.eyes}.`,
+    `Hair: ${c.hair}. Headwear: ${c.headwear}.`,
     `Wearing: ${c.outfit}. Footwear: ${c.shoes}. Accessories: ${c.accessories}.`,
     `Signature colours: ${c.colors}. Distinguishing feature: ${c.marks}. ${c.heightNote}`,
-    `Surfacing: ${c.material}.`,
+    'A real, believable human being throughout — real skin texture, real hair, a real face.',
     c.identityLock,
   ].filter(Boolean).join(' ');
 }
@@ -130,7 +129,7 @@ function characterBlock(c) {
  *
  * @param {object} scene
  * @param {object[]} cast
- * @param {object} opts { platform, rig, render, aspect }
+ * @param {object} opts { platform, look, render, aspect }
  */
 export function imagePrompt(scene, cast, opts = {}) {
   const platform = IMAGE_PLATFORMS[opts.platform] ?? IMAGE_PLATFORMS.generic;
@@ -138,10 +137,9 @@ export function imagePrompt(scene, cast, opts = {}) {
   const present = cast.filter((c) => scene.characters.includes(c.name));
   const inFrame = present.length ? present : cast;
 
-  // A cast can mix rigs — an animal-headed vet beside a blocky R6 kid. The
-  // scene-level rig sets the world; a character carrying its own rig overrides
-  // it in that character's own block.
-  const rig = opts.rig || inFrame[0]?.rig || 'r15';
+  // The scene-level look sets the overall realism grade; a character carrying its
+  // own look overrides it in that character's own block.
+  const look = opts.look || inFrame[0]?.look || 'natural';
 
   const characterBlocks = inFrame.map(characterBlock).join('\n\n');
 
@@ -156,19 +154,19 @@ export function imagePrompt(scene, cast, opts = {}) {
   const body = [
     platform.preface,
     '',
-    styleBlock({ rig, render: opts.render }),
+    styleBlock({ look, render: opts.render }),
     '',
     `SCENE ${scene.n} of the sequence — ${scene.beatLabel}. Duration in the edit: ${scene.durationSec}s.`,
     '',
-    'CHARACTERS IN FRAME — each built as described, and no one else:',
+    'PEOPLE IN FRAME — each a real human as described, and no one else:',
     characterBlocks,
     '',
     `ENVIRONMENT: ${scene.location}. ${scene.backgroundAction}. `
-      + 'Built from Roblox parts: flat-coloured surfaces, hard right-angled corners, simple '
-      + 'repeating textures, props sitting squarely on the grid.',
+      + 'A real, believable location with real materials, natural depth, lived-in clutter and '
+      + 'imperfection — not a synthetic or gridded set.',
     `ACTION AT THIS INSTANT: ${scene.action}`,
-    `EXPRESSION: ${scene.expression} Convey this through the printed face decal, the head `
-      + 'angle and the body pose — the face is a flat decal and cannot deform.',
+    `EXPRESSION: ${scene.expression} Convey it through a genuine human facial expression — the `
+      + 'eyes, brows and mouth, the head angle and the body — on a real, natural face.',
     `PLACEMENT: ${scene.position}`,
     '',
     `CAMERA: ${scene.framing}, ${scene.angle.toLowerCase()}. Composition built for ${aspect} vertical, `
@@ -217,9 +215,9 @@ export function videoPrompt(scene, cast, opts = {}) {
   return [
     platform.preface,
     '',
-    'WORLD: this is a scene inside the video game Roblox. Every character stays built from '
-      + 'separate rigid Roblox parts, and every face stays a flat printed decal. Animate the '
-      + 'parts — never soften, round, humanise or re-proportion anything.',
+    'WORLD: this is real live-action footage of real people in a real place. Everyone stays a '
+      + 'believable human with a real face and real skin. Animate them naturally — never stylise, '
+      + 'cartoonify, flatten, plasticise or re-proportion anyone.',
     '',
     `DURATION: exactly ${d} seconds. One continuous shot. Do not cut.`,
     '',
@@ -233,16 +231,16 @@ export function videoPrompt(scene, cast, opts = {}) {
     inFrame.map(characterBlock).join('\n\n'),
     '',
     'MOTION SCHEDULE:',
-    `  0.0–${p1}s — ${scene.expression.split('.')[0]}. Subtle head settle, one natural blink.`,
+    `  0.0–${p1}s — ${scene.expression.split('.')[0]}. A subtle head settle and one natural blink.`,
     `  ${p1}–${p2}s — ${scene.action}`,
     `  ${p2}–${d}s — reaction holds; ${scene.transition.toLowerCase()} prepared on the final frame.`,
     '',
     `CHARACTER MOTION: ${lead.body}. Movement stays inside the frame; no character exits or enters.`,
-    'FACIAL MOVEMENT: the face is a printed decal, so it changes by swapping between drawn '
-      + 'expressions, not by deforming. One or two blinks across the whole clip, each a quick '
-      + 'swap rather than a soft close. Do not sculpt, morph or add muscle movement to the face.',
-    'BODY MOVEMENT: rigid parts rotating at their joints, purposeful and slow enough to stay '
-      + 'clean. Limbs keep their shape throughout and never bend where a Roblox limb cannot.',
+    'FACIAL MOVEMENT: natural human micro-expressions — real blinks, small brow, eye and mouth '
+      + 'movements that match the emotion. Keep the same face and features throughout; do not morph, '
+      + 'swap, smooth or distort the face.',
+    'BODY MOVEMENT: natural, believable human motion with real weight, balance and joint movement. '
+      + 'Limbs and hands stay anatomically correct throughout — no warping, no melting, no extra fingers.',
     `ENVIRONMENT MOTION: ${scene.backgroundAction.toLowerCase()}. Keep it subtle — the background must not `
       + 'compete with the subject.',
     `CAMERA: ${scene.movement}. Nothing beyond this move.`,
@@ -250,12 +248,11 @@ export function videoPrompt(scene, cast, opts = {}) {
     '',
     speaks
       ? `DIALOGUE: the character says "${scene.dialogue}" — deliver the dialogue exactly once. `
-        + 'Mouth movement is the printed decal swapping between open and closed shapes in time '
-        + 'with the words, not a modelled jaw. Do not repeat, restart, paraphrase, echo or add '
-        + `any words. Fit the line comfortably inside ${d} seconds; leave the printed mouth closed `
-        + 'and still before and after it.'
-      : 'DIALOGUE: none. The character does not speak — the printed mouth stays closed and '
-        + 'unchanged for the entire clip. Do not generate any mouth movement.',
+        + 'The mouth and jaw move naturally with the words, with accurate lip-sync. Do not repeat, '
+        + 'restart, paraphrase, echo or add any words. Fit the line comfortably inside '
+        + `${d} seconds; keep the mouth closed and still before and after it.`
+      : 'DIALOGUE: none. The character does not speak — the mouth stays closed and still for the '
+        + 'entire clip. Do not generate any mouth or lip movement.',
     '',
     `ENDING FRAME: ${scene.transition}. Leave the subject positioned so the next scene can cut cleanly.`,
     '',
@@ -277,4 +274,3 @@ export function allVideoPrompts(scenes, cast, opts) {
   return scenes.map((s) => `=== SCENE ${s.n} — IMAGE-TO-VIDEO PROMPT ===\n\n${videoPrompt(s, cast, opts)}`)
     .join('\n\n\n');
 }
-

@@ -1,104 +1,99 @@
-import { styleBlock } from './robloxstyle.js';
+import { styleBlock } from './humanstyle.js';
 
 /**
- * Roblox game worlds and their known characters.
+ * Recurring story worlds and their known guest characters.
  *
  * Two different things live here, and the difference matters.
  *
- * GAME_WORLDS give a plan somewhere real to be set. A Short about Animal
- * Hospital should be staged in the Animal Hospital — its lobby, its treatment
- * rooms, its supplies shop — not in "a bright examination room". Naming the
- * actual locations and props is what makes a generated scene look like the game
- * the audience already knows.
+ * GAME_WORLDS give a plan somewhere real to be set. A Short about a clinic should
+ * be staged in the clinic — its reception, its treatment rooms, its supply room —
+ * not in "a bright examination room". Naming the actual locations and props is
+ * what makes a generated scene feel like a real, specific place.
  *
- * GAME_CHARACTERS are existing characters from those games, the kind a fan
- * video casts because the audience recognises them. They are not this project's
- * inventions and are not presented as such: each entry records the game it
- * belongs to, what the character actually does there, and a described
- * appearance for prompting. Prompts built from these say plainly that they are
- * a fan interpretation of an existing game character rather than a reproduction
- * of the official asset — which no image generator can produce anyway.
+ * GAME_CHARACTERS are recurring guest characters a series can cast because the
+ * audience recognises them across videos. They are real people, described for
+ * prompting so they stay consistent from Short to Short.
  *
  * The generated cast in characters.js stays entirely original. These are opted
  * into per day, by choosing one.
  */
 
-/** Locations and props that actually exist in each game. */
+/** Locations and props that give each recurring setting a real, specific place. */
 export const GAME_WORLDS = [
   {
     id: 'animal-hospital',
-    label: 'Animal Hospital',
+    label: 'Community clinic',
     pillar: 'animal-hospital',
-    premise: 'Players work shifts as veterinary staff, treating animal patients under a '
-      + 'supervising doctor and being graded on the shift.',
+    premise: 'Staff work shifts at a busy community clinic, treating people who arrive in need '
+      + 'and being mentored by a senior doctor.',
     locations: [
-      'the hospital reception desk, with the patient queue behind it',
+      'the clinic reception desk, with a queue of patients behind it',
       'a treatment room with two beds side by side and a wall-mounted chart',
-      'the lobby between shifts, where staff gather',
-      'the Supplies Shop, shelves stacked with labelled boxes',
+      'the staff room between shifts, where the team gathers',
+      'the supply room, shelves stacked with labelled boxes',
       'the ward corridor with numbered doors',
       'the emergency bay, lit by a pulsing alert light',
     ],
     props: ['patient chart clipboard', 'stethoscope', 'medical trolley', 'supply crate',
-      'wall clock', 'shift grade report card', 'treatment bed'],
-    rig: 'animal',
+      'wall clock', 'shift report card', 'treatment bed'],
+    look: 'natural',
   },
   {
     id: 'obby',
-    label: 'Obby / parkour',
+    label: 'Obstacle challenge',
     pillar: 'challenge',
-    premise: 'Players run an obstacle course of floating platforms toward a finish line, '
-      + 'restarting at checkpoints when they fall.',
+    premise: 'People take on a physical obstacle course toward a finish line, starting over when '
+      + 'they fall.',
     locations: [
-      'a run of floating coloured platforms over an empty void',
-      'a checkpoint pad glowing at the end of a difficult section',
-      'a spinning-blade obstacle stretched across a narrow walkway',
-      'the finish arch with a leaderboard beside it',
+      'a run of obstacles across an outdoor course',
+      'a checkpoint marked at the end of a difficult section',
+      'a spinning obstacle stretched across a narrow beam',
+      'the finish line with a leaderboard beside it',
     ],
-    props: ['checkpoint pad', 'spinning obstacle', 'timer display', 'finish arch'],
-    rig: 'r15',
+    props: ['checkpoint marker', 'spinning obstacle', 'timer display', 'finish banner'],
+    look: 'natural',
   },
   {
     id: 'roleplay-town',
-    label: 'Roleplay town',
+    label: 'Everyday town',
     pillar: 'family-comedy',
-    premise: 'Players live out everyday scenes — home, school, work — in a suburban Roblox town.',
+    premise: 'Ordinary everyday scenes — home, school, work — play out across a small town.',
     locations: [
-      'a suburban living room with a sofa facing a blocky television',
+      'a suburban living room with a sofa facing a television',
       'a school classroom with rows of desks',
       'a kitchen with a counter island and stools',
       'a front driveway with a car parked on it',
     ],
     props: ['sofa', 'school desk', 'lunch tray', 'car', 'backpack'],
-    rig: 'r15',
+    look: 'natural',
   },
   {
     id: 'hide-seek',
     label: 'Hide and seek',
     pillar: 'hide-and-seek',
-    premise: 'One player counts while the rest hide across a themed map, until time runs out.',
+    premise: 'One person counts while the rest hide across a location, until time runs out.',
     locations: [
-      'a cluttered attic room stacked with crates',
-      'a wide-open map with almost no cover, mid-count',
+      'a cluttered attic stacked with crates',
+      'a wide-open yard with almost no cover, mid-count',
       'a corridor of identical lockers',
-      'behind a stack of oversized props on a themed map',
+      'behind a stack of boxes in a storeroom',
     ],
     props: ['crate', 'locker', 'countdown timer', 'seeker marker'],
-    rig: 'r15',
+    look: 'natural',
   },
   {
     id: 'survival',
     label: 'Night survival',
     pillar: 'mystery',
-    premise: 'Players survive a run of nights, managing light and supplies while something '
+    premise: 'A group gets through a run of nights, managing light and supplies while something '
       + 'moves outside.',
     locations: [
-      'a small shelter interior lit by one lamp, night pressing at the windows',
+      'a small cabin interior lit by one lamp, night pressing at the windows',
       'a supply cache at the edge of a dark treeline',
       'a campfire clearing with the fire burning low',
     ],
     props: ['lantern', 'supply crate', 'campfire', 'night counter display'],
-    rig: 'r15',
+    look: 'natural',
   },
 ];
 
@@ -108,282 +103,233 @@ export const worldById = (id) => GAME_WORLDS.find((w) => w.id === id) ?? null;
  * Worlds that suit a pillar.
  *
  * Returns nothing when no world claims the pillar, rather than falling back to
- * the whole list — a caller reading `[0]` for a default would otherwise get
- * Animal Hospital's animal rig for an obby video.
+ * the whole list — a caller reading `[0]` for a default would otherwise get the
+ * wrong setting for a pillar it does not belong to.
  */
 export function worldsForPillar(pillarId) {
   return GAME_WORLDS.filter((w) => w.pillar === pillarId);
 }
 
 /**
- * Characters from those games that a fan video would cast.
+ * Recurring guest characters a series would cast.
  *
- * `lore` is what the character does in the game. `appearance` is a described
- * look for prompting — a fan interpretation, not the official asset.
+ * `lore` is what the character does across the series. `appearance` is a
+ * described real-human look for prompting, so they hold steady between videos.
  */
 export const GAME_CHARACTERS = [
   {
     id: 'dr-harlow',
     name: 'Dr. Harlow',
     game: 'animal-hospital',
-    gameLabel: 'Animal Hospital',
+    gameLabel: 'the clinic series',
     storyRole: 'Head doctor and supervisor',
     archetype: 'mentor and assessor',
-    // Casting him fills the story's senior-vet slot rather than adding a second
-    // doctor beside a generated one.
+    // Casting him fills the story's senior-doctor slot rather than adding a
+    // second doctor beside a generated one.
     replacesRole: 'vet',
-    lore: 'The head doctor of the Animal Hospital, and the player’s mentor and supervisor. '
-      + 'He appears at the end of each of the first six shifts to explain a mechanic and unlock '
-      + 'a new area of the hospital. After those, he can be found in the lobby and the Supplies '
-      + 'Shop, where players can talk to him. He grades each shift with a performance report, '
-      + 'and brings bonuses during emergencies.',
-    appearsIn: ['the lobby', 'the Supplies Shop', 'the end of a shift', 'an emergency call'],
+    lore: 'The head doctor of the clinic, and the newcomer’s mentor and supervisor. He appears at '
+      + 'the end of each of the first six shifts to explain what went wrong and to hand over a new '
+      + 'responsibility. After those, he can be found in the staff room and the supply room, where '
+      + 'the team can talk to him. He grades each shift with a performance report, and steps in '
+      + 'during emergencies.',
+    appearsIn: ['the staff room', 'the supply room', 'the end of a shift', 'an emergency call'],
     beats: [
       'delivers the performance grade at the end of a shift',
-      'explains a mechanic the player just got wrong',
-      'unlocks a new area and walks the player into it',
-      'arrives mid-emergency with a bonus',
+      'explains what the newcomer just got wrong',
+      'hands over a new responsibility and walks them into it',
+      'arrives mid-emergency and takes charge',
     ],
     /**
      * The moment he is known for, folded into the beat it belongs to.
      *
-     * In the game he arrives at the end of a shift and grades it, so his beat
-     * is the payoff — casting him should give the video the scene the audience
-     * already associates with him, not a generic close with his face on it.
+     * He arrives at the end of a shift and grades it, so his beat is the payoff —
+     * casting him should give the video the scene the audience already associates
+     * with him, not a generic close with his face on it.
      */
     storyBeat: {
       beat: 'payoff',
       // Used when the beat does not already have him in it.
       action: '{name} arrives at the end of the shift, looks over what happened, '
         + 'and hands across the performance report.',
-      // Used when it does — several seeds already end on the senior vet
+      // Used when it does — several seeds already end on the senior doctor
       // arriving, and appending the full sentence would have him arrive twice.
       continuation: 'He looks over what happened and hands across the performance report.',
       line: 'Shift report. You did better than you think.',
       caption: 'SHIFT REPORT',
     },
-    rig: 'animal',
+    look: 'polished',
     ageCategory: 'Adult',
     personality: 'Calm, exacting, encouraging without softening the grade',
 
     // Summary fields, for the character bible card and anywhere a short line is
     // wanted. The authoritative description is `spec` below — these must stay
     // consistent with it, never contradict it.
-    build: 'Classic stylized Roblox game-character construction: oversized head, short compact '
-      + 'torso, slim cylindrical arms, short cylindrical legs, rounded mitten-like hands with no '
-      + 'individually modelled fingers, small feet. Friendly toy-like proportions, not realistic '
-      + 'human anatomy',
-    head: 'Oversized angular deer head in warm golden-orange fur, with darker burnt-orange outer '
-      + 'ears extending horizontally from both sides, small rounded inner ear forms, and bright '
-      + 'orange vertical markings running symmetrically down the forehead and the bridge of the nose',
-    faceDecal: 'Extremely large, sharply angled cartoon eyes with solid glossy black interiors, '
-      + 'white outer sections, and one tiny white triangular highlight near the inner bottom '
-      + 'corner of each eye. No visible eyebrows. No visible mouth — it is completely covered by '
-      + 'the surgical mask',
-    hat: 'Two tall symmetrical grey deer antlers curving upward and slightly outward in a '
-      + 'simplified pointed low-poly silhouette, with a wide black medical headband wrapped '
-      + 'horizontally around the forehead and a large circular silver-white doctor’s reflector '
-      + 'centred precisely above the eyes, a small circular golden-orange hub at its exact centre, '
-      + 'sitting in front of the lower antler area',
-    hair: 'None — no hair of any kind; the moulded deer head is bare',
-    outfit: 'A clean pale-grey/white doctor’s lab coat to the upper thighs with narrow notched '
-      + 'lapels outlined in subtle grey seams, small dark-grey buttons running vertically down '
-      + 'the centre and two outlined rectangular lower pockets with rounded bottoms; a white shirt '
-      + 'beneath, a narrow red necktie centred under the collar, and bright royal-blue trousers',
-    shoes: 'Small plain black shoes',
-    accessories: 'A large vivid electric-blue surgical mask covering the entire muzzle, rounded '
-      + 'and slightly projected with subtle horizontal folded ridges and pale grey-white straps to '
-      + 'both sides of the face; a dark grey and black stethoscope around the neck with a small '
-      + 'metallic-grey chest piece on his right side, black tubing curving across the chest and '
-      + 'silver-grey earpieces; and a large rectangular matte-black hard-shell medical briefcase '
-      + 'with a thick black handle and a small distressed red TOP SECRET label, held in his right '
-      + 'hand — on the viewer’s left — hanging beside the leg and angled slightly outward',
-    colors: 'Golden orange (face, inner head, hands), burnt orange (ears and darker facial '
-      + 'regions), bright orange (forehead and nose markings), black and white (eyes), electric '
-      + 'blue (mask and trousers), pale grey-white (lab coat and reflector), medium grey (antlers '
-      + 'and medical components), deep red (necktie and briefcase label), matte black (headband, '
-      + 'shoes, tubing and briefcase)',
-    marks: 'The circular forehead reflector, the electric-blue surgical mask and the black '
-      + 'TOP SECRET briefcase in his right hand — present in every appearance',
-    expressions: 'Steady and level. The mask covers the mouth, so the eyes carry everything; the '
-      + 'eye shape, spacing and expression never change',
-    body: 'Stands upright and square, facing forward. The free hand hangs naturally beside the '
-      + 'body while the right hand holds the briefcase',
-    material: 'Polished Roblox-compatible 3D game character: smooth matte surfaces, simple '
-      + 'low-poly geometry with clean bevelled edges, soft fabric-like lab-coat shading, and '
-      + 'slight glossy highlights on the eyes, mask, reflector and stethoscope. No realistic fur '
-      + 'strands, no skin pores, no photorealistic anatomy, no excessive texture detail',
+    build: 'A tall, composed man in his early sixties with an upright, unhurried posture and the '
+      + 'steady stillness of someone who has done this for decades',
+    face: 'A weathered, kindly face with deep smile lines, a strong jaw shadowed with grey stubble, '
+      + 'warm olive skin and a calm, level set to the features',
+    eyes: 'Sharp, attentive grey eyes behind thin silver-rimmed glasses, framed by heavy greying brows',
+    hair: 'Neatly combed steel-grey hair, receding a little at the temples',
+    headwear: 'A silver-white circular head mirror worn on a black band across the forehead, a small '
+      + 'golden hub at its centre',
+    outfit: 'A clean pale-grey doctor’s lab coat to the thigh over a white shirt and a narrow red '
+      + 'necktie, with royal-blue trousers',
+    shoes: 'Plain polished black shoes',
+    accessories: 'A vivid electric-blue surgical mask usually pulled down under the chin, a dark '
+      + 'stethoscope around the neck, and a matte-black hard-shell briefcase with a small distressed '
+      + 'red TOP SECRET label, carried in his right hand',
+    colors: 'Pale grey and white (coat), electric blue (mask), deep red (tie and briefcase label), '
+      + 'royal blue (trousers), silver (glasses and head mirror), matte black (briefcase and shoes)',
+    marks: 'The circular forehead head mirror, the electric-blue mask and the black TOP SECRET '
+      + 'briefcase in his right hand — present in every appearance',
+    expressions: 'Steady and level; warmth shows in the eyes and the smile lines rather than big '
+      + 'movement',
+    body: 'Stands upright and square, facing forward. The free hand hangs naturally beside the body '
+      + 'while the right hand holds the briefcase',
 
     /**
      * The authoritative build sheet, section by section.
      *
-     * Supplied by the creator against a reference image, so it is reproduced
-     * as given rather than paraphrased — the point of a character sheet is that
-     * it does not drift, and a summary of a lock is not a lock. Every image
-     * prompt that has him in frame prints this whole block.
+     * Supplied by the creator against a reference image, so it is reproduced as
+     * given rather than paraphrased — the point of a character sheet is that it
+     * does not drift, and a summary of a lock is not a lock. Every image prompt
+     * that has him in frame prints this whole block.
      */
     spec: [
-      ['Head and face', [
-        'Oversized angular deer head with warm golden-orange fur',
-        'Darker burnt-orange outer ears extending horizontally from both sides',
-        'Small rounded inner ear forms',
-        'Bright orange vertical markings running symmetrically down the forehead and bridge of the nose',
-        'Extremely large, sharply angled cartoon eyes',
-        'Solid glossy black eye interiors',
-        'White outer eye sections',
-        'One tiny white triangular highlight near the inner bottom corner of each eye',
-        'No visible eyebrows',
-        'No visible mouth because it is completely covered by the surgical mask',
-        'Preserve the exact eye shape, spacing, expression, markings, and head proportions',
+      ['Face and head', [
+        'A real man in his early sixties with warm olive skin',
+        'Weathered, kindly face with deep smile lines and forehead creases',
+        'Strong jaw shadowed with short grey stubble',
+        'Sharp attentive grey eyes behind thin silver-rimmed glasses',
+        'Heavy greying eyebrows',
+        'Neatly combed steel-grey hair, receding slightly at the temples',
+        'Preserve the exact face, eye colour, glasses and calm level expression',
       ]],
-      ['Antlers and medical head mirror', [
-        'Two tall, symmetrical grey deer antlers',
-        'Each antler curves upward and slightly outward',
-        'Simplified, pointed, low-poly antler silhouette',
-        'Wide black medical headband wrapped horizontally around the forehead',
-        'Large circular silver-white doctor’s reflector centred precisely above the eyes',
-        'Small circular golden-orange hub in the exact centre of the reflector',
-        'The reflector sits in front of the lower antler area',
+      ['Head mirror', [
+        'A silver-white circular doctor’s head mirror worn on a black band across the forehead',
+        'A small golden-orange hub at the exact centre of the mirror',
+        'Sits squarely above the eyes',
       ]],
       ['Surgical mask', [
-        'Large vivid electric-blue surgical mask covering the entire muzzle',
-        'Rounded, slightly projected mask shape',
-        'Subtle horizontal folded ridges across the mask',
-        'Pale grey-white straps extending toward both sides of the face',
-        'The mask keeps the same size, position, shape and saturated blue colour',
-        'Do not expose the nose or mouth',
+        'A vivid electric-blue surgical mask',
+        'Usually pulled down and resting under the chin so the face stays visible',
+        'Pale grey-white ear straps',
+        'Keeps the same size, shape and saturated blue colour',
       ]],
-      ['Body and proportions', [
-        'Classic stylized Roblox game-character construction',
-        'Oversized head relative to the body',
-        'Short, compact torso',
-        'Slim cylindrical arms',
-        'Short cylindrical legs',
-        'Rounded mitten-like hands with no individually modelled fingers',
-        'Small feet',
-        'Friendly toy-like proportions, not realistic human anatomy',
-        'Standing upright and facing directly forward',
+      ['Build and posture', [
+        'Tall, composed man with an upright, unhurried posture',
+        'Real, natural adult human proportions',
+        'Steady and still; stands facing forward',
       ]],
       ['Medical outfit', [
-        'Clean pale-grey/white doctor’s lab coat extending to the upper thighs',
-        'Narrow notched lapels outlined with subtle grey seams',
-        'Small dark-grey buttons running vertically down the centre',
-        'Two outlined rectangular lower pockets with rounded bottoms',
+        'Clean pale-grey doctor’s lab coat extending to the thigh',
+        'Narrow notched lapels with subtle grey seams',
+        'Small dark-grey buttons down the centre',
+        'Two lower pockets',
         'White shirt beneath the coat',
         'Narrow red necktie centred beneath the collar',
-        'Bright royal-blue trousers',
-        'Small plain black shoes',
-        'Preserve the precise garment lengths, colours and simple Roblox-style construction',
+        'Royal-blue trousers',
+        'Plain polished black shoes',
+        'Preserve the precise garment colours and cut',
       ]],
       ['Stethoscope', [
-        'Dark grey and black stethoscope resting around the neck',
-        'Small metallic-grey chest piece hanging on Dr. Harlow’s right side',
+        'A dark grey and black stethoscope resting around the neck',
+        'Small metallic chest piece hanging on his right side',
         'Black flexible tubing curving across the chest',
-        'Silver-grey earpieces and connecting components',
         'Placed without hiding the tie or coat details',
       ]],
       ['Hands and briefcase', [
-        'Rounded golden-orange hands matching the face',
-        'A large rectangular black medical briefcase held in his right hand, appearing on the viewer’s left',
-        'The briefcase hangs beside the leg and is angled slightly outward',
+        'Real, natural adult hands',
+        'A large rectangular matte-black hard-shell briefcase held in his right hand, appearing on the viewer’s left',
+        'The briefcase hangs beside the leg, angled slightly outward',
         'Thick black handle',
-        'Dark matte-black hard-shell construction',
         'A small distressed red label on the front reading exactly: TOP SECRET',
         'Do not place the briefcase in the opposite hand',
         'The free hand hangs naturally beside the body',
       ]],
-      ['Materials and surfacing', [
-        'Polished Roblox-compatible 3D game character',
-        'Smooth matte surfaces',
-        'Simple low-poly geometry with clean bevelled edges',
-        'Soft fabric-like lab-coat shading',
-        'Slight glossy highlights on the eyes, mask, reflector and stethoscope',
-        'No realistic fur strands',
-        'No skin pores',
-        'No photorealistic anatomy',
-        'No excessive texture detail',
-        'Preserve the charming, slightly mysterious cartoon-doctor appearance',
+      ['Skin and rendering', [
+        'Fully photoreal real human',
+        'Real skin with pores, fine lines and natural texture',
+        'Real hair made of individual strands',
+        'Real fabric that folds and creases',
+        'No cartoon, no 3D-render look, no plastic or waxy skin',
+        'Preserve the calm, reassuring, slightly mysterious veteran-doctor presence',
       ]],
       ['Colour lock', [
-        'Golden orange: face, inner head and hands',
-        'Burnt orange: ears and darker facial regions',
-        'Bright orange: forehead and nose markings',
-        'Black and white: oversized eyes',
-        'Electric blue: surgical mask and trousers',
-        'Pale grey-white: lab coat and reflector',
-        'Medium grey: antlers and medical components',
+        'Pale grey and white: lab coat and head mirror',
+        'Electric blue: surgical mask',
         'Deep red: necktie and briefcase label',
-        'Matte black: headband, shoes, tubing and briefcase',
+        'Royal blue: trousers',
+        'Silver: glasses and head-mirror rim',
+        'Matte black: briefcase and shoes',
       ]],
     ],
 
     /**
      * The permanent identity lock, used verbatim in place of the generated one.
      *
-     * A generated lock is assembled from summary fields; this was written
-     * against the reference image, so it wins.
+     * A generated lock is assembled from summary fields; this was written against
+     * the reference image, so it wins.
      */
     identityLock: 'PERMANENT IDENTITY LOCK — Dr. Harlow: in every image and every scene, preserve '
-      + 'his exact deer head shape and oversized proportions, orange facial markings, eye design '
-      + 'and expression, ear shape and placement, grey antler silhouette, black medical headband, '
-      + 'circular forehead reflector, electric-blue surgical mask, pale-grey lab coat, red tie, '
-      + 'stethoscope, royal-blue trousers, black shoes, golden-orange hands, and the black '
-      + 'TOP SECRET briefcase held in his right hand. Do not replace, age, humanize, beautify, '
-      + 'restyle, recolor or redesign Dr. Harlow. Do not change his clothing, accessories, '
-      + 'proportions, facial markings or medical equipment between scenes.',
+      + 'his exact face — a real man in his early sixties with warm olive skin, grey stubble, '
+      + 'silver-rimmed glasses, grey eyes and combed steel-grey hair — along with the silver '
+      + 'circular forehead head mirror on its black band, the electric-blue surgical mask under his '
+      + 'chin, the pale-grey lab coat, red tie, stethoscope, royal-blue trousers, black shoes, and '
+      + 'the black TOP SECRET briefcase held in his right hand. Do not recast, age further, '
+      + 'restyle, beautify, recolour, cartoonify or redesign Dr. Harlow. Do not change his clothing, '
+      + 'accessories, features or equipment between scenes, and keep him a real, photoreal human.',
 
     /** Carried into the negative list of any prompt he appears in. */
     negatives: [
-      'no human face', 'no realistic human body', 'no realistic deer anatomy', 'no realistic fur',
-      'no brown eyes', 'no round ordinary eyes', 'no visible mouth', 'no visible nose',
-      'no uncovered muzzle', 'no missing mask', 'no different mask color', 'no missing antlers',
-      'no additional antlers', 'no asymmetrical antlers', 'no missing head mirror',
-      'no miner’s lamp', 'no headlamp', 'no hat', 'no hair', 'no eyebrows', 'no extra clothing',
-      'no scrubs', 'no pants color change', 'no coat color change', 'no missing tie', 'no bow tie',
+      'no cartoon or animated look', 'no 3D-render or game-avatar look', 'no plastic or waxy skin',
+      'no antlers', 'no animal head', 'no deer features', 'no fur',
+      'no missing glasses', 'no missing head mirror', 'no miner’s lamp', 'no headlamp',
+      'no different mask colour', 'no missing mask', 'no hat', 'no eyebrows removed',
+      'no scrubs', 'no trouser colour change', 'no coat colour change', 'no missing tie', 'no bow tie',
       'no missing stethoscope', 'no extra medical tools', 'no backpack', 'no weapon',
-      'no suitcase in the wrong hand', 'no ordinary brown suitcase', 'no altered briefcase label',
-      'no extra fingers', 'no realistic fingers', 'no extra limbs', 'no duplicate character',
-      'no cropped antlers', 'no anime style', 'no flat 2D illustration',
+      'no briefcase in the wrong hand', 'no ordinary brown briefcase', 'no altered briefcase label',
+      'no extra fingers', 'no extra limbs', 'no duplicate character',
+      'no anime style', 'no flat 2D illustration',
       'no text outside the briefcase label', 'no facial identity drift', 'no character redesign',
     ],
 
     /**
      * The reference-sheet render.
      *
-     * A character sheet is generated once and then supplied alongside every
-     * scene prompt, which is what actually holds a character steady across
-     * separately generated images. Its framing rules are the opposite of a
-     * scene's — full body, dead-on, neutral pose, empty background — so they
-     * are kept apart rather than folded into the scene prompt.
+     * A character sheet is generated once and then supplied alongside every scene
+     * prompt, which is what actually holds a character steady across separately
+     * generated images. Its framing rules are the opposite of a scene's — full
+     * body, dead-on, neutral pose, empty background — so they are kept apart
+     * rather than folded into the scene prompt.
      */
     reference: {
       presentation: [
-        'Full-body character visible from antler tips to shoes',
+        'Full-body character visible from head to shoes',
         'Direct front-facing view',
         'Neutral standing pose',
         'Character centred in the frame',
         'Clean dark navy background',
         'Soft frontal studio lighting',
-        'Gentle rim light around the antlers, ears and coat',
+        'Gentle rim light around the head and coat',
         'Sharp readable silhouette',
-        'High-resolution 3D render',
+        'High-resolution photorealistic render',
         'Keep every important element inside the central safe area',
       ],
       negatives: ['no cropped feet', 'no side view', 'no action pose', 'no environment clutter',
         'no logo', 'no watermark', 'no signature'],
-      closing: 'Deliver exactly one complete, front-facing Roblox-style 3D character render of '
-        + 'Dr. Harlow, suitable as an exact character reference sheet for future Roblox scenes.',
+      closing: 'Deliver exactly one complete, front-facing photorealistic full-body portrait of '
+        + 'Dr. Harlow, suitable as an exact character reference sheet for future scenes.',
     },
 
-    usageNote: 'A recurring character from the Roblox game Animal Hospital, cast here the way '
-      + 'a fan video casts one. Describe him as a fan interpretation — do not present generated '
-      + 'images as the official in-game asset.',
+    usageNote: 'A recurring guest character in the clinic series, cast here as a real person. '
+      + 'Describe him as a consistent real human across every video.',
   },
 ];
 
 export const gameCharacterById = (id) => GAME_CHARACTERS.find((c) => c.id === id) ?? null;
 
-/** Game characters that belong to a pillar's world. */
+/** Guest characters that belong to a pillar's world. */
 export function gameCharactersForPillar(pillarId) {
   const worlds = GAME_WORLDS.filter((w) => w.pillar === pillarId).map((w) => w.id);
   return GAME_CHARACTERS.filter((c) => worlds.includes(c.game));
@@ -392,14 +338,14 @@ export function gameCharactersForPillar(pillarId) {
 /**
  * Turn a library entry into a cast member the rest of the planner understands.
  *
- * The shape matches a generated character exactly, so a game character can be
+ * The shape matches a generated character exactly, so a guest character can be
  * dropped into a cast, locked, exported and prompted with no special cases
  * anywhere downstream.
  */
 export function toCastMember(entry) {
   return {
     id: entry.id,
-    // Taking the role key it replaces lets a game character be saved, locked
+    // Taking the role key it replaces lets a guest character be saved, locked
     // and height-ordered exactly like a generated one.
     roleKey: entry.replacesRole ?? 'game',
     replacesRole: entry.replacesRole ?? null,
@@ -409,10 +355,10 @@ export function toCastMember(entry) {
     ageCategory: entry.ageCategory,
     personality: entry.personality,
     build: entry.build,
-    head: entry.head,
-    faceDecal: entry.faceDecal,
-    hat: entry.hat,
+    face: entry.face,
+    eyes: entry.eyes,
     hair: entry.hair,
+    headwear: entry.headwear,
     outfit: entry.outfit,
     shoes: entry.shoes,
     accessories: entry.accessories,
@@ -420,26 +366,24 @@ export function toCastMember(entry) {
     marks: entry.marks,
     expressions: entry.expressions,
     body: entry.body,
-    rig: entry.rig,
-    material: 'Flat matte Roblox plastic surfacing on every part; fur and fabric are printed '
-      + 'textures, never modelled',
+    look: entry.look,
     heightNote: '',
     fromGame: entry.gameLabel,
     lore: entry.lore,
     usageNote: entry.usageNote,
     mustNotChange: [
-      'Head shape and markings', 'Printed face decal', 'Headwear', 'Outfit design and colours',
-      'Footwear', 'Accessories', 'Avatar proportions',
+      'Face and features', 'Eyes', 'Hair', 'Headwear', 'Outfit design and colours',
+      'Footwear', 'Accessories', 'Build and proportions',
     ],
     mayChange: [
-      'Facial expression on the decal', 'Pose and gesture', 'Camera angle and distance',
+      'Facial expression', 'Pose and gesture', 'Camera angle and distance',
       'Lighting on the character', 'Background behind them',
     ],
     // A character sheet's own negatives replace the generic ones — they are
     // specific to this character and far stricter.
     negatives: entry.negatives ?? [
-      'no redesign between scenes', 'no outfit swap', 'no sculpted facial features',
-      'no humanised proportions', 'no duplicate of this character in frame',
+      'no recast between scenes', 'no outfit swap', 'no cartoon or stylised face',
+      'no plastic or doll-like skin', 'no duplicate of this character in frame',
       'no extra limbs', 'no cropped face',
     ],
     // The full build sheet, printed in every prompt he appears in.
@@ -470,12 +414,11 @@ export function referenceSheetPrompt(entry, { render = 'cinematic' } = {}) {
   return [
     `Create one character reference sheet for ${entry.name}.`,
     '',
-    styleBlock({ rig: entry.rig, render }),
+    styleBlock({ look: entry.look, render }),
     '',
     `CHARACTER IDENTITY — ${entry.name.toUpperCase()}`,
-    `${entry.name} is a ${entry.ageCategory.toLowerCase()} character from the Roblox game `
-      + `${entry.gameLabel}. This is a fan interpretation built from the description below, `
-      + 'not a copy of any official asset.',
+    `${entry.name} is a ${entry.ageCategory.toLowerCase()} recurring character in ${entry.gameLabel}. `
+      + 'Build him as a consistent real human from the description below.',
     '',
     sections,
     '',

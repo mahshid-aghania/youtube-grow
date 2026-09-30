@@ -87,19 +87,18 @@ export function buildDayPlan(rec, prefs, overrides = {}) {
     language: prefs.language,
   });
 
-  // The scene's rig comes from the game world this pillar is set in — the world
-  // sets the visual baseline, not whoever happens to be first in the cast. A
-  // character carrying its own rig still describes it in its own block, so an
-  // animal-headed vet can share an R15 frame with a blocky kid. A pinned
-  // preference beats both.
+  // The scene's realism look comes from the world this pillar is set in — the
+  // world sets the visual baseline, not whoever happens to be first in the cast.
+  // A character carrying its own look still describes it in its own block. A
+  // pinned preference beats both.
   const world = worldsForPillar(rec.pillarId)[0];
-  const rig = prefs.avatarRig && prefs.avatarRig !== 'auto'
-    ? prefs.avatarRig
-    : (world?.rig ?? cast[0]?.rig ?? 'r15');
+  const look = prefs.castingLook && prefs.castingLook !== 'auto'
+    ? prefs.castingLook
+    : (world?.look ?? cast[0]?.look ?? 'natural');
 
   const promptOpts = {
     platform: prefs.imagePlatform,
-    rig,
+    look,
     render: prefs.renderStyle,
     aspect: prefs.aspect,
   };

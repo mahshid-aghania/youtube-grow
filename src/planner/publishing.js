@@ -107,23 +107,23 @@ export function publishingPackage(rec, seed, cast, opts = {}) {
     ? titles[titles.length - 1]
     : titles[Math.floor(rand() * titles.length) % titles.length];
 
-  const base = ['roblox', 'robloxshorts', 'shorts'];
+  const base = ['lifelessons', 'inspiringstories', 'reflections', 'shorts'];
   const guestTags = guest
     ? [guest.fromGame.toLowerCase().replace(/[^a-z0-9]/g, ''),
       guest.name.toLowerCase().replace(/[^a-z0-9]/g, '')]
     : [];
   const pillarTags = {
-    'animal-hospital': ['animalhospital', 'robloxanimation', 'robloxroleplay'],
-    'tiny-rescue': ['rescuestory', 'robloxanimation', 'wholesome'],
-    comparison: ['comparison', 'robloxmemes', 'relatable'],
-    'troll-prank': ['robloxtroll', 'robloxfunny', 'prank'],
-    'family-comedy': ['robloxfamily', 'relatable', 'robloxfunny'],
-    transformation: ['transformation', 'beforeandafter', 'robloxbuild'],
-    'hide-and-seek': ['hideandseek', 'robloxgames', 'robloxfunny'],
-    challenge: ['robloxchallenge', 'obby', 'speedrun'],
-    mystery: ['robloxmystery', 'plottwist', 'robloxstory'],
-    experimental: ['robloxstory', 'animation'],
-  }[rec.pillarId] ?? ['robloxstory'];
+    'animal-hospital': ['kindness', 'emotionalstory', 'lifelesson'],
+    'tiny-rescue': ['rescuestory', 'kindness', 'wholesome'],
+    comparison: ['lifelesson', 'reflection', 'relatable'],
+    'troll-prank': ['karma', 'justice', 'story'],
+    'family-comedy': ['family', 'relatable', 'heartwarming'],
+    transformation: ['transformation', 'beforeandafter', 'motivation'],
+    'hide-and-seek': ['storytime', 'suspense', 'plottwist'],
+    challenge: ['challenge', 'motivation', 'mindset'],
+    mystery: ['mystery', 'plottwist', 'story'],
+    experimental: ['inspiringstories', 'story'],
+  }[rec.pillarId] ?? ['inspiringstories'];
 
   return {
     titles,

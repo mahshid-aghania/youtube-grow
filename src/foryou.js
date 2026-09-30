@@ -13,7 +13,7 @@ import { THEMES, PILLARS, pillarById } from './planner/pillars.js';
 import { recommendWeek, DAY_NAMES, addDays } from './planner/recommend.js';
 import { buildDayPlan, PRODUCTION_STATUSES, LOCKABLE } from './planner/plan.js';
 import { IMAGE_PLATFORM_OPTIONS, VIDEO_PLATFORM_OPTIONS } from './planner/prompts.js';
-import { RIG_OPTIONS, RENDER_OPTIONS } from './planner/robloxstyle.js';
+import { LOOK_OPTIONS, RENDER_OPTIONS } from './planner/humanstyle.js';
 import {
   GAME_CHARACTERS, gameCharacterById, gameCharactersForPillar, referenceSheetPrompt,
 } from './planner/games.js';
@@ -125,13 +125,13 @@ function strategyPanel() {
           'Used only when duration is set to "Fixed length".')}
         ${field('dialogue', 'Dialogue', select('dialogue', p.dialogue ? 'yes' : 'no', [
           { id: 'yes', label: 'With dialogue' }, { id: 'no', label: 'No dialogue — visual only' }]))}
-        ${field('avatarRig', 'Avatar rig',
-          select('avatarRig', p.avatarRig, [{ id: 'auto', label: 'Match the game' }, ...RIG_OPTIONS]),
-          'How characters are built. "Match the game" follows the pillar — an animal rig for '
-          + 'Animal Hospital, R15 for most others.')}
+        ${field('castingLook', 'Casting look',
+          select('castingLook', p.castingLook, [{ id: 'auto', label: 'Match the scene' }, ...LOOK_OPTIONS]),
+          'How real the people look. "Match the scene" follows the pillar; every option is real, '
+          + 'photoreal humans — it only sets the grade of realism.')}
         ${field('renderStyle', 'Render look',
           select('renderStyle', p.renderStyle, RENDER_OPTIONS),
-          'Only the lighting and grading change. The underlying geometry is fixed either way.')}
+          'Only the lighting and grading change. Everyone stays a real, photoreal human either way.')}
         ${field('imagePlatform', 'Image generator', select('imagePlatform', p.imagePlatform, IMAGE_PLATFORM_OPTIONS))}
         ${field('videoPlatform', 'Image-to-video tool', select('videoPlatform', p.videoPlatform, VIDEO_PLATFORM_OPTIONS))}
         ${field('aspect', 'Aspect ratio', select('aspect', p.aspect, ['9:16', '1:1', '16:9']))}
@@ -370,12 +370,12 @@ function tabCast(plan) {
         </div>` : ''}
         <dl class="kvgrid kvgrid--tight">
           ${kv('Age', c.ageCategory)} ${kv('Personality', c.personality)}
-          ${kv('Avatar build', c.build)} ${kv('Head', c.head)}
-          ${kv('Printed face', c.faceDecal)} ${kv('Headwear', c.hat)}
-          ${kv('Hair accessory', c.hair)} ${kv('Outfit', c.outfit)}
+          ${kv('Build', c.build)} ${kv('Face', c.face)}
+          ${kv('Eyes', c.eyes)} ${kv('Headwear', c.headwear)}
+          ${kv('Hair', c.hair)} ${kv('Outfit', c.outfit)}
           ${kv('Footwear', c.shoes)} ${kv('Accessories', c.accessories)}
           ${kv('Signature colours', c.colors)} ${kv('Distinguishing feature', c.marks)}
-          ${kv('Material', c.material)} ${kv('Expressions', c.expressions)}
+          ${kv('Expressions', c.expressions)}
           ${kv('Body language', c.body)} ${kv('Relative height', c.heightNote)}
           ${kv('Must never change', c.mustNotChange.join('; '))}
           ${kv('May change', c.mayChange.join('; '))}
@@ -860,8 +860,8 @@ async function handleCopy(button) {
   if (i < 0) return;
   const plan = planFor(week[i]);
   const key = button.dataset.copy;
-  const opts = { platform: state.prefs.imagePlatform, rig: state.prefs.avatarRig === 'auto'
-    ? undefined : state.prefs.avatarRig, render: state.prefs.renderStyle, aspect: state.prefs.aspect };
+  const opts = { platform: state.prefs.imagePlatform, look: state.prefs.castingLook === 'auto'
+    ? undefined : state.prefs.castingLook, render: state.prefs.renderStyle, aspect: state.prefs.aspect };
 
   if (key === 'day') return copyText(dayMarkdown(plan), button);
   if (key === 'cast') return copyText(castMarkdown(plan), button);

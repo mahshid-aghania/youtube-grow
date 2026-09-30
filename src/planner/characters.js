@@ -1,205 +1,200 @@
 /**
  * Character bibles.
  *
- * Generates original Roblox characters from role archetypes and produces the
- * identity lock paragraph that every image and video prompt repeats verbatim —
+ * Generates original, real human characters from role archetypes and produces
+ * the identity lock paragraph that every image and video prompt repeats verbatim —
  * that repetition is the only mechanism keeping a character recognisable across
  * separately generated scenes.
  *
- * Every description is written in Roblox terms, because that is what a generator
- * needs to build a Roblox avatar. A character here has a moulded head accessory
- * and a printed face decal, not "a soft jaw and hazel eyes"; a hair accessory,
- * not strands; a printed shirt or a layered solid, not draping cloth. Describing
- * an avatar in human terms is what makes an image generator produce a Pixar
- * character wearing the right colours.
+ * Every description is written the way a real person actually looks, because this
+ * niche is faceless live-action story Shorts: real people in real places. A
+ * character here has a real face with real features, real hair made of strands,
+ * and real clothing that folds — never a printed decal, a moulded accessory or a
+ * plastic shell. Describing a person in game-avatar terms is what makes an image
+ * generator produce a cartoon or a game render instead of a believable human.
  *
  * These characters are this project's own inventions. Characters that already
- * exist in a Roblox game live in games.js and are cast deliberately.
+ * exist elsewhere live in games.js and are cast deliberately.
  */
 
 import { hashString, makeRandom } from './recommend.js';
 import { ROLES } from './pillars.js';
 
-/** Pools the generator draws from. Original, and described the way Roblox builds. */
+/** Pools the generator draws from. Original, and described as real people look. */
 const POOL = {
   vet: {
     names: ['Dr. Wren', 'Dr. Solen', 'Dr. Marlo', 'Dr. Ashby'],
     age: 'Adult',
-    rig: 'animal',
+    look: 'polished',
     personality: 'Unhurried, watchful, speaks less than everyone around them',
-    build: 'Standard Roblox rig, upright and still, with an oversized head on a narrow body',
-    head: 'A moulded grey-blue cat head accessory with a pale muzzle and small upright ears',
-    faceDecal: 'A printed face: narrow half-closed eyes and a short flat line of a mouth',
-    hat: 'A soft sage-green surgical cap covering the top of the head',
-    hair: 'None — the moulded head is bare',
-    outfit: 'Sage-green scrub top and trousers printed flat onto the torso and legs',
-    shoes: 'Plain white clinic shoes',
-    accessories: 'A stethoscope layered around the neck, ID card clipped at the hip',
-    colors: 'Sage green, grey-blue, white',
-    marks: 'A single notch cut into the left ear of the moulded head',
-    expressions: 'The printed face stays neutral; the head tilts instead',
-    body: 'Moves in deliberate straight lines, crouches from the hip',
+    build: 'Middle height, calm and upright, an unhurried physical stillness',
+    face: 'A lined, weathered adult face with a strong jaw, warm mid-brown skin and faint '
+      + 'crow\'s feet from years of squinting under clinic lights',
+    eyes: 'Deep-set dark brown eyes, steady and half-lidded, that rarely widen',
+    hair: 'Short salt-and-pepper hair, neatly combed, greying at the temples',
+    headwear: 'A soft sage-green surgical cap pushed back off the forehead',
+    outfit: 'Sage-green scrubs, sleeves pushed to the elbow, slightly creased from a long shift',
+    shoes: 'Scuffed white clinic clogs',
+    accessories: 'A stethoscope resting around the neck, an ID badge clipped at the hip',
+    colors: 'Sage green, grey, white',
+    marks: 'A thin old scar through the left eyebrow',
+    expressions: 'Reads as calm; the only tell is a slow blink and a slight head tilt',
+    body: 'Moves in deliberate, economical lines; crouches from the knees, not the back',
   },
   intern: {
     names: ['Poppy', 'Tam', 'Juno', 'Wilder'],
     age: 'Young adult',
-    rig: 'r15',
+    look: 'natural',
     personality: 'Earnest, over-prepared, apologises before being blamed',
-    build: 'A short R15 rig with a slightly oversized head',
-    head: 'Standard Roblox block head in a light tan',
-    faceDecal: 'A printed face: very large round eyes with a big white highlight in each, '
-      + 'and a small open oval mouth',
-    hat: 'None',
-    hair: 'A moulded dark curly hair accessory sitting close to the head like a cap',
-    outfit: 'An oversized pale-blue scrub top printed on the torso, navy trousers printed on the legs',
-    shoes: 'Bright orange trainers, obviously new',
-    accessories: 'A small notebook held in one hand, three pens layered in the chest pocket',
+    build: 'Slight and slightly hunched, always a half-step too close',
+    face: 'A young, open, faintly freckled face with light tan skin and softly rounded cheeks',
+    eyes: 'Large, quick, anxious hazel eyes that dart to whoever is in charge',
+    hair: 'Dark curly hair cropped close, a little flattened on one side',
+    headwear: 'None',
+    outfit: 'An oversized pale-blue scrub top that never quite fits, navy trousers rolled at the ankle',
+    shoes: 'Bright orange trainers, obviously brand new',
+    accessories: 'A dog-eared notebook clutched in one hand, three pens crammed in the chest pocket',
     colors: 'Pale blue, navy, orange',
     marks: 'One of the three pens is always a different colour from the other two',
-    expressions: 'The printed face swaps between wide alarm and a flat determined line',
-    body: 'Quick and slightly jerky, glances over the shoulder',
+    expressions: 'Flickers between wide-eyed alarm and a tight, determined line',
+    body: 'Quick and slightly jerky; keeps glancing over one shoulder',
   },
   patient: {
-    names: ['Pip', 'Bramble', 'Nub', 'Sorrel'],
-    age: 'Very young',
-    rig: 'animal',
+    names: ['Pip', 'Bram', 'Nia', 'Sorrel'],
+    age: 'Child',
+    look: 'natural',
     personality: 'Wary at first, completely trusting once won over',
-    build: 'A very small Roblox rig, head nearly as wide as the torso',
-    head: 'A moulded round rabbit head accessory in sand and cream, with one ear folded '
-      + 'forward as part of the mould',
-    faceDecal: 'A printed face: huge dark oval eyes with one bright highlight each, and a '
-      + 'tiny curved mouth',
-    hat: 'None',
-    hair: 'None',
-    outfit: 'No clothing printed on the body; a white bandage accessory wrapped around one arm',
-    shoes: 'None',
-    accessories: 'A frayed red cloth tag layered at the neck',
+    build: 'A small, thin child who makes themselves smaller when frightened',
+    face: 'A round, soft child\'s face with pale skin, a small nose and a slightly trembling lip',
+    eyes: 'Huge dark eyes, watery at the edges, that go wide with fear then wonder',
+    hair: 'Fine sandy hair, a bit tangled, falling into the eyes',
+    headwear: 'None',
+    outfit: 'A worn, slightly-too-big jumper with frayed cuffs and faded jeans',
+    shoes: 'Scuffed light-up trainers, one lace undone',
+    accessories: 'A small plaster on one forearm, a frayed red friendship bracelet',
     colors: 'Sand, cream, faded red',
-    marks: 'The permanently folded left ear',
-    expressions: 'The printed eyes narrow when afraid and open wide when curious',
-    body: 'Stays low, moves in short bursts then freezes',
+    marks: 'The frayed red bracelet, never removed',
+    expressions: 'Eyes narrow when afraid, open wide and bright once they trust someone',
+    body: 'Stays low and close to walls; moves in short bursts, then freezes',
   },
   rival: {
-    names: ['Cassian', 'Brix', 'Vero', 'Halden'],
+    names: ['Cass', 'Brix', 'Vero', 'Halden'],
     age: 'Teen',
-    rig: 'r15',
-    personality: 'Loud, certain, performs confidence they do not have',
-    build: 'A broad R15 rig, shoulders squared, taking up space',
-    head: 'Standard Roblox block head in a pale colour',
-    faceDecal: 'A printed face: narrow slanted eyes and a wide one-sided smirk',
-    hat: 'A black cap worn backwards',
-    hair: 'A moulded bleached-blond hair accessory with dark roots, spiked at the front',
-    outfit: 'A black bomber jacket layered over a white printed tee, dark jeans printed on the legs',
-    shoes: 'Chunky black high-tops',
-    accessories: 'An oversized watch layered on one wrist',
+    look: 'polished',
+    personality: 'Loud, certain, performs a confidence they do not really feel',
+    build: 'Tall and broad-shouldered, squares up to take space',
+    face: 'A sharp-featured teen face, pale with a faint flush high on the cheeks, jaw set',
+    eyes: 'Narrow, cool grey eyes and a habitual one-sided smirk',
+    hair: 'Bleached-blond hair with dark roots, spiked up at the front',
+    headwear: 'A black cap worn backwards, never turned round',
+    outfit: 'A black bomber jacket over a plain white tee, dark slim jeans',
+    shoes: 'Chunky black high-tops, deliberately box-fresh',
+    accessories: 'An oversized watch on one wrist',
     colors: 'Black, white, cold silver',
-    marks: 'The cap is always backwards, never turned round',
-    expressions: 'Printed smirk at rest; swaps to wide-eyed shock in a single frame',
+    marks: 'The cap is always backwards',
+    expressions: 'Smirk at rest; drops to genuine wide-eyed shock in an instant',
     body: 'Wide gestures, leans back, arms often crossed',
   },
   parent: {
-    names: ['Rosalind', 'Denny', 'Marta', 'Osric'],
+    names: ['Rosa', 'Denny', 'Marta', 'Osric'],
     age: 'Adult',
-    rig: 'r15',
-    personality: 'Patient to a precise limit, then immovable',
-    build: 'A sturdy, square-set R15 rig that stands still',
-    head: 'Standard Roblox block head in a warm tan',
-    faceDecal: 'A printed face: level half-lidded eyes and a flat straight mouth',
-    hat: 'None',
-    hair: 'A moulded grey hair accessory pulled back into a low bun',
-    outfit: 'A mustard cardigan layered over a grey printed tee, dark trousers printed on the legs',
+    look: 'natural',
+    personality: 'Patient to a precise limit, then completely immovable',
+    build: 'Sturdy and square-set, stands planted and still',
+    face: 'A kind, tired middle-aged face with warm tan skin, soft jowls and smile lines',
+    eyes: 'Level, half-lidded brown eyes behind reading glasses',
+    hair: 'Grey hair pulled back into a low, practical bun',
+    headwear: 'Reading glasses usually pushed up onto the head',
+    outfit: 'A mustard cardigan over a grey tee, comfortable dark trousers',
     shoes: 'Soft brown house slippers',
-    accessories: 'Reading glasses pushed up onto the hair, a tea towel layered over one shoulder',
+    accessories: 'A tea towel over the same shoulder, a worn wedding band',
     colors: 'Mustard, grey, warm brown',
-    marks: 'The tea towel sits over the same shoulder every time',
-    expressions: 'The printed face barely changes; a slow blink ends the conversation',
+    marks: 'The tea towel always over the same shoulder',
+    expressions: 'The face barely changes; a slow, final blink ends the conversation',
     body: 'Stands still and lets everyone else move around them',
   },
   kid: {
     names: ['Bea', 'Toko', 'Nell', 'Ridge'],
     age: 'Child',
-    rig: 'r6',
-    personality: 'Total commitment to whatever the current idea is',
-    build: 'A short R6 rig — blocky, wide, never fully still',
-    head: 'Standard Roblox block head in a light colour',
-    faceDecal: 'A printed face: big round eyes and an enormous open grin',
-    hat: 'A cardboard crown, worn at all times',
-    hair: 'A moulded sandy hair accessory sticking up at the crown',
-    outfit: 'A red-and-white striped long sleeve printed on the torso and arms, denim shorts '
-      + 'printed on the legs',
+    look: 'natural',
+    personality: 'Total, whole-body commitment to whatever the current idea is',
+    build: 'A small, wiry child who is never fully still',
+    face: 'A bright, gap-toothed child\'s face with rosy cheeks and light skin, always mid-expression',
+    eyes: 'Big round eyes that go from delight to outrage with nothing in between',
+    hair: 'Messy sandy hair sticking up at the crown',
+    headwear: 'A lopsided cardboard crown, worn at all times',
+    outfit: 'A red-and-white striped long-sleeve top and well-worn denim shorts',
     shoes: 'Mismatched socks and light-up trainers',
     accessories: 'Nothing beyond the crown',
     colors: 'Red, white, denim blue',
     marks: 'The crown always sits slightly crooked',
-    expressions: 'Printed grin or printed outrage, nothing in between',
-    body: 'Bounces, spins, climbs on anything in reach',
+    expressions: 'Enormous grin or total outrage, switched in a heartbeat',
+    body: 'Bounces, spins and climbs on anything within reach',
   },
   noob: {
     names: ['Ollie', 'Sprig', 'Dex', 'Fen'],
     age: 'Teen',
-    rig: 'r6',
+    look: 'natural',
     personality: 'Hopeful, undeterred by evidence, tries everything twice',
-    build: 'A standard R6 rig — default blocky proportions, nothing customised',
-    head: 'The classic yellow Roblox block head',
-    faceDecal: 'The classic printed smile: two small black oval eyes and a wide simple grin',
-    hat: 'None',
-    hair: 'None',
-    outfit: 'A plain green printed shirt and blue printed trousers — the default starter look',
-    shoes: 'None; the legs end flat',
-    accessories: 'A backpack layered on both shoulders',
-    colors: 'Yellow, green, blue',
-    marks: 'Entirely unaccessorised apart from the backpack — the plainness is the joke',
-    expressions: 'The printed grin never changes, whatever is happening',
+    build: 'An ordinary, slightly gangly teenager, nothing customised',
+    face: 'A plain, friendly teen face with light skin, a scatter of spots and an easy grin',
+    eyes: 'Small, hopeful brown eyes that stay optimistic no matter what',
+    hair: 'Flat mousy hair with an obvious cowlick',
+    headwear: 'None',
+    outfit: 'A plain green tee and slightly-too-short blue jeans — the accidental everyman look',
+    shoes: 'Plain worn white trainers',
+    accessories: 'A cheap backpack on both shoulders',
+    colors: 'Green, blue, off-white',
+    marks: 'Utterly unremarkable except the ever-present backpack — the plainness is the joke',
+    expressions: 'The same hopeful grin whatever is happening',
     body: 'Leans in far too close to whatever they are doing',
   },
   pro: {
     names: ['Ines', 'Kade', 'Roux', 'Silas'],
     age: 'Young adult',
-    rig: 'r15',
-    personality: 'Economical, unimpressed, never explains twice',
-    build: 'A compact, balanced R15 rig with a low centre of gravity',
-    head: 'Standard Roblox block head in a deep tan',
-    faceDecal: 'A printed face: flat narrow eyes and a small straight mouth',
-    hat: 'A plain black headset layered over the head',
-    hair: 'A moulded black hair accessory scraped into a short tail',
-    outfit: 'A fitted dark-teal jacket layered over the torso, black leggings printed on the legs',
-    shoes: 'Low black trainers',
-    accessories: 'A single plain cord bracelet',
+    look: 'polished',
+    personality: 'Economical, unimpressed, never explains anything twice',
+    build: 'Compact and balanced, with a low, ready centre of gravity',
+    face: 'A composed young-adult face with deep tan skin, high cheekbones and a flat, calm mouth',
+    eyes: 'Narrow, steady dark eyes that miss nothing',
+    hair: 'Black hair scraped back into a short, tight ponytail',
+    headwear: 'A slim black headset resting around the neck',
+    outfit: 'A fitted dark-teal jacket over a black tee, black joggers',
+    shoes: 'Low black trainers, well used',
+    accessories: 'A single plain cord bracelet; tape wrapped around two fingers of the left hand',
     colors: 'Dark teal, black',
-    marks: 'Tape layered around two fingers of the left hand',
-    expressions: 'The printed face never changes; the body does all the reacting',
-    body: 'Completely still until they move, then very fast',
+    marks: 'Tape around two fingers of the left hand',
+    expressions: 'The face stays still; the body does all the reacting',
+    body: 'Completely still until they move, then very fast and precise',
   },
   helper: {
-    names: ['Marlow', 'Sena', 'Quill', 'Bo'],
+    names: ['Marlow', 'Sena', 'Quinn', 'Bo'],
     age: 'Young adult',
-    rig: 'r15',
+    look: 'natural',
     personality: 'Notices what others miss, acts before being asked',
-    build: 'An average R15 rig with the shoulders slightly forward',
-    head: 'Standard Roblox block head in a mid tan',
-    faceDecal: 'A printed face: watchful oval eyes and a small closed smile',
-    hat: 'None',
-    hair: 'A moulded auburn bob accessory tucked behind one ear',
-    outfit: 'A rust-orange work shirt layered over a cream printed tee, canvas trousers printed '
-      + 'on the legs',
-    shoes: 'Brown lace-up boots',
-    accessories: 'A canvas satchel layered across the body, a pencil behind one ear',
+    build: 'Average height with the shoulders carried slightly forward',
+    face: 'A warm, attentive face with medium tan skin, a light dusting of freckles and a small closed smile',
+    eyes: 'Watchful, kind brown eyes that settle on people gently',
+    hair: 'An auburn bob tucked behind one ear',
+    headwear: 'None',
+    outfit: 'A rust-orange work shirt over a cream tee, sturdy canvas trousers',
+    shoes: 'Brown lace-up work boots',
+    accessories: 'A canvas satchel across the body, a pencil tucked behind the right ear',
     colors: 'Rust orange, cream, canvas brown',
     marks: 'The pencil behind the right ear, always',
-    expressions: 'The printed face holds one quiet attentive look',
+    expressions: 'Holds one quiet, attentive look',
     body: 'Approaches slowly and keeps both hands visible',
   },
 };
 
 /** Never-change details, phrased for a prompt. */
 export function identityLock(character) {
-  return `IDENTITY LOCK — ${character.name}: preserve exactly the same head (${character.head}), `
-    + `printed face decal (${character.faceDecal}), headwear (${character.hat}), `
-    + `hair accessory (${character.hair}), avatar build (${character.build}), `
-    + `outfit (${character.outfit}), footwear (${character.shoes}), `
+  return `IDENTITY LOCK — ${character.name}: preserve exactly the same face (${character.face}), `
+    + `eyes (${character.eyes}), hair (${character.hair}), headwear (${character.headwear}), `
+    + `build (${character.build}), outfit (${character.outfit}), footwear (${character.shoes}), `
     + `accessories (${character.accessories}) and signature colours (${character.colors}) in every scene. `
-    + `Do not redesign, replace, age, humanise, beautify or restyle this character in any way, `
-    + `and do not give the face sculpted features — it stays a printed decal. `
+    + `This is the same real person throughout — do not recast, replace, age, restyle, beautify or `
+    + `cartoonify them, and keep the face a real human face, never flattened or stylised. `
     + `Keep the ${character.marks} visible.`;
 }
 
@@ -223,12 +218,12 @@ export function buildCharacter(roleKey, seedStr) {
     archetype: meta.archetype,
     ageCategory: pool.age,
     personality: pool.personality,
+    look: pool.look,
     build: pool.build,
-    rig: pool.rig,
-    head: pool.head,
-    faceDecal: pool.faceDecal,
-    hat: pool.hat,
+    face: pool.face,
+    eyes: pool.eyes,
     hair: pool.hair,
+    headwear: pool.headwear,
     outfit: pool.outfit,
     shoes: pool.shoes,
     accessories: pool.accessories,
@@ -236,21 +231,19 @@ export function buildCharacter(roleKey, seedStr) {
     marks: pool.marks,
     expressions: pool.expressions,
     body: pool.body,
-    material: 'Flat matte Roblox plastic surfacing on every part; fur, fabric and detail are '
-      + 'printed textures, never modelled geometry',
     heightNote: '',
     mustNotChange: [
-      'Head part or moulded head accessory', 'Printed face decal', 'Headwear',
-      'Hair accessory', 'Outfit design and colours', 'Footwear', 'Accessories',
-      'Apparent age', 'Avatar rig and proportions',
+      'Face and features', 'Eyes', 'Hair', 'Headwear',
+      'Outfit design and colours', 'Footwear', 'Accessories',
+      'Apparent age', 'Build and proportions',
     ],
     mayChange: [
       'Facial expression', 'Pose and gesture', 'Camera angle and distance',
       'Lighting on the character', 'Background behind them',
     ],
     negatives: [
-      'no redesign between scenes', 'no outfit swap', 'no hair accessory change',
-      'no age change', 'no sculpted facial features', 'no humanised proportions',
+      'no recast between scenes', 'no outfit swap', 'no hair change',
+      'no age change', 'no cartoon or stylised face', 'no plastic or doll-like skin',
       'no duplicate of this character in frame', 'no extra limbs', 'no cropped face',
     ],
   };
@@ -265,7 +258,7 @@ const HEIGHT_ORDER = ['patient', 'kid', 'intern', 'noob', 'helper', 'pro', 'riva
 /**
  * Write each character's height relative to the others, in place.
  *
- * Exported because the cast can change after it is built — casting a game
+ * Exported because the cast can change after it is built — casting a guest
  * character displaces the one it replaces, and a note reading "shorter than
  * Dr. Wren" is worse than useless once Dr. Wren is not in the video. Whoever
  * assembles the final cast re-runs this over it.
