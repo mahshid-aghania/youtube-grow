@@ -22,16 +22,16 @@ test('parseDuration returns NaN for junk rather than a wrong number', () => {
 const item = {
   id: 'abc123',
   snippet: {
-    title: 'Husband vs Wife Couples Challenge (funny reaction)',
-    description: 'A boyfriend and girlfriend relationship challenge for our anniversary.',
+    title: 'Life lesson: never judge someone by appearance — a reflection on respect #lifelesson',
+    description: 'Wisdom and a moral about humility and integrity.',
     channelTitle: 'Some Channel',
     channelId: 'UC123',
     publishedAt: '2024-08-20T12:00:00.000Z',
     defaultAudioLanguage: 'en-US',
-    categoryId: '24',
+    categoryId: '22',
     liveBroadcastContent: 'none',
   },
-  contentDetails: { duration: 'PT14M39S' },
+  contentDetails: { duration: 'PT2M31S' },
   statistics: { viewCount: '12880489', likeCount: '75214', commentCount: '1938' },
 };
 
@@ -40,28 +40,28 @@ test('toRecord maps a verified item onto the analysis shape, with a topic', () =
   const r = toRecord(item, new Map([['UC123', 6970000]]), now);
 
   assert.equal(r.id, 'abc123');
-  assert.equal(r.durationSec, 879);
+  assert.equal(r.durationSec, 151);
   assert.equal(r.views, 12880489, 'string counts become numbers');
   assert.equal(r.subs, 6970000);
   assert.equal(r.lang, 'en', 'locale is trimmed to a language code');
   assert.equal(r.publishedAt, '2024-08-20T12:00:00Z');
-  assert.equal(r.topic, 'couples');
+  assert.equal(r.topic, 'lessons');
   assert.equal(r.vph, Math.round((12880489 / 24) * 100) / 100);
 });
 
 test('classifyTopic uses title, description and category, not one signal alone', () => {
-  assert.equal(classifyTopic(item), 'couples');
-  assert.equal(classifyTopic({ snippet: { title: 'Kids vs Parents family challenge', description: 'our mom and dad play with the kids', categoryId: '22' } }), 'family');
+  assert.equal(classifyTopic(item), 'lessons');
+  assert.equal(classifyTopic({ snippet: { title: 'Homeless man’s act of kindness caught on camera', description: 'A heartwarming emotional true story and rescue', categoryId: '24' } }), 'inspiring');
   assert.equal(classifyTopic({ snippet: { title: 'Official Music Video', description: 'a song', categoryId: '10' } }), null,
     'an off-topic video is rejected, not force-fit');
 });
 
 const now = Date.parse('2026-09-09T12:00:00Z');
-const opts = { minDuration: 480, minViews: 1_000_000, now };
+const opts = { maxDuration: 180, minViews: 1_000_000, now };
 
-test('ineligibleReason enforces the duration and million-view floors', () => {
-  assert.equal(ineligibleReason(item, opts), null, 'a real long-form hit passes');
-  assert.equal(ineligibleReason({ ...item, contentDetails: { duration: 'PT5M0S' } }, opts), 'under 480s');
+test('ineligibleReason enforces the duration ceiling and million-view floor', () => {
+  assert.equal(ineligibleReason(item, opts), null, 'a real short-form hit passes');
+  assert.equal(ineligibleReason({ ...item, contentDetails: { duration: 'PT5M0S' } }, opts), 'over 180s');
   assert.equal(ineligibleReason({ ...item, statistics: { viewCount: '900000' } }, opts), 'under 1000000 views');
 });
 

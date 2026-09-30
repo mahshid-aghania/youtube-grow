@@ -1,19 +1,18 @@
 # Hearth
 
-A focused analytics dashboard for discovering verified **million-view, long-form
-YouTube videos about couples & partners and kids/family fun**, published
-**2021–2026**, tracking their momentum, and reverse-engineering successful videos
-scene by scene.
+A focused analytics dashboard for discovering verified **million-view, short-form
+YouTube videos in the "life lessons / inspiring stories / reflections" niche**
+(`#lifelesson #inspiringstories #reflections`), tracking their momentum, and
+reverse-engineering successful videos scene by scene.
 
 Every tracked video meets all of these, verified against authoritative video
 metadata at collection time:
 
-- **Topic** — couples, family, or the overlap between them.
-- **Duration** — at least **8 minutes** by default (configurable).
+- **Topic** — life lessons & reflections, inspiring stories, or the overlap between them.
+- **Duration** — no more than **3 minutes** by default, the YouTube Shorts ceiling (configurable).
 - **Views** — at least **1,000,000** verified views (configurable: 1M / 5M / 10M / 25M / 50M).
-- **Published** — 1 Jan 2021 through 31 Dec 2026 inclusive, never a future date.
-- **Format** — published, watchable, long-form videos. No Shorts, no upcoming
-  premieres, no active live streams.
+- **Published** — this wave of faceless channels is recent, so the snapshot window is **2025–2026**; the eligibility floor stays 1 Jan 2021 and the end is clamped so a future date can never slip in.
+- **Format** — published, watchable, short-form videos. No upcoming premieres, no active live streams.
 
 **Live:** https://mahshid-aghania.github.io/youtube-grow/
 
@@ -125,31 +124,31 @@ Analytics.
 ## The video tracker
 
 Reports on the verified eligible videos it discovers. It gives you total and
-median views, engagement rate, a per-year breakdown, the couples/family
+median views, engagement rate, a per-year breakdown, the life-lessons/inspiring
 topic mix, the top videos by views and by views-per-hour, the channels taking
 the most views, and breakout videos ranked by views per subscriber.
 
 Every candidate is re-fetched through `videos.list` and judged on its **actual**
 publication date, duration and view count — never on a search filter or snippet
-alone. Shorts, upcoming premieres and live streams are excluded; results are
-de-duplicated by video id; anything missing the metadata needed to prove
-eligibility is dropped. Queries are spread across topics and every year 2021–2026
-so no single subject, creator or recent year dominates.
+alone. Anything over the short-form ceiling, upcoming premieres and live streams
+are excluded; results are de-duplicated by video id; anything missing the metadata
+needed to prove eligibility is dropped. Queries are spread across topic phrasings
+and every year so no single angle, creator or recent year dominates.
 
 ```bash
 npm run fetch:videos                                        # refresh data/videos.json
 node scripts/fetch-videos.js --min-views 5000000            # raise the view floor
-node scripts/fetch-videos.js --min-duration 1200 --pages 3  # 20-minute floor, deeper search
+node scripts/fetch-videos.js --max-duration 60 --pages 3    # 60-second ceiling, deeper search
 npm run build && npx http-server public                     # view the report
 ```
 
-The **minimum-views** (1M / 5M / 10M / 25M / 50M), **minimum-length** (8 min
-through 1 hour) and **topic** (couples / family) filters on the Top
-Videos, Trending and Breakout pages raise those floors in the interface too —
+The **minimum-views** (1M / 5M / 10M / 25M / 50M), **maximum-length** (≤ 3 min
+down to ≤ 30 sec) and **topic** (life lessons / inspiring stories) filters on the
+Top Videos, Trending and Breakout pages tighten those bounds in the interface too —
 they only ever hide verified videos, never invent them, and never silently relax
 below the committed rules. Every video row carries a colour-coded topic tag, and
 the Overview shows the topic mix and combined views by year, so the spread across
-couples, family and all six years 2021–2026 is visible at a glance.
+life lessons, inspiring stories and the covered years is visible at a glance.
 
 ### Scene-by-scene analysis
 
@@ -183,7 +182,7 @@ public API that returns a shot list. So the flow is:
 2. Claude writes `data/shotlists/<videoId>.json` and adds the id to `index.json`
 3. `npm test` validates it, and the next push deploys it
 
-A few sample shot lists ship with the repo. None yet exists for the long-form
+A few sample shot lists ship with the repo. None yet exists for the short-form
 videos in the current snapshot, so pasting one of them shows the honest
 "no scene analysis recorded yet" state rather than a fabricated breakdown.
 
@@ -194,7 +193,7 @@ each with a full package — concept, cast, storyboard, image prompts,
 image-to-video prompts, an audio and editing guide, and a publishing kit.
 
 > **Note on scope.** For You is a **short-form production engine** that predates
-> the move to long-form couples & family *discovery*. It is retained and
+> the current life-lessons & inspiring-story *discovery* focus. It is retained and
 > reframed at the surface (labels and page copy), but its concept library,
 > character system and render presets remain structurally as built. It reads the
 > same snapshot the rest of the app does and never crashes on it, but it is a
@@ -399,9 +398,9 @@ enforces that.
 API does not expose a complete index of everything published, and it caps any
 single query's result set. `scripts/fetch-videos.js` pages through the top
 results by view count across many topics and years, so what you get is a broad,
-curated head of the distribution for eligible couples and family videos —
-enough to see what's working, not enough to say "these are *the* N biggest videos
-of 2021–2026". Every snapshot carries `coverage` and `coverageNote` fields, and
+curated head of the distribution for eligible life-lessons and inspiring-story
+videos — enough to see what's working, not enough to say "these are *the* N biggest
+videos of the period". Every snapshot carries `coverage` and `coverageNote` fields, and
 the page prints them above the numbers so a reader can't mistake one for the
 other. Empty, loading and error states are honest and distinct: "no matching
 videos found" is never confused with an API failure or quota limit.

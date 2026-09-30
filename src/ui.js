@@ -115,7 +115,7 @@ export const noteCard = (title, body) => `
  */
 export function mountTable(mountSel, {
   rows, columns, caption, initial = 10, searchInput, emptyText,
-  minViewsInput, minDurationInput, topicInput,
+  minViewsInput, maxDurationInput, topicInput,
 }) {
   const mount = $(mountSel);
   if (!mount) return;
@@ -124,20 +124,20 @@ export function mountTable(mountSel, {
   let sortDir = 'desc';
   let query = '';
   let minViews = 0;
-  let minDuration = 0;
+  let maxDuration = 0;
   let topic = '';
   let expanded = false;
 
   const searchable = (row) =>
     `${row.title ?? ''} ${row.channel ?? ''}`.toLowerCase();
 
-  const thresholdActive = () => minViews > 0 || minDuration > 0 || topic !== '';
+  const thresholdActive = () => minViews > 0 || maxDuration > 0 || topic !== '';
 
   function visibleRows() {
     let out = rows;
     if (query) out = out.filter((r) => searchable(r).includes(query));
     if (minViews > 0) out = out.filter((r) => (r.views ?? 0) >= minViews);
-    if (minDuration > 0) out = out.filter((r) => (r.durationSec ?? 0) >= minDuration);
+    if (maxDuration > 0) out = out.filter((r) => (r.durationSec ?? Infinity) <= maxDuration);
     if (topic) out = out.filter((r) => r.topic === topic);
     if (sortKey) {
       const col = columns.find((c) => c.key === sortKey);
@@ -158,8 +158,8 @@ export function mountTable(mountSel, {
           `Nothing matches “${query}”. Clear the search to see every row.`);
       } else if (thresholdActive()) {
         mount.innerHTML = emptyState('No videos meet these thresholds',
-          'No eligible video clears the selected minimum views and length. '
-          + 'Lower a threshold to see more — the thresholds only ever hide verified '
+          'No eligible video clears the selected minimum views and maximum length. '
+          + 'Relax a threshold to see more — the thresholds only ever hide verified '
           + 'videos, never invent them.');
       } else {
         mount.innerHTML = emptyState('Nothing to show',
@@ -242,9 +242,9 @@ export function mountTable(mountSel, {
     el.addEventListener('change', () => { apply(Number(el.value) || 0); expanded = false; render(); });
   };
   bindThreshold(minViewsInput, (v) => { minViews = v; });
-  bindThreshold(minDurationInput, (v) => { minDuration = v; });
+  bindThreshold(maxDurationInput, (v) => { maxDuration = v; });
 
-  // The topic select filters couples vs family; '' means both.
+  // The topic select filters life lessons vs inspiring stories; '' means both.
   if (topicInput) {
     const el = $(topicInput);
     if (el) el.addEventListener('change', () => { topic = el.value; expanded = false; render(); });
@@ -259,7 +259,7 @@ export const rankCell = (i) =>
   `<span class="rank${i < 3 ? ' rank--medal' : ''}" aria-label="Rank ${i + 1}">${i + 1}</span>`;
 
 /** Human labels for the topics; also the toggle for what a badge shows. */
-export const TOPIC_LABEL = { couples: 'Couples', family: 'Family & Kids' };
+export const TOPIC_LABEL = { lessons: 'Life Lessons', inspiring: 'Inspiring Stories' };
 
 /** A small topic tag, coloured per topic. Renders nothing for an unknown topic. */
 export const topicBadge = (topic) =>

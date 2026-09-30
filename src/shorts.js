@@ -1,5 +1,6 @@
 /**
- * Analysis for a snapshot of popular long-form couples and family videos.
+ * Analysis for a snapshot of popular short-form life-lessons and inspiring-story
+ * videos.
  *
  * Pure functions over an array of video records — no network, no clock — so the
  * whole module is directly testable. Fetching lives in scripts/fetch-videos.js.
@@ -9,15 +10,15 @@
  *     publishedAt, durationSec, views, likes, comments, engagementRate, vph }
  *
  * Eligibility (the discovery rules the whole product is built around):
- *   - long-form: at least 8 minutes by default;
- *   - popular:   at least 1,000,000 verified views;
- *   - in range:  published 2021-01-01 through 2026-12-31 inclusive, never in the
- *                future — enforced by withinWindow against the snapshot window,
- *                whose end is the collection time (and is clamped to 2026).
+ *   - short-form: no longer than 3 minutes by default (the YouTube Shorts cap);
+ *   - popular:    at least 1,000,000 verified views;
+ *   - in range:   published within the snapshot window, never in the future —
+ *                 enforced by withinWindow against the window, whose end is the
+ *                 collection time (and is clamped to 2026).
  */
 
-/** Default minimum runtime for a long-form video: eight minutes. */
-export const MIN_LONGFORM_SECONDS = 8 * 60;
+/** Default maximum runtime for a short: three minutes, the YouTube Shorts cap. */
+export const MAX_SHORTFORM_SECONDS = 3 * 60;
 
 /** Default minimum verified view count. */
 export const MIN_VIEWS = 1_000_000;
@@ -39,18 +40,22 @@ export const VIEW_THRESHOLDS = [
   { value: 50_000_000, label: '50M+' },
 ];
 
-/** The selectable minimum-duration thresholds, wired to the filter controls. */
+/**
+ * The selectable maximum-duration thresholds, wired to the filter controls.
+ * Short-form means these are ceilings: a smaller value keeps only tighter cuts.
+ */
 export const DURATION_THRESHOLDS = [
-  { value: 480, label: '8 min+' },
-  { value: 900, label: '15 min+' },
-  { value: 1200, label: '20 min+' },
-  { value: 1800, label: '30 min+' },
-  { value: 3600, label: '1 hour+' },
+  { value: 180, label: '≤ 3 min' },
+  { value: 120, label: '≤ 2 min' },
+  { value: 90, label: '≤ 90 sec' },
+  { value: 60, label: '≤ 60 sec' },
+  { value: 30, label: '≤ 30 sec' },
 ];
 
-/** Is this a watchable long-form video, at or above `minDurationSec`? */
-export function isLongForm(video, minDurationSec = MIN_LONGFORM_SECONDS) {
-  return Number.isFinite(video?.durationSec) && video.durationSec >= minDurationSec;
+/** Is this a watchable short, at or under `maxDurationSec`? */
+export function isShortForm(video, maxDurationSec = MAX_SHORTFORM_SECONDS) {
+  return Number.isFinite(video?.durationSec)
+    && video.durationSec > 0 && video.durationSec <= maxDurationSec;
 }
 
 /**
@@ -60,8 +65,8 @@ export function isLongForm(video, minDurationSec = MIN_LONGFORM_SECONDS) {
  * pure record has no notion of "now"; the snapshot window carries the dates.
  * Records missing the metadata needed to prove eligibility fail closed.
  */
-export function isEligible(video, { minDurationSec = MIN_LONGFORM_SECONDS, minViews = MIN_VIEWS } = {}) {
-  return isLongForm(video, minDurationSec)
+export function isEligible(video, { maxDurationSec = MAX_SHORTFORM_SECONDS, minViews = MIN_VIEWS } = {}) {
+  return isShortForm(video, maxDurationSec)
     && Number.isFinite(video?.views) && video.views >= minViews;
 }
 
@@ -258,26 +263,26 @@ export function compact(n) {
 /**
  * The whole report, from a raw snapshot to everything the page renders.
  *
- * The minimum views and duration default to the snapshot's own thresholds (and
- * fall back to the product defaults), but a caller can raise them — this is what
- * the view-threshold and duration filter controls drive.
+ * The minimum views and maximum duration default to the snapshot's own
+ * thresholds (and fall back to the product defaults), but a caller can tighten
+ * them — this is what the view-threshold and duration filter controls drive.
  *
  * @param {object} snapshot
- * @param {{minViews?: number, minDurationSec?: number}} [filters]
+ * @param {{minViews?: number, maxDurationSec?: number}} [filters]
  */
 export function buildReport(snapshot, filters = {}) {
   const window = reportWindow(snapshot);
   const minViews = filters.minViews ?? snapshot.minViews ?? MIN_VIEWS;
-  const minDurationSec = filters.minDurationSec ?? snapshot.minDurationSec ?? MIN_LONGFORM_SECONDS;
+  const maxDurationSec = filters.maxDurationSec ?? snapshot.maxDurationSec ?? MAX_SHORTFORM_SECONDS;
 
-  const eligible = snapshot.videos.filter((v) => isEligible(v, { minViews, minDurationSec }));
+  const eligible = snapshot.videos.filter((v) => isEligible(v, { minViews, maxDurationSec }));
   const videos = withinWindow(eligible, window);
 
   return {
-    scope: snapshot.scope ?? 'couples-family',
-    topics: snapshot.topics ?? ['couples', 'family'],
+    scope: snapshot.scope ?? 'life-lessons',
+    topics: snapshot.topics ?? ['lessons', 'inspiring'],
     minViews,
-    minDurationSec,
+    maxDurationSec,
     window,
     fetchedAt: snapshot.fetchedAt,
     source: snapshot.source,

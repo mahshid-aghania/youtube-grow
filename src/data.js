@@ -74,9 +74,9 @@ export const loadReport = () => once('report', async () => {
   const snapshot = await loadSnapshot();
   const report = buildReport(snapshot);
   const minViews = report.minViews;
-  const minDurationSec = report.minDurationSec;
+  const maxDurationSec = report.maxDurationSec;
   const videos = withinWindow(
-    snapshot.videos.filter((v) => isEligible(v, { minViews, minDurationSec })),
+    snapshot.videos.filter((v) => isEligible(v, { minViews, maxDurationSec })),
     reportWindow(snapshot));
 
   return {

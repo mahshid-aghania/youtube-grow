@@ -17,12 +17,12 @@ export default function mount() {
     })));
 
     mountTable('#table-vph', {
-      caption: 'Couples and family videos ranked by average views per hour',
+      caption: 'Life-lessons & inspiring-story Shorts ranked by average views per hour',
       rows: deep.topByVph,
       initial: 10,
       searchInput: '#search-vph',
       minViewsInput: '#filter-views',
-      minDurationInput: '#filter-duration',
+      maxDurationInput: '#filter-duration',
       topicInput: '#filter-topic',
       columns: [
         { key: 'rank', label: '#', cellClass: 'cell-rank', render: (_r, i) => rankCell(i) },

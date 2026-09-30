@@ -1,7 +1,7 @@
 {
   "name": "youtube-grow",
   "version": "0.1.0",
-  "description": "Discovers verified million-view long-form entertainment and science YouTube videos (2021–2026)",
+  "description": "Discovers verified million-view short-form life-lessons & inspiring-story YouTube videos (2025–2026)",
   "type": "module",
   "main": "src/shorts.js",
   "scripts": {

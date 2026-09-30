@@ -28,7 +28,7 @@ export function overviewMetrics(report) {
       label: 'Videos tracked',
       value: compactNumber(t.videoCount),
       exact: exactNumber(t.videoCount),
-      caption: 'Verified million-view long-form videos',
+      caption: 'Verified million-view short-form videos',
       tone: 'neutral',
       icon: 'film',
     },
@@ -141,7 +141,7 @@ export function keyInsights(report) {
     const parts = mix.map((b) => `${b.count} ${topicLabel(b.topic)}`);
     out.push({
       id: 'topics',
-      headline: 'Discovery spans couples and family',
+      headline: 'Discovery spans life lessons and inspiring stories',
       detail: `This selection holds ${listPhrase(parts)} — judged from each video's `
         + `title, description and category, not a single keyword.`,
     });
@@ -151,9 +151,9 @@ export function keyInsights(report) {
 }
 
 /** Human-facing topic label. A hook for future topics. */
-const topicLabel = (topic) => ({ couples: 'couples', family: 'family & kids' }[topic] ?? topic);
+const topicLabel = (topic) => ({ lessons: 'life lessons', inspiring: 'inspiring stories' }[topic] ?? topic);
 
-/** ["3 couples", "2 family & kids"] -> "3 couples and 2 family & kids". */
+/** ["3 life lessons", "2 inspiring stories"] -> "3 life lessons and 2 inspiring stories". */
 function listPhrase(parts) {
   if (parts.length <= 1) return parts.join('');
   return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;

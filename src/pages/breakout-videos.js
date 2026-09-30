@@ -17,7 +17,7 @@ export default function mount() {
       initial: 10,
       searchInput: '#search-breakouts',
       minViewsInput: '#filter-views',
-      minDurationInput: '#filter-duration',
+      maxDurationInput: '#filter-duration',
       topicInput: '#filter-topic',
       emptyText: `No channel in this set clears the ${MIN_SUBS.toLocaleString('en-GB')}-subscriber floor.`,
       columns: [
