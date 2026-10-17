@@ -11,8 +11,14 @@ import { renderStatus, statusUnavailable } from '../nav.js';
 import { errorState, setHTML } from '../ui.js';
 import { buildReport } from '../shorts.js';
 import { mountForYou } from '../foryou.js';
+import { renderTitleIdeas, bindTitleIdeas } from '../planner/titleideas.js';
 
 export default async function mount() {
+  // The title swipe file is static curated data, so it renders immediately and
+  // independently of the snapshot — a failed fetch below must not hide it.
+  setHTML('#foryou-titleideas', renderTitleIdeas());
+  bindTitleIdeas();
+
   try {
     const snapshot = await loadSnapshot();
     renderStatus(buildReport(snapshot), snapshot);

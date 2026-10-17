@@ -1200,3 +1200,52 @@ textarea.input { resize: vertical; font-family: inherit; }
 .charcard__beats li[data-current]::after {
   content: " — in this plan"; color: var(--violet); font-weight: 600; font-size: .72rem;
 }
+
+/* ---------- Proven title ideas (For You) ---------- */
+
+.btn--sm { min-height: 34px; padding: .3rem .7rem; font-size: .78rem; }
+
+.titleideas { padding: 1.1rem 1.15rem 1.25rem; margin-bottom: 1.25rem; }
+.titleideas__head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1rem;
+}
+.titleideas__title { font-size: 1rem; margin: 0 0 .25rem; }
+.titleideas__sub { font-size: .82rem; color: var(--text-2); margin: 0; max-width: 60ch; }
+
+.titleideas__list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+
+.titleidea {
+  display: flex; align-items: center; gap: .85rem;
+  padding: .6rem .7rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.titleidea__score {
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  font-weight: 700; font-variant-numeric: tabular-nums; font-size: .92rem;
+  color: var(--emerald);
+  background: var(--emerald-wash);
+  border: 1px solid color-mix(in srgb, var(--emerald) 30%, transparent);
+}
+.titleidea__body { flex: 1 1 auto; min-width: 0; }
+.titleidea__text { margin: 0 0 .25rem; font-size: .9rem; line-height: 1.3; color: var(--text); }
+.titleidea__tag {
+  display: inline-block;
+  padding: .05rem .45rem;
+  border-radius: 4px;
+  font-size: .68rem; font-weight: 600; letter-spacing: .01em;
+  color: var(--tone, var(--text-2));
+  background: color-mix(in srgb, var(--tone, var(--border-strong)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone, var(--border-strong)) 32%, transparent);
+}
+.titleidea__copy { flex: none; }
+
+@media (max-width: 640px) {
+  .titleidea { flex-wrap: wrap; }
+  .titleidea__copy { margin-left: auto; }
+}
