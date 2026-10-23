@@ -107,7 +107,7 @@ export function publishingPackage(rec, seed, cast, opts = {}) {
     ? titles[titles.length - 1]
     : titles[Math.floor(rand() * titles.length) % titles.length];
 
-  const base = ['lifelessons', 'inspiringstories', 'reflections', 'shorts'];
+  const base = ['shortdrama', 'billionaireromance', 'fullmovie', 'aidrama'];
   const guestTags = guest
     ? [guest.fromGame.toLowerCase().replace(/[^a-z0-9]/g, ''),
       guest.name.toLowerCase().replace(/[^a-z0-9]/g, '')]

@@ -3,10 +3,10 @@
  *
  * These titles are written in the viral formats reverse-engineered from the
  * fastest-growing faceless story channels (hidden-wealth reveal, revenge /
- * comeback, Cinderella status-flip, family secret) and adapted to the
- * life-lessons / inspiring-stories Shorts niche. Each score is vidIQ's
- * short-form click-through-rate rating (0–100), captured once; this module is
- * static data, so the panel renders even when the video snapshot is offline.
+ * comeback, Cinderella status-flip, family secret) in the billionaire-romance
+ * and betrayal/revenge full-movie drama niche. Each score is vidIQ's
+ * click-through-rate rating (0–100), captured once; this module is static data,
+ * so the panel renders even when the video snapshot is offline.
  */
 
 import { esc } from '../ui.js';

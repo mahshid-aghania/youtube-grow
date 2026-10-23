@@ -97,7 +97,7 @@ export function renderPage(route, body) {
       </span>
       <span>
         <span class="brand__name">${esc(SITE_NAME)}</span><br>
-        <span class="brand__sub">Life lessons &amp; stories · 2025–2026</span>
+        <span class="brand__sub">AI drama · billionaire romance &amp; betrayal · 2026</span>
       </span>
     </a>
 

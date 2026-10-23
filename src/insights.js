@@ -28,7 +28,7 @@ export function overviewMetrics(report) {
       label: 'Videos tracked',
       value: compactNumber(t.videoCount),
       exact: exactNumber(t.videoCount),
-      caption: 'Verified million-view short-form videos',
+      caption: 'Verified faceless AI full-movie dramas',
       tone: 'neutral',
       icon: 'film',
     },
@@ -141,7 +141,7 @@ export function keyInsights(report) {
     const parts = mix.map((b) => `${b.count} ${topicLabel(b.topic)}`);
     out.push({
       id: 'topics',
-      headline: 'Discovery spans life lessons and inspiring stories',
+      headline: 'Discovery spans billionaire romance and betrayal/revenge',
       detail: `This selection holds ${listPhrase(parts)} — judged from each video's `
         + `title, description and category, not a single keyword.`,
     });
@@ -151,9 +151,9 @@ export function keyInsights(report) {
 }
 
 /** Human-facing topic label. A hook for future topics. */
-const topicLabel = (topic) => ({ lessons: 'life lessons', inspiring: 'inspiring stories' }[topic] ?? topic);
+const topicLabel = (topic) => ({ romance: 'billionaire romance', betrayal: 'betrayal & revenge' }[topic] ?? topic);
 
-/** ["3 life lessons", "2 inspiring stories"] -> "3 life lessons and 2 inspiring stories". */
+/** ["12 billionaire romance", "8 betrayal & revenge"] -> "12 … and 8 …". */
 function listPhrase(parts) {
   if (parts.length <= 1) return parts.join('');
   return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;

@@ -16,7 +16,7 @@ export const DEFAULT_PREFS = {
   weekStartDay: 'Saturday',
   postingDays: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
   perDay: 1,
-  niche: 'Life lessons & inspiring stories',
+  niche: 'Billionaire romance & betrayal/revenge drama',
   pillars: [],
   audience: '',
   tone: 'Family-friendly',

@@ -244,7 +244,7 @@ export function mountTable(mountSel, {
   bindThreshold(minViewsInput, (v) => { minViews = v; });
   bindThreshold(maxDurationInput, (v) => { maxDuration = v; });
 
-  // The topic select filters life lessons vs inspiring stories; '' means both.
+  // The topic select filters billionaire romance vs betrayal/revenge; '' means both.
   if (topicInput) {
     const el = $(topicInput);
     if (el) el.addEventListener('change', () => { topic = el.value; expanded = false; render(); });
@@ -259,7 +259,7 @@ export const rankCell = (i) =>
   `<span class="rank${i < 3 ? ' rank--medal' : ''}" aria-label="Rank ${i + 1}">${i + 1}</span>`;
 
 /** Human labels for the topics; also the toggle for what a badge shows. */
-export const TOPIC_LABEL = { lessons: 'Life Lessons', inspiring: 'Inspiring Stories' };
+export const TOPIC_LABEL = { romance: 'Billionaire Romance', betrayal: 'Betrayal & Revenge' };
 
 /** A small topic tag, coloured per topic. Renders nothing for an unknown topic. */
 export const topicBadge = (topic) =>

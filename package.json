@@ -1,12 +1,13 @@
 {
   "name": "youtube-grow",
   "version": "0.1.0",
-  "description": "Discovers verified million-view short-form life-lessons & inspiring-story YouTube videos (2025–2026)",
+  "description": "Discovers verified faceless AI full-movie drama YouTube videos — billionaire romance & betrayal/revenge (2026)",
   "type": "module",
   "main": "src/shorts.js",
   "scripts": {
     "build": "node scripts/build.js",
     "fetch:videos": "node scripts/fetch-videos.js",
+    "seed:videos": "node scripts/seed-snapshot.js",
     "test": "node --test"
   },
   "license": "MIT"

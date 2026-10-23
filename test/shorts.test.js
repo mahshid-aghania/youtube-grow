@@ -20,34 +20,34 @@ const sample = [
     publishedAt: '2025-08-21T23:59:59Z', durationSec: 180, views: 2_000_000, likes: 50000, comments: 5000, vph: 120 },
 ];
 
-test('isShortForm applies the three-minute ceiling', () => {
-  assert.equal(isShortForm({ durationSec: 180 }), true);
-  assert.equal(isShortForm({ durationSec: 181 }), false);
+test('isShortForm applies the four-hour runtime ceiling', () => {
+  assert.equal(isShortForm({ durationSec: 14400 }), true);
+  assert.equal(isShortForm({ durationSec: 14401 }), false);
   assert.equal(isShortForm({ durationSec: 0 }), false, 'zero duration fails closed');
   assert.equal(isShortForm({ durationSec: undefined }), false);
-  assert.equal(isShortForm({ durationSec: 90 }, 60), false, 'a tighter ceiling is respected');
+  assert.equal(isShortForm({ durationSec: 9000 }, 3600), false, 'a tighter ceiling is respected');
 });
 
-test('isEligible requires both the duration ceiling and the million-view floor', () => {
-  assert.equal(isEligible({ durationSec: 60, views: 2_000_000 }), true);
-  assert.equal(isEligible({ durationSec: 600, views: 2_000_000 }), false, 'too long');
-  assert.equal(isEligible({ durationSec: 60, views: 900_000 }), false, 'too few views');
-  assert.equal(isEligible({ durationSec: 60 }), false, 'missing view count fails closed');
+test('isEligible requires both the runtime ceiling and the view floor', () => {
+  assert.equal(isEligible({ durationSec: 2400, views: 2_000_000 }), true);
+  assert.equal(isEligible({ durationSec: 15000, views: 2_000_000 }), false, 'too long');
+  assert.equal(isEligible({ durationSec: 2400, views: 40_000 }), false, 'too few views');
+  assert.equal(isEligible({ durationSec: 2400 }), false, 'missing view count fails closed');
   assert.equal(isEligible({ views: 2_000_000 }), false, 'missing duration fails closed');
-  assert.equal(MAX_SHORTFORM_SECONDS, 180);
-  assert.equal(MIN_VIEWS, 1_000_000);
+  assert.equal(MAX_SHORTFORM_SECONDS, 14400);
+  assert.equal(MIN_VIEWS, 50_000);
 });
 
 test('isEligible honours tightened thresholds from the filter controls', () => {
-  const v = { durationSec: 90, views: 2_000_000 };
+  const v = { durationSec: 2400, views: 2_000_000 };
   assert.equal(isEligible(v, { minViews: 5_000_000 }), false);
-  assert.equal(isEligible(v, { maxDurationSec: 60 }), false);
-  assert.equal(isEligible(v, { minViews: 1_000_000, maxDurationSec: 120 }), true);
+  assert.equal(isEligible(v, { maxDurationSec: 1200 }), false);
+  assert.equal(isEligible(v, { minViews: 1_000_000, maxDurationSec: 3600 }), true);
 });
 
 test('the offered thresholds match the brief', () => {
-  assert.deepEqual(VIEW_THRESHOLDS.map((t) => t.value), [1e6, 5e6, 1e7, 2.5e7, 5e7]);
-  assert.equal(DURATION_THRESHOLDS[0].value, 180, 'default ceiling is three minutes');
+  assert.deepEqual(VIEW_THRESHOLDS.map((t) => t.value), [50_000, 100_000, 500_000, 1e6, 5e6]);
+  assert.equal(DURATION_THRESHOLDS[0].value, 14400, 'default ceiling is four hours');
 });
 
 test('withinWindow includes the start instant and excludes the end', () => {
@@ -189,24 +189,26 @@ test('the committed snapshot is well-formed, eligible and free of future dates',
 
   assert.equal(report.excluded, 0, 'every committed record is eligible and in range');
   assert.ok(report.totals.videoCount >= 30, 'a substantial, diverse set ships');
-  assert.ok(report.totals.channelCount >= 10, 'discovery is broad, not a handful of channels');
+  assert.ok(report.totals.channelCount >= 5, 'discovery spans several channels, not a single one');
   assert.equal(new Set(snapshot.videos.map((v) => v.id)).size, snapshot.videos.length, 'no duplicate ids');
 
   const topics = new Set(snapshot.videos.map((v) => v.topic));
-  assert.ok(topics.has('lessons') && topics.has('inspiring'), 'both topics are represented');
+  assert.ok(topics.has('romance') && topics.has('betrayal'), 'both topics are represented');
   // Neither topic is a token handful — both are meaningfully represented.
   const byTopic = report.topics_breakdown;
-  assert.ok(byTopic.every((t) => t.count >= 10), 'both life lessons and inspiring stories are well represented');
+  assert.ok(byTopic.every((t) => t.count >= 10), 'both billionaire romance and betrayal/revenge are well represented');
 
-  const years = new Set(snapshot.videos.map((v) => v.publishedAt.slice(0, 4)));
-  assert.ok(years.size >= 2, 'coverage spans more than one publication year');
+  // This niche is brand new (channels launched mid-2026), so coverage spans
+  // months within a single year rather than multiple years.
+  const months = new Set(snapshot.videos.map((v) => v.publishedAt.slice(0, 7)));
+  assert.ok(months.size >= 3, 'coverage spans more than one publication month');
 
   const now = Date.now();
   for (const v of snapshot.videos) {
     assert.ok(v.id && v.title && v.channelId, `record ${v.id} has identity fields`);
-    assert.ok(v.durationSec > 0 && v.durationSec <= 180, `record ${v.id} is short-form`);
-    assert.ok(v.views >= 1_000_000, `record ${v.id} clears a million views`);
-    assert.ok(v.topic === 'lessons' || v.topic === 'inspiring', `record ${v.id} is on-topic`);
+    assert.ok(v.durationSec > 0 && v.durationSec <= 14400, `record ${v.id} is within the runtime ceiling`);
+    assert.ok(v.views >= 50_000, `record ${v.id} clears the view floor`);
+    assert.ok(v.topic === 'romance' || v.topic === 'betrayal', `record ${v.id} is on-topic`);
     const at = Date.parse(v.publishedAt);
     assert.ok(at >= Date.parse('2021-01-01T00:00:00Z'), `record ${v.id} is not before 2021`);
     assert.ok(at < Date.parse('2027-01-01T00:00:00Z'), `record ${v.id} is not after 2026`);

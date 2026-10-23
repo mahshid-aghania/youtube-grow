@@ -4,8 +4,9 @@
  * This module exists because of a specific failure: a prompt that just says
  * "a woman in a diner" gives a generator no defence against drifting into a
  * cartoon, a 3D-animated render, or a plastic, doll-like look. This niche —
- * faceless life-lessons and inspiring-story Shorts — is real people in real
- * places, so every constraint that keeps a frame photoreal is written out.
+ * faceless AI full-movie drama (billionaire romance and betrayal/revenge) — is
+ * cinematic real people in real places, so every constraint that keeps a frame
+ * photoreal is written out.
  *
  * The wording is deliberately concrete: "real skin with visible pores", "hair
  * made of individual strands", "fabric that folds and creases". Adjectives like

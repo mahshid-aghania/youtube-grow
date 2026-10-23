@@ -22,13 +22,13 @@ test('parseDuration returns NaN for junk rather than a wrong number', () => {
 const item = {
   id: 'abc123',
   snippet: {
-    title: 'Life lesson: never judge someone by appearance — a reflection on respect #lifelesson',
-    description: 'Wisdom and a moral about humility and integrity.',
+    title: 'Billionaire CEO Secretly Married the Poor Maid He Once Hated | Full Movie',
+    description: 'A Cinderella love story: the arrogant billionaire falls for the maid his family rejected.',
     channelTitle: 'Some Channel',
     channelId: 'UC123',
     publishedAt: '2024-08-20T12:00:00.000Z',
     defaultAudioLanguage: 'en-US',
-    categoryId: '22',
+    categoryId: '24',
     liveBroadcastContent: 'none',
   },
   contentDetails: { duration: 'PT2M31S' },
@@ -45,24 +45,24 @@ test('toRecord maps a verified item onto the analysis shape, with a topic', () =
   assert.equal(r.subs, 6970000);
   assert.equal(r.lang, 'en', 'locale is trimmed to a language code');
   assert.equal(r.publishedAt, '2024-08-20T12:00:00Z');
-  assert.equal(r.topic, 'lessons');
+  assert.equal(r.topic, 'romance');
   assert.equal(r.vph, Math.round((12880489 / 24) * 100) / 100);
 });
 
 test('classifyTopic uses title, description and category, not one signal alone', () => {
-  assert.equal(classifyTopic(item), 'lessons');
-  assert.equal(classifyTopic({ snippet: { title: 'Homeless man’s act of kindness caught on camera', description: 'A heartwarming emotional true story and rescue', categoryId: '24' } }), 'inspiring');
+  assert.equal(classifyTopic(item), 'romance');
+  assert.equal(classifyTopic({ snippet: { title: 'My Bad Sister Stole My Husband—Then I Took Revenge', description: 'Betrayal and a cheating affair; she plotted a trap to get even', categoryId: '24' } }), 'betrayal');
   assert.equal(classifyTopic({ snippet: { title: 'Official Music Video', description: 'a song', categoryId: '10' } }), null,
     'an off-topic video is rejected, not force-fit');
 });
 
 const now = Date.parse('2026-09-09T12:00:00Z');
-const opts = { maxDuration: 180, minViews: 1_000_000, now };
+const opts = { maxDuration: 14400, minViews: 50_000, now };
 
-test('ineligibleReason enforces the duration ceiling and million-view floor', () => {
-  assert.equal(ineligibleReason(item, opts), null, 'a real short-form hit passes');
-  assert.equal(ineligibleReason({ ...item, contentDetails: { duration: 'PT5M0S' } }, opts), 'over 180s');
-  assert.equal(ineligibleReason({ ...item, statistics: { viewCount: '900000' } }, opts), 'under 1000000 views');
+test('ineligibleReason enforces the runtime ceiling and view floor', () => {
+  assert.equal(ineligibleReason(item, opts), null, 'a real long-form hit passes');
+  assert.equal(ineligibleReason({ ...item, contentDetails: { duration: 'PT5H0M0S' } }, opts), 'over 14400s');
+  assert.equal(ineligibleReason({ ...item, statistics: { viewCount: '40000' } }, opts), 'under 50000 views');
 });
 
 test('ineligibleReason excludes future dates and anything outside 2021–2026', () => {

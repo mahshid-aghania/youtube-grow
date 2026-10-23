@@ -953,7 +953,7 @@ test('publishing leads with the recognisable character and stays publishable', (
   assert.ok(pub.recommendedTitle.startsWith('Dr. Harlow'), 'he leads the recommended title');
   assert.ok(pub.recommendedTitle.length <= 80, 'and it fits');
   assert.ok(!pub.recommendedTitle.includes('…'), 'a recommended title is never truncated');
-  assert.ok(pub.hashtags.includes('#drharlow') && pub.hashtags.includes('#lifelessons'));
+  assert.ok(pub.hashtags.includes('#drharlow') && pub.hashtags.includes('#shortdrama'));
   assert.match(pub.longCaption, /Dr\. Harlow from the clinic series/);
 
   // Across the whole week, guest or not, a title is chosen to fit rather than

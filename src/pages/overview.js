@@ -134,7 +134,7 @@ function workspaceCard(route, deep, report) {
 
 /* ---------- distribution ---------- */
 
-const TOPIC_TONE = { lessons: 'violet', inspiring: 'emerald' };
+const TOPIC_TONE = { romance: 'violet', betrayal: 'red' };
 
 /** Topic-mix chips and a combined-views-by-year bar chart. */
 function renderDistribution(report) {

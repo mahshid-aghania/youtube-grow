@@ -1,6 +1,6 @@
 /**
- * Analysis for a snapshot of popular short-form life-lessons and inspiring-story
- * videos.
+ * Analysis for a snapshot of popular faceless AI "full movie" drama videos —
+ * the billionaire-romance and betrayal/revenge niche.
  *
  * Pure functions over an array of video records — no network, no clock — so the
  * whole module is directly testable. Fetching lives in scripts/fetch-videos.js.
@@ -10,18 +10,19 @@
  *     publishedAt, durationSec, views, likes, comments, engagementRate, vph }
  *
  * Eligibility (the discovery rules the whole product is built around):
- *   - short-form: no longer than 3 minutes by default (the YouTube Shorts cap);
- *   - popular:    at least 1,000,000 verified views;
+ *   - long-form:  no longer than four hours by default (these "full movies" run
+ *                 from ~10 minutes to several hours);
+ *   - popular:    at least 50,000 verified views;
  *   - in range:   published within the snapshot window, never in the future —
  *                 enforced by withinWindow against the window, whose end is the
  *                 collection time (and is clamped to 2026).
  */
 
-/** Default maximum runtime for a short: three minutes, the YouTube Shorts cap. */
-export const MAX_SHORTFORM_SECONDS = 3 * 60;
+/** Default maximum runtime: four hours — the ceiling for a long-form "full movie". */
+export const MAX_SHORTFORM_SECONDS = 4 * 60 * 60;
 
 /** Default minimum verified view count. */
-export const MIN_VIEWS = 1_000_000;
+export const MIN_VIEWS = 50_000;
 
 /** The publication window the product covers. */
 export const ELIGIBLE_START = '2021-01-01T00:00:00Z';
@@ -33,26 +34,26 @@ export const ELIGIBLE_END = '2027-01-01T00:00:00Z';
  * Each is a { value, label } the interface renders directly.
  */
 export const VIEW_THRESHOLDS = [
+  { value: 50_000, label: '50K+' },
+  { value: 100_000, label: '100K+' },
+  { value: 500_000, label: '500K+' },
   { value: 1_000_000, label: '1M+' },
   { value: 5_000_000, label: '5M+' },
-  { value: 10_000_000, label: '10M+' },
-  { value: 25_000_000, label: '25M+' },
-  { value: 50_000_000, label: '50M+' },
 ];
 
 /**
  * The selectable maximum-duration thresholds, wired to the filter controls.
- * Short-form means these are ceilings: a smaller value keeps only tighter cuts.
+ * These are ceilings: a smaller value keeps only the tighter, shorter cuts.
  */
 export const DURATION_THRESHOLDS = [
-  { value: 180, label: '≤ 3 min' },
-  { value: 120, label: '≤ 2 min' },
-  { value: 90, label: '≤ 90 sec' },
-  { value: 60, label: '≤ 60 sec' },
-  { value: 30, label: '≤ 30 sec' },
+  { value: 4 * 60 * 60, label: '≤ 4 hr' },
+  { value: 2 * 60 * 60, label: '≤ 2 hr' },
+  { value: 60 * 60, label: '≤ 1 hr' },
+  { value: 45 * 60, label: '≤ 45 min' },
+  { value: 20 * 60, label: '≤ 20 min' },
 ];
 
-/** Is this a watchable short, at or under `maxDurationSec`? */
+/** Is this a watchable movie, at or under `maxDurationSec`? */
 export function isShortForm(video, maxDurationSec = MAX_SHORTFORM_SECONDS) {
   return Number.isFinite(video?.durationSec)
     && video.durationSec > 0 && video.durationSec <= maxDurationSec;
@@ -279,8 +280,8 @@ export function buildReport(snapshot, filters = {}) {
   const videos = withinWindow(eligible, window);
 
   return {
-    scope: snapshot.scope ?? 'life-lessons',
-    topics: snapshot.topics ?? ['lessons', 'inspiring'],
+    scope: snapshot.scope ?? 'ai-drama',
+    topics: snapshot.topics ?? ['romance', 'betrayal'],
     minViews,
     maxDurationSec,
     window,

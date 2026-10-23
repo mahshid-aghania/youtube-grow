@@ -17,7 +17,7 @@ export default function mount() {
     })));
 
     mountTable('#table-vph', {
-      caption: 'Life-lessons & inspiring-story Shorts ranked by average views per hour',
+      caption: 'Billionaire-romance & betrayal/revenge dramas ranked by average views per hour',
       rows: deep.topByVph,
       initial: 10,
       searchInput: '#search-vph',

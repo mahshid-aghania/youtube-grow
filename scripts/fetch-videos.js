@@ -2,14 +2,16 @@
 /**
  * Refresh data/videos.json from the YouTube Data API v3.
  *
- * Discovers highly popular, short-form YouTube videos in the "life lessons /
- * inspiring stories / reflections" niche (#lifelesson #inspiringstories
- * #reflections), published 2021-01-01 through the current date (capped at
- * 2026-12-31), no longer than 3 minutes and with at least 1,000,000 verified views.
+ * Discovers popular, long-form faceless AI "full movie" drama videos — the
+ * billionaire-romance and betrayal/revenge niche (#shortdrama #billionaire
+ * #fullmovie): poor-maid-marries-CEO, contract marriages, secret babies,
+ * cheating-husband revenge, "my sister stole my husband," family-secret reveals.
+ * Published 2021-01-01 through the current date (capped at 2026-12-31), under a
+ * generous runtime ceiling and with at least 50,000 verified views.
  *
  * Usage:
  *   YOUTUBE_API_KEY=... node scripts/fetch-videos.js \
- *       [--max-duration 180] [--min-views 1000000] [--pages 2] [--require-key]
+ *       [--max-duration 14400] [--min-views 50000] [--pages 2] [--require-key]
  *
  * How it stays honest:
  *   - It searches many phrasings across every year 2021–2026, so no single angle,
@@ -18,7 +20,7 @@
  *     publication date, duration and view count — never on a search filter or
  *     snippet alone.
  *   - Upcoming premieres and live streams are excluded, and anything over the
- *     short-form ceiling or missing the metadata needed to prove eligibility is
+ *     runtime ceiling or missing the metadata needed to prove eligibility is
  *     dropped.
  *   - Results are de-duplicated by video id.
  *   - Without YOUTUBE_API_KEY the script exits 0 without touching anything, so a
@@ -35,7 +37,7 @@ import { dirname, resolve } from 'node:path';
 
 const API = 'https://www.googleapis.com/youtube/v3';
 
-const DEFAULTS = { maxDuration: 3 * 60, minViews: 1_000_000, pages: 2, requireKey: false };
+const DEFAULTS = { maxDuration: 4 * 60 * 60, minViews: 50_000, pages: 2, requireKey: false };
 const RANGE_START = '2021-01-01T00:00:00Z';
 const RANGE_END_EXCLUSIVE = '2027-01-01T00:00:00Z'; // 2026-12-31 inclusive
 
@@ -44,39 +46,39 @@ const RANGE_END_EXCLUSIVE = '2027-01-01T00:00:00Z'; // 2026-12-31 inclusive
  * a fixed channel list. Interpreted across relevant creators and subjects.
  */
 const TOPIC_QUERIES = {
-  lessons: [
-    'life lesson short', 'moral of the story shorts', 'wisdom life lessons',
-    'lesson learned reflection', 'good deeds come back', 'never judge by appearance',
-    'kindness lesson story', 'respect and character', 'motivational life lesson',
-    'life advice wisdom short',
+  romance: [
+    'billionaire romance full movie', 'billionaire love story', 'ceo romance drama',
+    'maid billionaire love story', 'contract marriage drama', 'cinderella billionaire story',
+    'secret baby ceo drama', 'rich husband love story full movie', 'hidden identity romance drama',
+    'short drama billionaire full movie',
   ],
-  inspiring: [
-    'inspiring story short', 'emotional true story', 'act of kindness caught on camera',
-    'faith in humanity restored', 'karma justice story', 'homeless man kindness story',
-    'stranger helped him', 'heartwarming story shorts', 'she was mocked until',
-    'kindness wins story',
+  betrayal: [
+    'betrayal revenge drama full movie', 'sister stole my husband', 'cheating husband revenge story',
+    'family betrayal drama', 'wife revenge full movie', 'husband cheated full movie',
+    'rich vs poor revenge drama', 'fake marriage trap revenge', 'reborn for revenge drama',
+    'she was mocked until billionaire',
   ],
 };
 
-/** Terms that mark a video as life-lesson / wisdom leaning, checked against title+description. */
-const LESSONS_TERMS = [
-  'life lesson', 'life lessons', 'lifelesson', 'lifelessons', 'lesson', 'moral',
-  'wisdom', 'reflection', 'reflections', 'never judge', 'good deeds', 'good deed',
-  'respect', 'character', 'humility', 'integrity', 'honesty', 'gratitude',
-  'motivation', 'motivational', 'mindset', 'quote', 'quotes', 'proverb',
+/** Terms that mark a video as billionaire / CEO romance, checked against title+description. */
+const ROMANCE_TERMS = [
+  'billionaire', 'billionaires', 'ceo', 'millionaire', 'heir', 'heiress', 'maid',
+  'cinderella', 'prince', 'princess', 'married', 'marriage', 'marry', 'wife',
+  'husband', 'bride', 'groom', 'wedding', 'love', 'romance', 'contract marriage',
+  'secret baby', 'fell in love', 'fiance', 'fiancé', 'tycoon', 'mogul', 'rich',
 ];
 
-/** Terms that mark a video as an inspiring / emotional story. */
-const INSPIRING_TERMS = [
-  'inspiring', 'inspirational', 'inspiringstories', 'story', 'true story',
-  'emotional', 'heartwarming', 'heart touching', 'hearttouching', 'kindness',
-  'kind', 'karma', 'justice', 'homeless', 'stranger', 'hero', 'rescue', 'saved',
-  'mocked', 'humiliated', 'faith in humanity', 'act of kindness', 'touching',
+/** Terms that mark a video as betrayal / revenge / family-secret drama. */
+const BETRAYAL_TERMS = [
+  'betrayed', 'betrayal', 'cheated', 'cheating', 'affair', 'revenge', 'trap',
+  'stole', 'steal', 'dumped', 'abandoned', 'mocked', 'humiliated', 'villain',
+  'secret', 'lie', 'lied', 'divorce', 'mistress', 'stepsister', 'stepmother',
+  'comeback', 'karma', 'ruined', 'destroyed', 'reborn', 'rebirth',
 ];
 
 /** YouTube category ids that lean each way (used alongside the term lists). */
-const LESSONS_CATEGORIES = new Set(['22', '27', '24']); // People & Blogs, Education, Entertainment
-const INSPIRING_CATEGORIES = new Set(['22', '24', '1']); // People & Blogs, Entertainment, Film & Animation
+const ROMANCE_CATEGORIES = new Set(['24', '1', '22']); // Entertainment, Film & Animation, People & Blogs
+const BETRAYAL_CATEGORIES = new Set(['24', '1', '22']); // Entertainment, Film & Animation, People & Blogs
 
 function parseArgs(argv) {
   const args = { ...DEFAULTS };
@@ -103,22 +105,23 @@ export function parseDuration(iso) {
 }
 
 /**
- * Classify a video as a life lesson, an inspiring story, or neither, from its
- * title, description and category — never a single keyword or category alone.
- * Returns the stronger of the two topics, or null when nothing relevant is found.
+ * Classify a video as billionaire romance, betrayal/revenge drama, or neither,
+ * from its title, description and category — never a single keyword or category
+ * alone. Returns the stronger of the two topics, or null when nothing relevant
+ * is found.
  */
 export function classifyTopic(item) {
   const haystack = ` ${(item.snippet?.title ?? '')} ${(item.snippet?.description ?? '')} `.toLowerCase();
   const categoryId = item.snippet?.categoryId;
-  // Whole-word matching, so "son" doesn't match "song" and "kind" doesn't match "kindergarten".
+  // Whole-word matching, so "son" doesn't match "song" and "heir" doesn't match "their".
   const has = (t) => new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(haystack);
   const count = (terms) => terms.reduce((n, t) => (has(t) ? n + 1 : n), 0);
 
-  const lessons = count(LESSONS_TERMS) + (LESSONS_CATEGORIES.has(categoryId) ? 1 : 0);
-  const inspiring = count(INSPIRING_TERMS) + (INSPIRING_CATEGORIES.has(categoryId) ? 1 : 0);
+  const romance = count(ROMANCE_TERMS) + (ROMANCE_CATEGORIES.has(categoryId) ? 1 : 0);
+  const betrayal = count(BETRAYAL_TERMS) + (BETRAYAL_CATEGORIES.has(categoryId) ? 1 : 0);
 
-  if (lessons === 0 && inspiring === 0) return null;
-  return lessons >= inspiring ? 'lessons' : 'inspiring';
+  if (romance === 0 && betrayal === 0) return null;
+  return betrayal > romance ? 'betrayal' : 'romance';
 }
 
 async function get(path, params, key) {
@@ -143,7 +146,7 @@ async function searchIds({ q, publishedAfter, publishedBefore, videoDuration, pa
       part: 'id',
       q,
       type: 'video',
-      videoDuration, // 'short' (<4m) — the true 3-minute ceiling is enforced later by real duration
+      videoDuration, // 'long' (>20m) — the true runtime ceiling is enforced later by real duration
       order: 'viewCount',
       publishedAfter,
       publishedBefore,
@@ -267,7 +270,7 @@ async function main() {
   for (const [topic, queries] of Object.entries(TOPIC_QUERIES)) {
     for (const q of queries) {
       for (const window of years) {
-        const ids = await searchIds({ q, ...window, videoDuration: 'short', pages: args.pages, key });
+        const ids = await searchIds({ q, ...window, videoDuration: 'long', pages: args.pages, key });
         for (const id of ids) candidateIds.add(id);
       }
     }
@@ -294,23 +297,23 @@ async function main() {
   console.log(`Kept ${videos.length}. Dropped:`, dropped);
 
   const snapshot = {
-    scope: 'life-lessons',
-    topics: ['lessons', 'inspiring'],
-    query: 'Popular short-form life-lessons and inspiring-story videos',
-    format: 'short',
+    scope: 'ai-drama',
+    topics: ['romance', 'betrayal'],
+    query: 'Faceless AI full-movie drama — billionaire romance & betrayal/revenge',
+    format: 'long',
     maxDurationSec: args.maxDuration,
     minViews: args.minViews,
     windowStart: RANGE_START,
     windowEnd: new Date(endCap).toISOString().replace(/\.\d{3}Z$/, 'Z'),
     fetchedAt: new Date(now).toISOString().replace(/\.\d{3}Z$/, 'Z'),
-    source: 'YouTube Data API v3 search.list (order=viewCount) across life-lessons and '
-      + 'inspiring-story phrasings and publication years, verified with videos.list',
+    source: 'YouTube Data API v3 search.list (order=viewCount) across billionaire-romance and '
+      + 'betrayal/revenge drama phrasings and publication years, verified with videos.list',
     coverage: 'partial',
     coverageNote:
-      `${videos.length} verified videos: short-form (≤${Math.round(args.maxDuration / 60)} min), `
+      `${videos.length} verified videos: long-form "full movie" drama (≤${Math.round(args.maxDuration / 60)} min), `
       + `at least ${args.minViews.toLocaleString('en-US')} views, published 2021-01-01 through the `
       + 'collection date. YouTube search exposes no complete index, so this is the head of the '
-      + 'distribution across life lessons and inspiring stories — not a census of every qualifying video.',
+      + 'distribution across billionaire-romance and betrayal/revenge drama — not a census of every qualifying video.',
     videos,
   };
 
