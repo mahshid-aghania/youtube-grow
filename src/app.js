@@ -15,6 +15,7 @@ const PAGES = {
   'for-you': () => import('./pages/for-you.js'),
   'top-videos': () => import('./pages/top-videos.js'),
   trending: () => import('./pages/trending.js'),
+  shorts: () => import('./pages/shorts.js'),
   'top-channels': () => import('./pages/top-channels.js'),
   'breakout-videos': () => import('./pages/breakout-videos.js'),
   'shot-analyzer': () => import('./pages/shot-analyzer.js'),

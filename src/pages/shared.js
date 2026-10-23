@@ -12,10 +12,12 @@ import { emptyState, errorState, setHTML } from '../ui.js';
 /**
  * @param {string[]} mounts  selectors to fill with the empty or error state
  * @param {(ctx: object) => void} render  called with { snapshot, report, videos, deep }
+ * @param {() => Promise<object>} [loader]  which report to load; defaults to the
+ *   long-form movies. The Shorts page passes loadShortsReport.
  */
-export async function withReport(mounts, render) {
+export async function withReport(mounts, render, loader = loadReport) {
   try {
-    const ctx = await loadReport();
+    const ctx = await loader();
 
     if (ctx.report.totals.videoCount === 0) {
       statusUnavailable('Snapshot empty');

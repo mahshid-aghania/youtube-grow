@@ -34,8 +34,11 @@ async function getJson(path) {
   return res.json();
 }
 
-/** The committed snapshot. */
+/** The committed long-form (full-movie) snapshot. */
 export const loadSnapshot = () => once('snapshot', () => getJson('data/videos.json'));
+
+/** The committed short-form (YouTube Shorts) snapshot. */
+export const loadShortsSnapshot = () => once('shorts-snapshot', () => getJson('data/shorts.json'));
 
 /** The list of videos with a recorded scene breakdown. */
 export const loadShotlistIndex = () => once('shotlist-index', async () => {
@@ -64,14 +67,15 @@ export async function loadAllShotlists(videoIds) {
 }
 
 /**
- * The snapshot, the report, and the deeply-ranked tables, computed once.
+ * Turn a raw snapshot into the report plus the deeply-ranked tables.
  *
  * `buildReport` caps its rankings at ten for the overview; the tables re-rank
  * the same filtered set further so "Show all" has something to reveal. The
- * analysis functions themselves are untouched — this only calls them.
+ * analysis functions themselves are untouched — this only calls them. The same
+ * pipeline serves the long-form movies and the Shorts, because each snapshot
+ * carries its own eligibility thresholds.
  */
-export const loadReport = () => once('report', async () => {
-  const snapshot = await loadSnapshot();
+function reportFrom(snapshot) {
   const report = buildReport(snapshot);
   const minViews = report.minViews;
   const maxDurationSec = report.maxDurationSec;
@@ -90,4 +94,10 @@ export const loadReport = () => once('report', async () => {
       breakouts: breakouts(videos, { minSubs: 1000, limit: 30 }),
     },
   };
-});
+}
+
+/** The long-form full-movie report, computed once. */
+export const loadReport = () => once('report', async () => reportFrom(await loadSnapshot()));
+
+/** The short-form (YouTube Shorts) report, computed once. */
+export const loadShortsReport = () => once('shorts-report', async () => reportFrom(await loadShortsSnapshot()));

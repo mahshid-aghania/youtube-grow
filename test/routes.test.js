@@ -20,7 +20,7 @@ const navLinks = (html) => attrs(html, 'a').filter((a) => a.includes('class="nav
 
 test('the route table covers every required destination exactly once', () => {
   assert.deepEqual(ROUTES.map((r) => r.id), [
-    'overview', 'for-you', 'top-videos', 'trending',
+    'overview', 'for-you', 'top-videos', 'trending', 'shorts',
     'top-channels', 'breakout-videos', 'shot-analyzer',
   ]);
   assert.equal(new Set(ROUTES.map((r) => r.dir)).size, ROUTES.length, 'no two routes share a directory');

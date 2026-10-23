@@ -1,0 +1,63 @@
+      <header class="pagehead">
+        <div>
+          <p class="pagehead__eyebrow" style="--tone: var(--red)">Short-form</p>
+          <h1>YouTube Shorts</h1>
+          <p class="pagehead__sub">
+            Viral vertical micro-dramas in the same billionaire-romance and betrayal/revenge niche —
+            the ≤3-minute teaser clips and standalone Shorts that feed discovery toward the full
+            movies. Tracked separately from the long-form snapshot.
+          </p>
+        </div>
+        <div class="pagehead__status" id="head-status" aria-live="polite">
+          <span class="pill">Loading snapshot…</span>
+        </div>
+      </header>
+
+      <section class="section" style="padding-top:0" aria-labelledby="chart-h">
+        <h2 class="sr-only" id="chart-h">Top Shorts by views</h2>
+        <div id="chart-shorts"></div>
+      </section>
+
+      <section class="section" aria-labelledby="table-h">
+        <div class="section__head">
+          <div>
+            <h2 id="table-h">Every tracked Short</h2>
+            <p class="section__desc">
+              Sort any column, filter by views and length, search by title or channel, and expand
+              to the whole list. The “× subs” column shows how far each Short out-reached its
+              channel’s size — the signal that a format is travelling.
+            </p>
+          </div>
+          <div class="section__tools">
+            <label class="sr-only" for="search-shorts">Search Shorts by title or channel</label>
+            <input class="input section__search" id="search-shorts" type="search"
+                   placeholder="Search title or channel…" autocomplete="off">
+            <select class="input section__filter" id="filter-views" aria-label="Minimum views">
+              <option value="100000">100K+ views</option>
+              <option value="250000">250K+ views</option>
+              <option value="500000">500K+ views</option>
+              <option value="1000000">1M+ views</option>
+            </select>
+            <select class="input section__filter" id="filter-duration" aria-label="Maximum length">
+              <option value="240">≤ 4 min</option>
+              <option value="180">≤ 3 min</option>
+              <option value="120">≤ 2 min</option>
+              <option value="60">≤ 1 min</option>
+              <option value="30">≤ 30 sec</option>
+            </select>
+            <select class="input section__filter" id="filter-topic" aria-label="Topic">
+              <option value="">All topics</option>
+              <option value="romance">Billionaire Romance</option>
+              <option value="betrayal">Betrayal &amp; Revenge</option>
+            </select>
+          </div>
+        </div>
+        <div id="table-shorts">
+          <div class="tablecard">
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+            <div class="skeleton skeleton--row"></div>
+          </div>
+        </div>
+        <div class="notes" id="notes-shorts"></div>
+      </section>

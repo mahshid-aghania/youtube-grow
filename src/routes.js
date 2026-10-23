@@ -70,6 +70,16 @@ export const ROUTES = [
     icon: svg('<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>'),
   },
   {
+    id: 'shorts',
+    dir: 'shorts',
+    label: 'YouTube Shorts',
+    title: 'YouTube Shorts',
+    description: 'Viral vertical micro-dramas in the same billionaire-romance and betrayal/revenge niche — '
+      + 'the ≤3-minute teaser clips and standalone Shorts that feed discovery toward the full movies, '
+      + 'ranked by views, momentum and reach against subscriber count.',
+    icon: svg('<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="m11 9 4 2.5-4 2.5z"/>'),
+  },
+  {
     id: 'top-channels',
     dir: 'top-channels',
     label: 'Top Channels',
