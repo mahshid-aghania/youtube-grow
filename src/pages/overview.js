@@ -13,9 +13,10 @@ import {
   ICON, TOPIC_LABEL, barChart, channelUrl, emptyState, esc, extLink, insightCard,
   metricCard, setHTML, thumbUrl, watchUrl,
 } from '../ui.js';
+import { loadShortsReport } from '../data.js';
 import { withReport } from './shared.js';
 
-const MOUNTS = ['#metrics', '#insights', '#distribution', '#leaders', '#workspaces'];
+const MOUNTS = ['#metrics', '#insights', '#distribution', '#formats', '#channels', '#leaders', '#workspaces'];
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -160,6 +161,58 @@ function renderDistribution(report) {
     ${yearRows.length ? barChart(yearRows) : ''}`);
 }
 
+/* ---------- both formats: combined totals + named channels ---------- */
+
+/** A totals card for one format (or the combined grand total). */
+function formatCard({ label, icon, tone, videoCount, views, channelCount, caption }) {
+  return metricCard({
+    label, icon, tone,
+    value: compactNumber(videoCount),
+    exact: `${exactNumber(videoCount)} videos`,
+    caption: caption ?? `${compactNumber(views)} views · ${plural(channelCount, 'channel')}`,
+  });
+}
+
+/** Combined totals across the long-form movies and the Shorts. */
+function renderFormats(moviesReport, shortsReport) {
+  const m = moviesReport.totals;
+  const cards = [formatCard({
+    label: 'Full movies', icon: 'film', tone: 'red',
+    videoCount: m.videoCount, views: m.views, channelCount: m.channelCount,
+  })];
+
+  if (shortsReport) {
+    const s = shortsReport.totals;
+    cards.push(formatCard({
+      label: 'YouTube Shorts', icon: 'play', tone: 'violet',
+      videoCount: s.videoCount, views: s.views, channelCount: s.channelCount,
+    }));
+    cards.push(formatCard({
+      label: 'Combined', icon: 'trending', tone: 'cyan',
+      videoCount: m.videoCount + s.videoCount,
+      caption: `${compactNumber(m.views + s.views)} views · both formats`,
+    }));
+  }
+
+  setHTML('#formats', cards.join(''));
+}
+
+/** Name every tracked channel, grouped by format. */
+function renderChannels(movieChannels, shortChannels) {
+  const chip = (c) => `<a class="pill pill--channel" href="${channelUrl(c.channelId)}"
+      target="_blank" rel="noopener noreferrer"
+      title="${esc(c.channel)} — ${esc(exactNumber(c.views))} views across this set"
+      >${esc(c.channel)}</a>`;
+
+  const group = (label, channels) => (channels.length ? `
+    <div class="chan-group">
+      <p class="chan-group__label">${esc(label)} · ${plural(channels.length, 'channel')}</p>
+      <div class="distchips">${channels.map(chip).join('')}</div>
+    </div>` : '');
+
+  setHTML('#channels', group('Full movies', movieChannels) + group('YouTube Shorts', shortChannels));
+}
+
 export default function mount() {
   withReport(MOUNTS, ({ report, deep }) => {
     setHTML('#metrics', overviewMetrics(report).map(metricCard).join(''));
@@ -171,6 +224,18 @@ export default function mount() {
 
     renderDistribution(report);
     renderLeaders(deep);
+
+    // Fold the Shorts snapshot into the totals and name every channel. If the
+    // Shorts data can't load, fall back to a movies-only view rather than fail.
+    loadShortsReport().then(
+      (shorts) => {
+        renderFormats(report, shorts.report);
+        renderChannels(deep.topChannels, shorts.deep.topChannels);
+      },
+      () => {
+        renderFormats(report, null);
+        renderChannels(deep.topChannels, []);
+      });
 
     setHTML('#workspaces', ROUTES
       .filter((r) => r.id !== 'overview')

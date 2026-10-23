@@ -232,6 +232,15 @@ a:hover { color: var(--red); }
 }
 .pill--live { color: var(--emerald); border-color: rgba(52, 211, 153, .3); background: var(--emerald-wash); }
 .pill--amber { color: var(--amber); border-color: rgba(251, 191, 36, .3); background: var(--amber-wash); }
+.pill--channel { color: var(--text); text-decoration: none; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.pill--channel:hover { color: var(--red); border-color: color-mix(in srgb, var(--red) 40%, var(--border)); }
+
+/* Named-channel roster on the overview, grouped by format. */
+.chan-group { margin-top: 1rem; }
+.chan-group__label {
+  font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--text-3, var(--text-2)); margin: 0 0 .5rem;
+}
 
 .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
 @media (prefers-reduced-motion: no-preference) {
